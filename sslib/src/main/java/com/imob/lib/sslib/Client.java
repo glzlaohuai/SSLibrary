@@ -37,7 +37,9 @@ public class Client {
 
         void onConnected();
 
-        void onConnectCoruppted(String error, Exception e);
+        void onConnectCorrupted(String error, Exception e);
+
+        void onConnectDestroyed();
 
         void onAlreadyStopped();
 
@@ -104,11 +106,13 @@ public class Client {
                                     @Override
                                     public void onConnectCorrupted(String msg, Exception e) {
                                         cleanup();
+                                        listener.onConnectCorrupted(msg, e);
                                     }
 
                                     @Override
                                     public void onConnectDestroyed() {
                                         cleanup();
+                                        listener.onConnectDestroyed();
                                     }
 
                                     @Override

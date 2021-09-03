@@ -84,8 +84,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         }
 
                         @Override
-                        public void onConnectCoruppted(String error, Exception e) {
+                        public void onConnectCorrupted(String error, Exception e) {
                             Log.i(TAG, "onConnectCoruppted: " + error + ", " + e);
+                            doStuffAfterConnectFailedOrStopped();
+                        }
+
+                        @Override
+                        public void onConnectDestroyed() {
+                            Log.i(TAG, "onConnectDestroyed: ");
                             doStuffAfterConnectFailedOrStopped();
                         }
 

@@ -17,4 +17,32 @@
         android:text="stop server" />
 
 
+    <Button
+        android:id="@+id/create_client"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="create client" />
+
+
+    <Button
+        android:id="@+id/stop_client"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="stop client" />
+
+
+    <Button
+        android:id="@+id/send_msg_to_clients"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="send msg to all connected clients" />
+
+
+    <Button
+        android:id="@+id/send_msg_to_server"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="send msg to server" />
+
+
 </LinearLayout>

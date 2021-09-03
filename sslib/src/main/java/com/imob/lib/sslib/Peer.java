@@ -129,10 +129,10 @@ public class Peer {
                                     Logger.e(e);
 
                                     if (e == null || e.getTailBytes() == null || e.getSize() <= 0) {
+                                        readChunkResult = TYPE_CHUNK_READ_FINISHED_WITHOUT_BYTES_DELIVERED;
+                                    } else {
                                         readChunkResult = TYPE_CHUNK_READ_FINISHED_WITH_BYTES_DELIVERED;
                                         bytes = Arrays.copyOf(e.getTailBytes(), e.getSize());
-                                    } else {
-                                        readChunkResult = TYPE_CHUNK_READ_FINISHED_WITHOUT_BYTES_DELIVERED;
                                     }
                                 }
 

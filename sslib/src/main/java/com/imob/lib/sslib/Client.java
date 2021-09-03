@@ -37,6 +37,12 @@ public class Client {
 
         void onConnected();
 
+        void onConnectCoruppted(String error, Exception e);
+
+        void onAlreadyStopped();
+
+        void onStop();
+
     }
 
     public Client(@NonNull String ip, int port, @NonNull OnClientStateListener listener) {
@@ -47,11 +53,13 @@ public class Client {
 
 
     private void cleanup() {
-        isConnecting = false;
-        isConnecting = false;
-        if (connectedPeer != null) {
-            connectedPeer.destroy();
-            connectedPeer = null;
+        if (isConnected) {
+            isConnecting = false;
+            isConnected = false;
+            if (connectedPeer != null) {
+                connectedPeer.destroy();
+                connectedPeer = null;
+            }
         }
     }
 
@@ -162,6 +170,23 @@ public class Client {
         } else {
             listener.onAlreadyConnected();
         }
+    }
+
+
+    public boolean stop() {
+
+        if (isConnecting) {
+            Logger.i(TAG, "client is still in connecting prorgess, stop operation failed");
+            return false;
+        }
+
+        if (isConnected) {
+            cleanup();
+            listener.onStop();
+        } else {
+            listener.onAlreadyStopped();
+        }
+        return true;
     }
 
 

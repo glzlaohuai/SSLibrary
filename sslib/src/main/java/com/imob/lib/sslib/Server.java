@@ -112,9 +112,16 @@ public class Server {
 
 
     private void cleanup() {
-        started = false;
-        silentlyStopServer();
-        connectedPeers.clear();
+        if (started) {
+            started = false;
+            silentlyStopServer();
+            if (connectedPeers != null) {
+                for (Peer peer : connectedPeers) {
+                    peer.destroy();
+                }
+            }
+            connectedPeers.clear();
+        }
     }
 
     private void doStartUp() {

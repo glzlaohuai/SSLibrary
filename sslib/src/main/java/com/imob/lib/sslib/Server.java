@@ -165,6 +165,7 @@ public class Server {
                         Logger.i(TAG, "incoming client: " + socket.toString());
 
                         Peer peer = new Peer(socket, new Peer.OnPeerListener() {
+
                             String TAG = "Peer # " + UUID.randomUUID().toString().hashCode();
 
                             @Override

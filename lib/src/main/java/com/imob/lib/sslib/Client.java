@@ -1,6 +1,5 @@
 package com.imob.lib.sslib;
 
-import android.text.TextUtils;
 
 import com.imob.lib.sslib.send.msg.IMsg;
 import com.imob.lib.sslib.utils.Logger;
@@ -9,8 +8,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import androidx.annotation.NonNull;
 
 public class Client {
 
@@ -47,7 +44,7 @@ public class Client {
 
     }
 
-    public Client(@NonNull String ip, int port, @NonNull OnClientStateListener listener) {
+    public Client(String ip, int port, OnClientStateListener listener) {
         this.ip = ip;
         this.port = port;
         this.listener = listener;
@@ -67,7 +64,7 @@ public class Client {
 
     public void connect() {
 
-        if (TextUtils.isEmpty(ip) || port <= 0) {
+        if (ip == null || ip.equals("") || port <= 0) {
             listener.onConnectFailed("invalid ip or port", null);
             return;
         }

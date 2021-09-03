@@ -1,6 +1,5 @@
 package com.imob.lib.sslib;
 
-import android.util.Log;
 
 import com.imob.lib.sslib.send.msg.IMsg;
 import com.imob.lib.sslib.utils.Logger;
@@ -14,7 +13,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import androidx.annotation.NonNull;
 
 public class Server {
 
@@ -50,7 +48,7 @@ public class Server {
 
     private List<Peer> connectedPeers = new ArrayList<>();
 
-    public Server(@NonNull OnServerStateListener listener) {
+    public Server(OnServerStateListener listener) {
         this.listener = listener;
     }
 
@@ -170,67 +168,67 @@ public class Server {
 
                             @Override
                             public void onConnected(String ip, int port) {
-                                Log.i(TAG, "onConnected: " + ip + ", " + port);
+                                Logger.i(TAG, "onConnected: " + ip + ", " + port);
                             }
 
                             @Override
                             public void onConnectFailed(String msg, Exception e) {
-                                Log.i(TAG, "onConnectFailed: " + msg + ", " + e);
+                                Logger.i(TAG, "onConnectFailed: " + msg + ", " + e);
                             }
 
                             @Override
                             public void onConnectCorrupted(String msg, Exception e) {
-                                Log.i(TAG, "onConnectCorrupted: " + msg + ", " + e);
+                                Logger.i(TAG, "onConnectCorrupted: " + msg + ", " + e);
                             }
 
                             @Override
                             public void onConnectDestroyed() {
-                                Log.i(TAG, "onConnectDestroyed: ");
+                                Logger.i(TAG, "onConnectDestroyed: ");
                             }
 
                             @Override
                             public void onSendMessageToQueue(IMsg msg) {
-                                Log.i(TAG, "onSendMessageToQueue: " + msg.id());
+                                Logger.i(TAG, "onSendMessageToQueue: " + msg.id());
                             }
 
                             @Override
                             public void onSendMessageStarted(IMsg msg) {
-                                Log.i(TAG, "onSendMessageStarted: " + msg.id());
+                                Logger.i(TAG, "onSendMessageStarted: " + msg.id());
                             }
 
                             @Override
                             public void onSendMessageFailed(IMsg msg, String error, Exception e) {
-                                Log.i(TAG, "onSendMessageFailed: " + msg.id() + ", error: " + error);
+                                Logger.i(TAG, "onSendMessageFailed: " + msg.id() + ", error: " + error);
                             }
 
                             @Override
                             public void onSendMessageChunk(IMsg msg, byte chunkType, int chunkLen) {
-                                Log.i(TAG, "onSendMessageChunk: " + msg.id() + ", " + chunkType + ", " + chunkLen);
+                                Logger.i(TAG, "onSendMessageChunk: " + msg.id() + ", " + chunkType + ", " + chunkLen);
                             }
 
                             @Override
                             public void onSendMessageCompleted(IMsg msg) {
-                                Log.i(TAG, "onSendMessageCompleted: " + msg.id());
+                                Logger.i(TAG, "onSendMessageCompleted: " + msg.id());
                             }
 
                             @Override
                             public void onIncomingMessage(String msgID, byte msgType, byte userDefiniedType) {
-                                Log.i(TAG, "onIncomingMessage: " + msgID + ", " + msgType + ", " + userDefiniedType);
+                                Logger.i(TAG, "onIncomingMessage: " + msgID + ", " + msgType + ", " + userDefiniedType);
                             }
 
                             @Override
                             public void onIncomingMessageChunk(String msgID, byte msgType, byte userDefiniedType, byte[] bytes) {
-                                Log.i(TAG, "onIncomingMessageChunk: " + msgID + ", " + msgType + ", " + userDefiniedType + ", " + (bytes == null ? 0 : bytes.length));
+                                Logger.i(TAG, "onIncomingMessageChunk: " + msgID + ", " + msgType + ", " + userDefiniedType + ", " + (bytes == null ? 0 : bytes.length));
                             }
 
                             @Override
                             public void onIncomingMessageCompleted(String msgID, byte msgType, byte userDefiniedType) {
-                                Log.i(TAG, "onIncomingMessageCompleted: " + msgID + ", " + msgType + ", " + userDefiniedType);
+                                Logger.i(TAG, "onIncomingMessageCompleted: " + msgID + ", " + msgType + ", " + userDefiniedType);
                             }
 
                             @Override
                             public void onIncomingMessageInteruppted(String msgID, byte msgType, byte userDefiniedType) {
-                                Log.i(TAG, "onIncomingMessageInteruppted: " + msgID + ", " + msgType + ", " + userDefiniedType);
+                                Logger.i(TAG, "onIncomingMessageInteruppted: " + msgID + ", " + msgType + ", " + userDefiniedType);
                             }
                         });
 

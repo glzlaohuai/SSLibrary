@@ -8,4 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "SSLibrary"
 include ':app'
-include ':sslib'
+include ':lib'

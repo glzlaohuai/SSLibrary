@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import androidx.annotation.NonNull;
 
 public class Peer {
 
@@ -86,7 +85,7 @@ public class Peer {
     }
 
 
-    public void send(IMsg msg) {
+    public void send(final IMsg msg) {
         if (msg.isValid()) {
             listener.onSendMessageToQueue(msg);
             sendService.execute(new Runnable() {
@@ -179,7 +178,7 @@ public class Peer {
         }
     }
 
-    public Peer(@NonNull Socket socket, @NonNull OnPeerListener listener) {
+    public Peer(final Socket socket, final OnPeerListener listener) {
         this.socket = socket;
         this.listener = listener;
 

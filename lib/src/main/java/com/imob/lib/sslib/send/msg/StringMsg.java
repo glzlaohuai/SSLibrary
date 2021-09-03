@@ -1,6 +1,5 @@
 package com.imob.lib.sslib.send.msg;
 
-import android.text.TextUtils;
 
 import com.imob.lib.sslib.send.exc.SenderPeerEOFException;
 import com.imob.lib.sslib.send.exc.SenderPeerFetchBytesFailedException;
@@ -36,7 +35,7 @@ public class StringMsg implements IMsg {
 
     @Override
     public boolean isValid() {
-        return !TextUtils.isEmpty(string);
+        return string != null && !string.equals("");
     }
 
     @Override

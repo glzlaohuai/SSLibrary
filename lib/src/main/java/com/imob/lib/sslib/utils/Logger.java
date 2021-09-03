@@ -1,6 +1,5 @@
 package com.imob.lib.sslib.utils;
 
-import android.util.Log;
 
 public class Logger {
 
@@ -17,7 +16,7 @@ public class Logger {
 
     public static void i(String tag, String msg) {
         if (debug) {
-            Log.i(tag, msg);
+            System.out.println("< " + tag + " > : " + msg);
         }
     }
 }

@@ -3,7 +3,7 @@ package com.imob.lib.sslib.utils;
 
 public class Logger {
 
-    private final static boolean debug = false;
+    private final static boolean debug = true;
 
     public static void e(Exception exception) {
         if (debug) {

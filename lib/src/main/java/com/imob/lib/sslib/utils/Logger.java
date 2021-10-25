@@ -12,7 +12,7 @@ public class Logger {
     }
 
 
-    public static void print(Throwable throwable) {
+    public static void e(Throwable throwable) {
         if (DEBUG) {
             if (throwable != null) {
                 throwable.printStackTrace();

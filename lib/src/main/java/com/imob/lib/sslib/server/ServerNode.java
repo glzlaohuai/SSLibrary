@@ -1,58 +1,62 @@
 package com.imob.lib.sslib.server;
 
-import com.imob.lib.sslib.server.exception.AlreadyHasARunningServerException;
-import com.imob.lib.sslib.server.exception.ServerIsCreatingException;
-import com.imob.lib.sslib.server.exception.ServerIsDestroiedException;
+import com.imob.lib.sslib.msg.Msg;
+import com.imob.lib.sslib.peer.Peer;
+import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.utils.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerNode {
 
-    private final static ExecutorService createExecutorService = Executors.newSingleThreadExecutor();
+    private ExecutorService createExecutorService = Executors.newSingleThreadExecutor();
 
-    private final static ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor();
+    private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor();
 
     public interface OnServerListener {
         void onCreated();
 
         void onCreateFailed(Exception exception);
 
-        void onDestroied();
+        void onDestroyed();
 
-        void onCorrupted();
+        void onCorrupted(String msg, Exception e);
     }
 
     private boolean isCreating = false;
-    private boolean isRunning = false;
-    private boolean isDestroied = false;
+    private boolean isDestroyed = false;
+
+    private boolean isDestroyedCallbacked = false;
+    private boolean isCorruptedCallbacked = false;
 
     private ServerSocket serverSocket;
     private OnServerListener listener;
+    private PeerListener peerListener;
+
+    private List<Peer> connectedPeers = new ArrayList<>();
 
     public ServerNode(OnServerListener serverListener) {
         this.listener = serverListener;
     }
 
-    public boolean isCreating() {
-        return isCreating;
+    public boolean isInUsing() {
+        return (isCreating || isRunning()) && !isDestroyed;
     }
 
-    public void create() throws AlreadyHasARunningServerException, ServerIsDestroiedException, ServerIsCreatingException {
+    public boolean create() {
 
-        if (isCreating) {
-            throw new ServerIsCreatingException();
-        } else if (isRunning()) {
-            throw new AlreadyHasARunningServerException();
-        } else if (isDestroied()) {
-            throw new ServerIsDestroiedException();
+        if (isCreating || isRunning() || isDestroyed()) {
+            return false;
         }
 
         handleCreate();
+        return true;
     }
 
     private void handleCreate() {
@@ -61,11 +65,7 @@ public class ServerNode {
             public void run() {
                 try {
                     serverSocket = new ServerSocket(0);
-
                     isCreating = false;
-                    isRunning = true;
-                    isDestroied = false;
-
                     listener.onCreated();
 
                     startMonitorIncomingClients();
@@ -102,42 +102,74 @@ public class ServerNode {
     }
 
     public void destroy() {
-        if (!isDestroied()) {
-            isDestroied = true;
-            listener.onDestroied();
-            closeServerSocket();
-            listener.onDestroied();
+        if (!isDestroyed) {
+            isDestroyed = true;
+            doDestroyStuff();
+            callbackDestroyed();
+        }
+    }
+
+    private void callbackCorrupted(String msg, Exception e) {
+        if (!isCorruptedCallbacked) {
+            isCorruptedCallbacked = true;
+            listener.onCorrupted(msg, e);
         }
     }
 
 
+    private void callbackDestroyed() {
+        if (!isDestroyedCallbacked) {
+            listener.onDestroyed();
+        }
+    }
+
+    private void doDestroyStuff() {
+        closeServerSocket();
+        destroyAllConnectedPeers();
+    }
+
+    private void destroyAllConnectedPeers() {
+        for (Peer peer : connectedPeers) {
+            peer.destroy();
+        }
+    }
+
     private void handleMonitorIncomingClients() {
-        while (true) {
-            try {
+        try {
+            while (true) {
                 Socket socket = serverSocket.accept();
                 manageIncomingClient(socket);
-
-            } catch (IOException e) {
-                Logger.e(e);
-                if (!isDestroied) {
-                    isDestroied = true;
-                    listener.onCorrupted();
-                }
             }
+        } catch (IOException e) {
+            Logger.e(e);
+            destroy();
+            callbackCorrupted("server socket connection corrupted due to error occured while monitoring incoming clients", e);
+        }
+    }
+
+
+    public void broadcast(Msg msg) {
+        for (Peer peer : connectedPeers) {
+            peer.sendMessage(msg);
         }
     }
 
 
     private void manageIncomingClient(Socket socket) {
-        // TODO: 2021/10/25
+        Peer peer = new Peer(socket, peerListener);
+        connectedPeers.add(peer);
+    }
+
+    public void removePeer(Peer peer) {
+        connectedPeers.remove(peer);
     }
 
     public boolean isRunning() {
-        return isRunning && serverSocket != null && serverSocket.isBound() && !serverSocket.isClosed();
+        return serverSocket != null && serverSocket.isBound() && !serverSocket.isClosed();
     }
 
-    public boolean isDestroied() {
-        return isDestroied;
+    public boolean isDestroyed() {
+        return isDestroyed;
     }
 
 

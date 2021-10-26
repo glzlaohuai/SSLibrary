@@ -19,15 +19,6 @@ public class ServerNode {
 
     private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor();
 
-    public interface OnServerListener {
-        void onCreated();
-
-        void onCreateFailed(Exception exception);
-
-        void onDestroyed();
-
-        void onCorrupted(String msg, Exception e);
-    }
 
     private boolean isCreating = false;
     private boolean isDestroyed = false;
@@ -36,13 +27,14 @@ public class ServerNode {
     private boolean isCorruptedCallbacked = false;
 
     private ServerSocket serverSocket;
-    private OnServerListener listener;
+    private ServerListener serverListener;
     private PeerListener peerListener;
 
     private List<Peer> connectedPeers = new ArrayList<>();
 
-    public ServerNode(OnServerListener serverListener) {
-        this.listener = serverListener;
+    public ServerNode(ServerListener serverListener, PeerListener peerListener) {
+        this.serverListener = serverListener;
+        this.peerListener = peerListener;
     }
 
     public boolean isInUsing() {
@@ -66,13 +58,13 @@ public class ServerNode {
                 try {
                     serverSocket = new ServerSocket(0);
                     isCreating = false;
-                    listener.onCreated();
+                    serverListener.onCreated();
 
                     startMonitorIncomingClients();
 
                 } catch (IOException e) {
                     Logger.e(e);
-                    listener.onCreateFailed(e);
+                    serverListener.onCreateFailed(e);
                 } finally {
                     isCreating = false;
                 }
@@ -112,14 +104,14 @@ public class ServerNode {
     private void callbackCorrupted(String msg, Exception e) {
         if (!isCorruptedCallbacked) {
             isCorruptedCallbacked = true;
-            listener.onCorrupted(msg, e);
+            serverListener.onCorrupted(msg, e);
         }
     }
 
 
     private void callbackDestroyed() {
         if (!isDestroyedCallbacked) {
-            listener.onDestroyed();
+            serverListener.onDestroyed();
         }
     }
 

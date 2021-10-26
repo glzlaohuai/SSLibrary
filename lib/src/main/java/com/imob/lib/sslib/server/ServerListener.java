@@ -4,7 +4,11 @@ public interface ServerListener {
 
     void onCreated();
 
-    void onCreateFailed(String errorMsg);
+    void onCreateFailed(Exception exception);
+
+    void onDestroyed();
+
+    void onCorrupted(String msg, Exception e);
 
 
 }

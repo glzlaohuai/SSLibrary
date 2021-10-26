@@ -5,9 +5,9 @@ public class Logger {
     private static final String TAG = "SS_LIB";
     private static final boolean DEBUG = true;
 
-    public static void i(String msg) {
+    public static void i(String tag, String msg) {
         if (DEBUG) {
-            System.out.println(TAG + ": " + msg);
+            System.out.println(TAG + " - " + tag + " : " + msg);
         }
     }
 

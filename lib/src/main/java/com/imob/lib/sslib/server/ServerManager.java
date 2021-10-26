@@ -151,7 +151,10 @@ public class ServerManager {
         public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
             Logger.i(TAG, "onIncomingMsgReadFailed, id: " + id + ", total: " + total + ", soFar: " + soFar);
             base.onIncomingMsgReadFailed(peer, id, total, soFar);
-
         }
+    }
+
+    public static ServerNode getManagedServerNode() {
+        return serverNode;
     }
 }

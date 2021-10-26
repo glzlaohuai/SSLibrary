@@ -164,5 +164,13 @@ public class ServerNode {
         return isDestroyed;
     }
 
+    public String getServerSocketInfo() {
+        if (isRunning()) {
+            return serverSocket.getInetAddress().toString() + " : " + serverSocket.getLocalPort();
+        } else {
+            return "server is not running";
+        }
+    }
+
 
 }

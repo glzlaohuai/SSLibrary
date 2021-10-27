@@ -5,7 +5,10 @@ import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.utils.Logger;
 
 public class ServerManager {
+
     private static ServerNode serverNode;
+
+
     private static final String TAG = "ServerManager";
 
     /**
@@ -55,6 +58,13 @@ public class ServerManager {
             Logger.i(TAG, "onCorrupted, msg: " + msg + ", exception: " + e);
 
             base.onCorrupted(msg, e);
+        }
+
+        @Override
+        public void onIncomingClient(Peer peer) {
+            Logger.i(TAG, "onIncomingClient: " + peer.getSocket());
+
+            base.onIncomingClient(peer);
         }
     }
 
@@ -128,9 +138,9 @@ public class ServerManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadFailed(Peer peer, String id) {
-            Logger.i(TAG, "onIncomingMsgChunkReadFailed, id: " + id);
-            base.onIncomingMsgChunkReadFailed(peer, id);
+        public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+            Logger.i(TAG, "onIncomingMsgChunkReadFailedDueToPeerIOFailed, id: " + id);
+            base.onIncomingMsgChunkReadFailedDueToPeerIOFailed(peer, id);
 
         }
 

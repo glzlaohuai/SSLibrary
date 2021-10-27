@@ -1,5 +1,6 @@
 package com.imob.lib.sslib.server;
 
+import com.imob.lib.sslib.INode;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ServerNode {
+public class ServerNode implements INode {
 
     private ExecutorService createExecutorService = Executors.newSingleThreadExecutor();
 
@@ -140,15 +141,98 @@ public class ServerNode {
     }
 
 
-    public void broadcast(Msg msg) {
+    /**
+     *
+     * @param msg
+     * @return true - has connected peers, false - has no connected peers
+     */
+    public boolean broadcast(Msg msg) {
+        if (connectedPeers.size() <= 0) return false;
         for (Peer peer : connectedPeers) {
             peer.sendMessage(msg);
         }
+        return true;
     }
 
+    public List<Peer> getConnectedPeers() {
+        return connectedPeers;
+    }
 
     private void manageIncomingClient(Socket socket) {
-        Peer peer = new Peer(socket, peerListener);
+        Peer peer = new Peer(socket, ServerNode.this, new PeerListener() {
+            @Override
+            public void onMsgIntoQueue(Peer peer, String id) {
+                peerListener.onMsgIntoQueue(peer, id);
+            }
+
+            @Override
+            public void onMsgSendStart(Peer peer, String id) {
+                peerListener.onMsgIntoQueue(peer, id);
+            }
+
+            @Override
+            public void onMsgSendSucceeded(Peer peer, String id) {
+                peerListener.onMsgSendSucceeded(peer, id);
+            }
+
+            @Override
+            public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
+                peerListener.onMsgSendFailed(peer, id, msg, exception);
+            }
+
+            @Override
+            public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+                peerListener.onMsgChunkSendSucceeded(peer, id, chunkSize);
+            }
+
+            @Override
+            public void onIOStreamOpened(Peer peer) {
+                peerListener.onIOStreamOpened(peer);
+            }
+
+            @Override
+            public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
+                peerListener.onIOStreamOpenFailed(peer, errorMsg, exception);
+            }
+
+            @Override
+            public void onCorrupted(Peer peer, String msg, Exception e) {
+                peerListener.onCorrupted(peer, msg, e);
+                removePeer(peer);
+            }
+
+            @Override
+            public void onDestroy(Peer peer) {
+                peerListener.onDestroy(peer);
+                removePeer(peer);
+            }
+
+            @Override
+            public void onIncomingMsg(Peer peer, String id, int available) {
+                peerListener.onIncomingMsg(peer, id, available);
+            }
+
+            @Override
+            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+                peerListener.onIncomingMsgChunkReadFailedDueToPeerIOFailed(peer, id);
+            }
+
+            @Override
+            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
+                peerListener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar);
+            }
+
+            @Override
+            public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+                peerListener.onIncomingMsgReadSucceeded(peer, id);
+            }
+
+            @Override
+            public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
+                peerListener.onIncomingMsgReadFailed(peer, id, total, soFar);
+            }
+        });
+        serverListener.onIncomingClient(peer);
         connectedPeers.add(peer);
     }
 
@@ -172,5 +256,8 @@ public class ServerNode {
         }
     }
 
-
+    @Override
+    public boolean isServerNode() {
+        return true;
+    }
 }

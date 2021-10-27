@@ -1,5 +1,6 @@
 package com.imob.lib.sslib.peer;
 
+import com.imob.lib.sslib.INode;
 import com.imob.lib.sslib.msg.Chunk;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.MsgQueue;
@@ -27,7 +28,7 @@ public class Peer {
 
     private MsgQueue msgQueue = new MsgQueue();
 
-    private boolean isDestroied = false;
+    private boolean isDestroyed = false;
 
     private ExecutorService msgSendService = Executors.newSingleThreadExecutor();
     private ExecutorService monitorIncomingMsgService = Executors.newSingleThreadExecutor();
@@ -35,14 +36,21 @@ public class Peer {
     private boolean destroyCallbacked = false;
     private boolean corruptedCallbacked = false;
 
+    private INode localNode;
 
-    public Peer(Socket socket, PeerListener listener) {
+
+    public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
         this.listener = listener;
+
+        this.localNode = localNode;
 
         init();
     }
 
+    public INode getLocalNode() {
+        return localNode;
+    }
 
     private void init() {
         msgSendService.execute(new Runnable() {
@@ -69,10 +77,11 @@ public class Peer {
     }
 
     public void destroy() {
-        if (!isDestroied) {
-            isDestroied = true;
+        if (!isDestroyed) {
+            isDestroyed = true;
 
             doDestroyStuff();
+            callbackDestroy();
         }
     }
 
@@ -121,7 +130,7 @@ public class Peer {
             return;
         }
 
-        if (isDestroied) {
+        if (isDestroyed) {
             listener.onMsgSendFailed(this, msg.getId(), MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
             msg.destroy();
             return;
@@ -131,9 +140,8 @@ public class Peer {
         listener.onMsgIntoQueue(this, msg.getId());
     }
 
-
-    public boolean isDestroied() {
-        return isDestroied;
+    public boolean isDestroyed() {
+        return isDestroyed;
     }
 
 
@@ -144,7 +152,7 @@ public class Peer {
         msgSendService.execute(new Runnable() {
             @Override
             public void run() {
-                while (!isDestroied) {
+                while (!isDestroyed) {
                     Msg msg = msgQueue.poll();
                     listener.onMsgSendStart(Peer.this, msg.getId());
 
@@ -203,7 +211,7 @@ public class Peer {
             @Override
             public void run() {
                 try {
-                    while (!isDestroied) {
+                    while (!isDestroyed) {
                         String id = dis.readUTF();
                         int available = dis.readInt();
                         listener.onIncomingMsg(Peer.this, id, available);
@@ -216,7 +224,7 @@ public class Peer {
                             readed += chunkSize;
 
                             if (chunkSize == 0) {
-                                listener.onIncomingMsgChunkReadFailed(Peer.this, id);
+                                listener.onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer.this, id);
                                 break;
                             } else {
                                 listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, chunkSize, readed);
@@ -239,4 +247,8 @@ public class Peer {
         });
     }
 
+
+    public Socket getSocket() {
+        return socket;
+    }
 }

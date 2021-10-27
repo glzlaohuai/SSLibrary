@@ -1,5 +1,7 @@
 package com.imob.lib.sslib.client;
 
+import com.imob.lib.sslib.INode;
+import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.utils.Logger;
 
@@ -8,7 +10,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ClientNode {
+public class ClientNode implements INode {
 
     private static final String ERROR_INVALID_PARAMETERS = "ip or port invalid";
 
@@ -38,17 +40,51 @@ public class ClientNode {
                 socketCreateService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        if (!isCreating) {
-                            try {
-                                Socket socket = new Socket(ip, port);
-                            } catch (IOException e) {
-                                Logger.e(e);
-                                listener.onClientCreateFailed(ClientNode.this, "create client failed due to error occured", e);
-                            }
+                        try {
+                            Socket socket = new Socket(ip, port);
+                            peer = new Peer(socket, ClientNode.this, listener);
+                        } catch (IOException e) {
+                            Logger.e(e);
+                            listener.onClientCreateFailed(ClientNode.this, "create client failed due to error occured", e);
                         }
                     }
                 });
             }
         }
+    }
+
+
+    public boolean destroy() {
+        if (isCreating) {
+            return false;
+        }
+
+        if (peer != null) {
+            peer.destroy();
+        }
+        return true;
+    }
+
+
+    public boolean sendMsg(Msg msg) {
+        if (peer == null) return false;
+        else {
+            peer.sendMessage(msg);
+            return true;
+        }
+    }
+
+
+    public String getIp() {
+        return ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean isServerNode() {
+        return false;
     }
 }

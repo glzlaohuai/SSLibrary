@@ -20,4 +20,30 @@
         android:text="print server info" />
 
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="broadcastMsg"
+        android:text="broadcast msg" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="createClient"
+        android:text="create client" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="printConnectedClientsInfo"
+        android:text="print connected clients info" />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="w"
+        android:text="send msg to server" />
+
+
 </LinearLayout>

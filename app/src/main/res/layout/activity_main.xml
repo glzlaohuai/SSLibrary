@@ -60,11 +60,25 @@
         android:text="destroy client" />
 
 
-    <TextView
-        android:id="@+id/logView"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/logView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1"
+            android:gravity="bottom" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.5"
+            android:onClick="clearLog"
+            android:text="clear" />
+    </FrameLayout>
 
 </LinearLayout>

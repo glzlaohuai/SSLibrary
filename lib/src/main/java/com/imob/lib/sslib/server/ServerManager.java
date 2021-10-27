@@ -154,10 +154,10 @@ public class ServerManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,byte[] chunkBytes) {
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(chunkBytes));
+        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(Arrays.copyOfRange(chunkBytes, 0, chunkSize)));
 
-            base.onIncomingMsgChunkReadSucceeded(peer,id,chunkSize,soFar,chunkBytes);
+            base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
         }
 
         @Override

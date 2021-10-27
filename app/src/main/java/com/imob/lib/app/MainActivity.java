@@ -31,6 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Demo";
     private TextView logView;
 
+    public void clearLog(View view) {
+        logView.setText("");
+    }
+
     static class Log {
         public static void i(String tag, String msg) {
             String info = tag + " - " + msg;
@@ -50,11 +54,9 @@ public class MainActivity extends AppCompatActivity {
         logView.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         Logger.setLogWatcher(new Logger.LogWatcher() {
-
             @Override
             public void log(String log) {
                 appendLog(log);
-
             }
         });
     }
@@ -64,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 logView.append(log + "\n");
-                logView.scrollTo(0, 0);
             }
         });
     }
@@ -213,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        if (port.get() == 0 && ServerManager.getManagedServerNode().isRunning()) {
+                        if (port.get() == 0 && ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().isRunning()) {
                             port.set(ServerManager.getManagedServerNode().getPort());
                         }
 

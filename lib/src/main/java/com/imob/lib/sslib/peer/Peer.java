@@ -241,6 +241,7 @@ public class Peer {
                     while (!isDestroyed) {
                         String id = dis.readUTF();
                         int available = dis.readInt();
+
                         listener.onIncomingMsg(Peer.this, id, available);
 
 

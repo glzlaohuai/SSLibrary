@@ -9,6 +9,7 @@ import com.imob.lib.app.utils.DialogUtils;
 import com.imob.lib.sslib.client.ClientListener;
 import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
+import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
@@ -17,6 +18,7 @@ import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 import com.imob.lib.sslib.utils.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public void clearLog(View view) {
         logView.setText("");
     }
+
 
     static class Log {
         public static void i(String tag, String msg) {
@@ -186,8 +189,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void broadcastMsg(View view) {
+        Msg msg = StringMsg.build(UUID.randomUUID().toString(), "this is a test msg send from server");
+        doBroadcastMsg(msg);
+    }
+
+    public void broadcastFileMsg(View view) {
+        try {
+            Msg msg = new Msg(UUID.randomUUID().toString(), getAssets().open("test.apk"));
+            doBroadcastMsg(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i(TAG, "create msg failed");
+        }
+    }
+
+    private void doBroadcastMsg(Msg msg) {
         if (ServerManager.getManagedServerNode() != null) {
-            boolean result = ServerManager.getManagedServerNode().broadcast(StringMsg.build(UUID.randomUUID().toString(), "this is a test msg send from server"));
+            boolean result = ServerManager.getManagedServerNode().broadcast(msg);
             Log.i(TAG, "broadcastMsg, result: " + result);
         } else {
             Log.i(TAG, "broadcastMsg: has no server node instance");

@@ -26,6 +26,14 @@
         android:onClick="broadcastMsg"
         android:text="broadcast msg" />
 
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="broadcastFileMsg"
+        android:text="broadcast long msg" />
+
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

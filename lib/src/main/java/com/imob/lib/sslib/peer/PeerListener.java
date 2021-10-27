@@ -23,7 +23,7 @@ public interface PeerListener {
 
     void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id);
 
-    void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar);
+    void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes);
 
     void onIncomingMsgReadSucceeded(Peer peer, String id);
 

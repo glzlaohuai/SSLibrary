@@ -1,9 +1,9 @@
 package com.imob.lib.app;
 
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.widget.TextView;
 
 import com.imob.lib.app.utils.DialogUtils;
 import com.imob.lib.sslib.client.ClientListener;
@@ -15,7 +15,9 @@ import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.server.ServerListener;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
+import com.imob.lib.sslib.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,12 +29,46 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Demo";
+    private TextView logView;
+
+    static class Log {
+        public static void i(String tag, String msg) {
+            String info = tag + " - " + msg;
+            Logger.LogWatcher logWatcher = Logger.getLogWatcher();
+            if (logWatcher != null) {
+                logWatcher.log(info);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        logView = findViewById(R.id.logView);
+        logView.setMovementMethod(ScrollingMovementMethod.getInstance());
+
+        Logger.setLogWatcher(new Logger.LogWatcher() {
+
+            @Override
+            public void log(String log) {
+                appendLog(log);
+
+            }
+        });
     }
+
+    private void appendLog(String log) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logView.append(log + "\n");
+                logView.scrollTo(0, 0);
+            }
+        });
+    }
+
 
     public void createServer(View view) {
         ServerManager.createServerNode(new ServerListener() {
@@ -117,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
+            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
 
             }
 
@@ -161,106 +197,111 @@ public class MainActivity extends AppCompatActivity {
         DialogUtils.createInputDialog(this, "ip", new DialogUtils.OnDialogInputListener() {
             @Override
             public void onInputContent(String content) {
-                if (TextUtils.isEmpty(content)) {
-
-                } else {
-                    String ip = content;
-                    AtomicInteger port = new AtomicInteger(0);
-
-                    DialogUtils.createInputDialog(MainActivity.this, "port", new DialogUtils.OnDialogInputListener() {
-                        @Override
-                        public void onInputContent(String content) {
-                            try {
-                                port.set(Integer.parseInt(content));
-                            } catch (Throwable e) {
-                                e.printStackTrace();
-                            }
-                            Log.i(TAG, "create client: " + ip + ", port: " + port.get());
-
-                            ClientManager.createClient(ip, port.get(), new ClientListener() {
-                                @Override
-                                public void onClientCreated(ClientNode clientNode) {
-
-                                }
-
-                                @Override
-                                public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
-
-                                }
-
-                                @Override
-                                public void onMsgIntoQueue(Peer peer, String id) {
-
-                                }
-
-                                @Override
-                                public void onMsgSendStart(Peer peer, String id) {
-
-                                }
-
-                                @Override
-                                public void onMsgSendSucceeded(Peer peer, String id) {
-
-                                }
-
-                                @Override
-                                public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
-
-                                }
-
-                                @Override
-                                public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
-
-                                }
-
-                                @Override
-                                public void onIOStreamOpened(Peer peer) {
-
-                                }
-
-                                @Override
-                                public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
-
-                                }
-
-                                @Override
-                                public void onCorrupted(Peer peer, String msg, Exception e) {
-
-                                }
-
-                                @Override
-                                public void onDestroy(Peer peer) {
-
-                                }
-
-                                @Override
-                                public void onIncomingMsg(Peer peer, String id, int available) {
-
-                                }
-
-                                @Override
-                                public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
-
-                                }
-
-                                @Override
-                                public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
-
-                                }
-
-                                @Override
-                                public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-
-                                }
-
-                                @Override
-                                public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
-
-                                }
-                            });
-                        }
-                    });
+                if (content == null || content.equals("")) {
+                    content = "127.0.0.1";
                 }
+
+                String ip = content;
+                AtomicInteger port = new AtomicInteger(0);
+
+                DialogUtils.createInputDialog(MainActivity.this, "port", new DialogUtils.OnDialogInputListener() {
+                    @Override
+                    public void onInputContent(String content) {
+                        try {
+                            port.set(Integer.parseInt(content));
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+
+                        if (port.get() == 0 && ServerManager.getManagedServerNode().isRunning()) {
+                            port.set(ServerManager.getManagedServerNode().getPort());
+                        }
+
+                        Log.i(TAG, "create client: " + ip + ", port: " + port.get());
+
+                        ClientManager.createClient(ip, port.get(), new ClientListener() {
+                            @Override
+                            public void onClientCreated(ClientNode clientNode) {
+
+                            }
+
+                            @Override
+                            public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
+
+                            }
+
+                            @Override
+                            public void onMsgIntoQueue(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onMsgSendStart(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onMsgSendSucceeded(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
+
+                            }
+
+                            @Override
+                            public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+
+                            }
+
+                            @Override
+                            public void onIOStreamOpened(Peer peer) {
+
+                            }
+
+                            @Override
+                            public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
+
+                            }
+
+                            @Override
+                            public void onCorrupted(Peer peer, String msg, Exception e) {
+
+                            }
+
+                            @Override
+                            public void onDestroy(Peer peer) {
+
+                            }
+
+                            @Override
+                            public void onIncomingMsg(Peer peer, String id, int available) {
+
+                            }
+
+                            @Override
+                            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+
+                            }
+
+                            @Override
+                            public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
+
+                            }
+                        });
+                    }
+                });
             }
         });
     }
@@ -276,18 +317,49 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public void sendMsgToServer(View view) {
-        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+        boolean result = ClientManager.sendMsgByAllClients(StringMsg.build(UUID.randomUUID().toString(), "a test msg send to connected server"));
+        Log.i(TAG, "send msg to server: " + result);
+    }
 
-        Set<String> keySet = inUsingClientMap.keySet();
-        for (String key : keySet) {
-            Set<ClientNode> clientNodes = inUsingClientMap.get(key);
-            if (clientNodes != null) {
-                for (ClientNode clientNode : clientNodes) {
-                    clientNode.sendMsg(StringMsg.build(UUID.randomUUID().toString(), "a test msg from client to server"));
+    public void destroyServer(View view) {
+        ServerNode managedServerNode = ServerManager.getManagedServerNode();
+        if (managedServerNode != null) {
+            managedServerNode.destroy();
+        }
+    }
+
+
+    public void destroyClient(View view) {
+        if (ClientManager.getInUsingClientMap().isEmpty()) {
+            Log.i(TAG, "destroyClient, found no clients");
+        } else {
+            Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+            Set<String> keySet = inUsingClientMap.keySet();
+
+            List<String> items = new ArrayList<>();
+
+            for (String key : keySet) {
+                Set<ClientNode> clientNodes = inUsingClientMap.get(key);
+                for (int i = 0; i < clientNodes.size(); i++) {
+                    items.add(key + " - " + i);
                 }
             }
+            String[] itemsArray = new String[items.size()];
+            items.toArray(itemsArray);
+
+            DialogUtils.createListDialog(this, itemsArray, new DialogUtils.OnListDialogSelectListener() {
+                @Override
+                public void onSelected(int index) {
+                    Log.i(TAG, "destry client: " + itemsArray[index]);
+
+                    String[] splits = itemsArray[index].split("-");
+
+                    Set<ClientNode> clientNodes = inUsingClientMap.get(splits[0].trim());
+                    ClientNode clientNode = clientNodes.iterator().next();
+                    clientNode.destroy();
+                }
+            });
         }
     }
 }

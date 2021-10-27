@@ -4,6 +4,8 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.utils.Logger;
 
+import java.util.Arrays;
+
 public class ServerManager {
 
     private static ServerNode serverNode;
@@ -15,13 +17,18 @@ public class ServerManager {
      *
      * @return true - create a new server node instance, false - has a running server node already, create failed
      */
-    public static boolean createServerNode(ServerListener serverListener, PeerListener peerListener) {
+    public synchronized static boolean createServerNode(ServerListener serverListener, PeerListener peerListener) {
         if (serverNode != null && serverNode.isInUsing()) {
             return false;
         } else {
             serverNode = new ServerNode(new ServerListenerWrapper(serverListener), new PeerListenerWrapper(peerListener));
             return serverNode.create();
         }
+    }
+
+
+    private synchronized static void nullServerNodeAfterDestroyCallback() {
+        serverNode = null;
     }
 
     private static class ServerListenerWrapper implements ServerListener {
@@ -51,6 +58,7 @@ public class ServerManager {
             Logger.i(TAG, "onDestroyed");
 
             base.onDestroyed();
+            ServerManager.nullServerNodeAfterDestroyCallback();
         }
 
         @Override
@@ -58,6 +66,7 @@ public class ServerManager {
             Logger.i(TAG, "onCorrupted, msg: " + msg + ", exception: " + e);
 
             base.onCorrupted(msg, e);
+            ServerManager.nullServerNodeAfterDestroyCallback();
         }
 
         @Override
@@ -145,9 +154,10 @@ public class ServerManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar);
-            base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar);
+        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,byte[] chunkBytes) {
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(chunkBytes));
+
+            base.onIncomingMsgChunkReadSucceeded(peer,id,chunkSize,soFar,chunkBytes);
         }
 
         @Override

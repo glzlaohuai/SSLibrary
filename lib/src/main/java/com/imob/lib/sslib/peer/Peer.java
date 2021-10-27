@@ -16,6 +16,10 @@ import java.util.concurrent.Executors;
 
 public class Peer {
 
+    private static final String S_TAG = "Peer";
+
+    public static final int CHUNK_BYTE_LEN = 1024 * 1024;
+
     private static final String MSG_SEND_ERROR_PEER_IS_DESTROIED = "send failed, peer is already destroied";
     private static final String MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT = "no available bytes found";
     private static final String MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT_ = "error occured while reading byte chunk from input stream";
@@ -38,6 +42,8 @@ public class Peer {
 
     private INode localNode;
 
+    private String tag;
+
 
     public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
@@ -46,6 +52,8 @@ public class Peer {
         this.localNode = localNode;
 
         init();
+
+        tag = S_TAG + " - " + (localNode.isServerNode() ? "server" : "client") + " # " + hashCode();
     }
 
     public INode getLocalNode() {
@@ -124,7 +132,7 @@ public class Peer {
         Closer.close(socket);
     }
 
-    public void sendMessage(Msg msg) {
+    public synchronized void sendMessage(Msg msg) {
         if (msg == null || !msg.isValid()) {
             listener.onMsgSendFailed(this, msg == null ? null : msg.getId(), "msg is null or invalid", null);
             return;
@@ -137,7 +145,9 @@ public class Peer {
         }
 
         msgQueue.add(msg);
+        Logger.i(tag, "awake msg queue loop thread after adding msg into msg queue.");
         listener.onMsgIntoQueue(this, msg.getId());
+        notify();
     }
 
     public boolean isDestroyed() {
@@ -146,67 +156,84 @@ public class Peer {
 
 
     private void startHandleMsgSendStuff() {
-
-        final byte[] bytes = new byte[1024 * 1024];
-
         msgSendService.execute(new Runnable() {
             @Override
             public void run() {
-                while (!isDestroyed) {
-                    Msg msg = msgQueue.poll();
-                    listener.onMsgSendStart(Peer.this, msg.getId());
-
-                    int available = msg.getAvailable();
-                    if (available <= 0) {
-                        listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
-                        msg.destroy();
-                        continue;
-                    }
-
-                    //available != 0
-                    try {
-                        dos.writeUTF(msg.getId());
-                        dos.writeInt(available);
-
-                        int readed = 0;
-
-                        while (readed < available) {
-                            Chunk chunk = msg.readChunk(bytes);
-                            //eof, should never go there
-                            if (chunk.getSize() == -1) {
-
-                            } else if (chunk.getSize() == 0) {
-                                //exception occured
-                                listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT_, null);
-                                dos.writeInt(0);
-                            } else {
-                                readed += chunk.getSize();
-
-                                dos.writeInt(chunk.getSize());
-                                dos.write(chunk.getBytes(), 0, chunk.getSize());
-
-                                listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
-                            }
-                        }
-                        listener.onMsgSendSucceeded(Peer.this, msg.getId());
-                    } catch (IOException e) {
-                        Logger.e(e);
-                        //send msg failed, connection lost
-                        destroy();
-                        listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_CONNECTION_LOST, e);
-
-                        callbackCorrupted("corrupted due to exception occured while sending msg to peer", e);
-
-                    } finally {
-                        msg.destroy();
-                    }
-                }
+                loopMsgQueue();
             }
         });
     }
 
+    private synchronized void loopMsgQueue() {
+        final byte[] bytes = new byte[CHUNK_BYTE_LEN];
+        while (!isDestroyed) {
+            Msg msg = msgQueue.poll();
+            Logger.i(tag, "poll msg: " + msg);
+            if (msg == null) {
+                Logger.i(tag, "has no msg in msg queue currently, halt loop thread.");
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+            listener.onMsgSendStart(Peer.this, msg.getId());
+
+            int available = msg.getAvailable();
+            if (available <= 0) {
+                listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
+                msg.destroy();
+                continue;
+            }
+
+            //available != 0
+            try {
+                dos.writeUTF(msg.getId());
+                dos.writeInt(available);
+
+                int readed = 0;
+
+                while (readed < available) {
+                    Chunk chunk = msg.readChunk(bytes);
+                    //eof, should never go there
+                    if (chunk.getSize() == -1) {
+
+                    } else if (chunk.getSize() == 0) {
+                        //exception occured
+                        listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT_, null);
+                        dos.writeInt(0);
+                    } else {
+                        readed += chunk.getSize();
+
+                        dos.writeInt(chunk.getSize());
+                        dos.write(chunk.getBytes(), 0, chunk.getSize());
+
+                        listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
+                    }
+                }
+                listener.onMsgSendSucceeded(Peer.this, msg.getId());
+            } catch (IOException e) {
+                Logger.e(e);
+                //send msg failed, connection lost
+                destroy();
+                listener.onMsgSendFailed(Peer.this, msg.getId(), MSG_SEND_ERROR_CONNECTION_LOST, e);
+
+                callbackCorrupted("corrupted due to exception occured while sending msg to peer", e);
+
+            } finally {
+                msg.destroy();
+            }
+        }
+
+        Logger.i(tag, "msg queue loop end");
+
+    }
 
     private void startMonitorIncomingMsg() {
+
+        final byte[] buffer = new byte[CHUNK_BYTE_LEN];
+
         monitorIncomingMsgService.execute(new Runnable() {
             @Override
             public void run() {
@@ -227,7 +254,8 @@ public class Peer {
                                 listener.onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer.this, id);
                                 break;
                             } else {
-                                listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, chunkSize, readed);
+                                dis.readFully(buffer, 0, chunkSize);
+                                listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, chunkSize, readed, buffer);
                             }
                         }
 

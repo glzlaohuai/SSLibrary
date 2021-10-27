@@ -218,8 +218,8 @@ public class ServerNode implements INode {
             }
 
             @Override
-            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
-                peerListener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar);
+            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+                peerListener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
             }
 
             @Override
@@ -242,6 +242,10 @@ public class ServerNode implements INode {
 
     public boolean isRunning() {
         return serverSocket != null && serverSocket.isBound() && !serverSocket.isClosed();
+    }
+
+    public int getPort() {
+        return serverSocket.getLocalPort();
     }
 
     public boolean isDestroyed() {

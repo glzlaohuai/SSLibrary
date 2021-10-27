@@ -2,13 +2,34 @@ package com.imob.lib.sslib.utils;
 
 public class Logger {
 
+
     private static final String TAG = "SS_LIB";
     private static final boolean DEBUG = true;
 
+    public interface LogWatcher {
+        void log(String log);
+    }
+
+    private static LogWatcher logWatcher;
+
     public static void i(String tag, String msg) {
         if (DEBUG) {
-            System.out.println(TAG + " - " + tag + " : " + msg);
+            String info = TAG + " - " + tag + " : " + msg;
+            System.out.println(info);
+
+            if (logWatcher != null) {
+                logWatcher.log(info);
+            }
         }
+    }
+
+    public static void setLogWatcher(LogWatcher logWatcher) {
+        Logger.logWatcher = logWatcher;
+    }
+
+
+    public static LogWatcher getLogWatcher() {
+        return logWatcher;
     }
 
 

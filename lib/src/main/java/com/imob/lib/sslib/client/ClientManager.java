@@ -1,12 +1,16 @@
 package com.imob.lib.sslib.client;
 
+import com.imob.lib.sslib.msg.Msg;
+import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.utils.Logger;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class ClientManager {
     private static final String TAG = "ClientManager";
@@ -127,10 +131,10 @@ public class ClientManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar) {
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar);
+        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(chunkBytes));
 
-            base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar);
+            base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
         }
 
         @Override
@@ -189,5 +193,25 @@ public class ClientManager {
 
     public static Map<String, Set<ClientNode>> getInUsingClientMap() {
         return inUsingClientMap;
+    }
+
+
+    public static boolean sendMsgByAllClients(Msg msg) {
+        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+
+        if (inUsingClientMap == null || inUsingClientMap.isEmpty()) {
+            return false;
+        }
+
+        Set<String> keySet = inUsingClientMap.keySet();
+        for (String key : keySet) {
+            Set<ClientNode> clientNodes = inUsingClientMap.get(key);
+            if (clientNodes != null) {
+                for (ClientNode clientNode : clientNodes) {
+                    clientNode.sendMsg(StringMsg.build(UUID.randomUUID().toString(), "a test msg from client to server"));
+                }
+            }
+        }
+        return true;
     }
 }

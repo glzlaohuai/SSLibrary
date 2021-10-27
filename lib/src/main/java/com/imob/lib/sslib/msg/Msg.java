@@ -58,4 +58,12 @@ public class Msg {
 
         return 0;
     }
+
+    @Override
+    public String toString() {
+        return "Msg{" +
+                "id='" + id + '\'' +
+                ", inputStream=" + inputStream +
+                '}';
+    }
 }

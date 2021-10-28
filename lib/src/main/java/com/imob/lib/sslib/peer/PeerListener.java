@@ -3,11 +3,19 @@ package com.imob.lib.sslib.peer;
 public interface PeerListener {
     void onMsgIntoQueue(Peer peer, String id);
 
+    void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total);
+
     void onMsgSendStart(Peer peer, String id);
+
+    void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total);
 
     void onMsgSendSucceeded(Peer peer, String id);
 
+    void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total);
+
     void onMsgSendFailed(Peer peer, String id, String msg, Exception exception);
+
+    void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception);
 
     void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize);
 
@@ -29,5 +37,6 @@ public interface PeerListener {
 
     void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar);
 
+    void onIncomingConfirmMsg(Peer, String id, int soFar, int total);
 
 }

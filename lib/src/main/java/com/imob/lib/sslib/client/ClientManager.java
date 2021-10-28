@@ -1,16 +1,13 @@
 package com.imob.lib.sslib.client;
 
 import com.imob.lib.sslib.msg.Msg;
-import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.utils.Logger;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class ClientManager {
     private static final String TAG = "ClientManager";
@@ -33,12 +30,15 @@ public class ClientManager {
         }
 
 
-        private void removeClientNodeFromMap(ClientNode clientNode) {
+        private synchronized void removeClientNodeFromMap(ClientNode clientNode) {
             if (clientNode == null) return;
 
             Set<ClientNode> clientNodes = inUsingClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
             if (clientNodes != null) {
                 clientNodes.remove(clientNode);
+            }
+            if (clientNodes.size() == 0) {
+                inUsingClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
             }
         }
 
@@ -154,7 +154,7 @@ public class ClientManager {
 
         @Override
         public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(Arrays.copyOfRange(chunkBytes, 0, chunkSize)));
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + chunkBytes);
 
             base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
         }
@@ -224,6 +224,10 @@ public class ClientManager {
     }
 
 
+    /**
+     * @param msg
+     * @return true - has connected clients | false - has none connected clients
+     */
     public static boolean sendMsgByAllClients(Msg msg) {
         Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
 
@@ -236,7 +240,7 @@ public class ClientManager {
             Set<ClientNode> clientNodes = inUsingClientMap.get(key);
             if (clientNodes != null) {
                 for (ClientNode clientNode : clientNodes) {
-                    clientNode.sendMsg(StringMsg.build(UUID.randomUUID().toString(), "a test msg from client to server"));
+                    clientNode.sendMsg(msg);
                 }
             }
         }

@@ -220,9 +220,15 @@ public class MainActivity extends AppCompatActivity {
         doBroadcastMsg(msg);
     }
 
+
+    private Msg createTestFileMsg() throws IOException {
+        Msg msg = new Msg(UUID.randomUUID().toString(), getAssets().open("test.apk"));
+        return msg;
+    }
+
     public void broadcastFileMsg(View view) {
         try {
-            Msg msg = new Msg(UUID.randomUUID().toString(), getAssets().open("test.apk"));
+            Msg msg = createTestFileMsg();
             doBroadcastMsg(msg);
         } catch (IOException e) {
             e.printStackTrace();
@@ -392,6 +398,17 @@ public class MainActivity extends AppCompatActivity {
         boolean result = ClientManager.sendMsgByAllClients(StringMsg.build(UUID.randomUUID().toString(), "a test msg send to connected server"));
         Log.i(TAG, "send msg to server: " + result);
     }
+
+    public void sendLargeMsgToServer(View view) {
+        try {
+            boolean result = ClientManager.sendMsgByAllClients(createTestFileMsg());
+            Log.i(TAG, "send msg to server: " + result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i(TAG, "create file msg failed: " + e);
+        }
+    }
+
 
     public void destroyServer(View view) {
         ServerNode managedServerNode = ServerManager.getManagedServerNode();

@@ -235,10 +235,9 @@ public class Peer {
                 dos.writeUTF(msg.getId());
 
                 if (msg instanceof ConfirmMsg) {
-                    dos.write(msg.getAvailable());
-                    dos.write(((ConfirmMsg) msg).getSoFar());
-                    dos.write(((ConfirmMsg) msg).getTotal());
-                    dos.flush();
+                    dos.writeInt(msg.getAvailable());
+                    dos.writeInt(((ConfirmMsg) msg).getSoFar());
+                    dos.writeInt(((ConfirmMsg) msg).getTotal());
                 } else {
                     dos.writeInt(available);
 

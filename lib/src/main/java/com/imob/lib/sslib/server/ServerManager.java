@@ -4,8 +4,6 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.utils.Logger;
 
-import java.util.Arrays;
-
 public class ServerManager {
 
     private static ServerNode serverNode;
@@ -180,7 +178,7 @@ public class ServerManager {
 
         @Override
         public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + Arrays.toString(Arrays.copyOfRange(chunkBytes, 0, chunkSize)));
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + chunkBytes);
 
             base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
         }

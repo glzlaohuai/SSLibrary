@@ -37,6 +37,7 @@ public class Peer {
 
     private ExecutorService msgSendService = Executors.newSingleThreadExecutor();
     private ExecutorService monitorIncomingMsgService = Executors.newSingleThreadExecutor();
+    private ExecutorService msgInQueueService = Executors.newSingleThreadExecutor();
 
     private boolean destroyCallbacked = false;
     private boolean corruptedCallbacked = false;
@@ -135,7 +136,17 @@ public class Peer {
         Closer.close(socket);
     }
 
-    public synchronized void sendMessage(Msg msg) {
+    public void sendMessage(final Msg msg) {
+        msgInQueueService.execute(new Runnable() {
+            @Override
+            public void run() {
+                doSendMessage(msg);
+            }
+        });
+    }
+
+
+    private synchronized void doSendMessage(Msg msg) {
         if (msg == null || !msg.isValid()) {
             callbackMsgSendFailed(msg, "msg is null or invalid", null);
             return;

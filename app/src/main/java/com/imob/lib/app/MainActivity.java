@@ -197,6 +197,16 @@ public class MainActivity extends AppCompatActivity {
             public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
 
             }
+
+            @Override
+            public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onMsgSendPending(Peer peer, String id) {
+
+            }
         });
     }
 
@@ -374,6 +384,16 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
+
+                            }
+
+                            @Override
+                            public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+
+                            }
+
+                            @Override
+                            public void onMsgSendPending(Peer peer, String id) {
 
                             }
                         });

@@ -257,6 +257,16 @@ public class ServerNode implements INode {
             public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
                 peerListener.onIncomingConfirmMsg(peer, id, soFar, total);
             }
+
+            @Override
+            public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+                peerListener.onConfirmMsgSendPending(peer, id, soFar, total);
+            }
+
+            @Override
+            public void onMsgSendPending(Peer peer, String id) {
+                peerListener.onMsgSendPending(peer, id);
+            }
         });
         serverListener.onIncomingClient(peer);
         connectedPeers.add(peer);

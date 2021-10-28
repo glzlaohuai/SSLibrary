@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 public class ClientNode implements INode {
 
     private static final String ERROR_INVALID_PARAMETERS = "ip or port invalid";
+    private static final String ERROR_SEND_MSG_NULL_PEER = "peer is null";
 
     private String ip;
     private int port;
@@ -69,8 +70,10 @@ public class ClientNode implements INode {
 
 
     public boolean sendMsg(Msg msg) {
-        if (peer == null) return false;
-        else {
+        if (peer == null) {
+            listener.onMsgSendFailed(null, msg.getId(), ERROR_SEND_MSG_NULL_PEER, null);
+            return false;
+        } else {
             peer.sendMessage(msg);
             return true;
         }

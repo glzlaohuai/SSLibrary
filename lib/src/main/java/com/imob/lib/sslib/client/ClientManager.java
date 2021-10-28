@@ -178,15 +178,26 @@ public class ClientManager {
             Logger.i(TAG, "onIncomingConfirmMsg, id: " + id + ", total: " + total + ", soFar: " + soFar);
             base.onIncomingConfirmMsg(peer, id, total, soFar);
         }
+
+        @Override
+        public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onConfirmMsgSendPending, id: " + id + ", total: " + total + ", soFar: " + soFar);
+            base.onConfirmMsgSendPending(peer, id, soFar, total);
+        }
+
+        @Override
+        public void onMsgSendPending(Peer peer, String id) {
+            Logger.i(TAG, "onMsgSendPending, id: " + id);
+            base.onMsgSendPending(peer, id);
+        }
     }
 
 
     /**
-     *
      * @param ip
      * @param port
      * @param clientListener
-     * @return true - valid para
+     * @return true - valid parameters
      */
     public static boolean createClient(String ip, int port, ClientListener clientListener) {
         if (ip == null || ip.equals("") || port <= 0) {

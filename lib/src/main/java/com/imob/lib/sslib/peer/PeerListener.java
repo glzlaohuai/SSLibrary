@@ -39,4 +39,7 @@ public interface PeerListener {
 
     void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total);
 
+    void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total);
+
+    void onMsgSendPending(Peer peer, String id);
 }

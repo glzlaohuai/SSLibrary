@@ -200,6 +200,18 @@ public class ServerManager {
             Logger.i(TAG, "onIncomingConfirmMsg, id: " + id + ", soFar: " + soFar + ", total: " + total);
             base.onIncomingConfirmMsg(peer, id, soFar, total);
         }
+
+        @Override
+        public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onConfirmMsgSendPending, id: " + id + ", soFar: " + soFar + ", total: " + total);
+            base.onConfirmMsgSendPending(peer, id, soFar, total);
+        }
+
+        @Override
+        public void onMsgSendPending(Peer peer, String id) {
+            Logger.i(TAG, "onMsgSendPending, id: " + id);
+            base.onMsgSendPending(peer, id);
+        }
     }
 
     public static ServerNode getManagedServerNode() {

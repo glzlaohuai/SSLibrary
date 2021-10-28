@@ -138,6 +138,7 @@ public class Peer {
 
     public void sendMessage(final Msg msg) {
         msgQueue.add(msg);
+        callbackMsgSendPending(msg);
         msgInQueueService.execute(new Runnable() {
             @Override
             public void run() {
@@ -146,6 +147,13 @@ public class Peer {
         });
     }
 
+    private void callbackMsgSendPending(Msg msg) {
+        if (msg instanceof ConfirmMsg) {
+            listener.onConfirmMsgSendPending(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
+        } else {
+            listener.onMsgSendPending(this, msg.getId());
+        }
+    }
 
     private synchronized void doSendMessage(Msg msg) {
         if (msg == null || !msg.isValid()) {

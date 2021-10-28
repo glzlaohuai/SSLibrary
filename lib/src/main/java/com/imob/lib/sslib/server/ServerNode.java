@@ -166,8 +166,18 @@ public class ServerNode implements INode {
             }
 
             @Override
+            public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
+                peerListener.onConfirmMsgIntoQueue(peer, id, soFar, total);
+            }
+
+            @Override
             public void onMsgSendStart(Peer peer, String id) {
                 peerListener.onMsgIntoQueue(peer, id);
+            }
+
+            @Override
+            public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
+                peerListener.onConfirmMsgSendStart(peer, id, soFar, total);
             }
 
             @Override
@@ -176,8 +186,19 @@ public class ServerNode implements INode {
             }
 
             @Override
+            public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
+                peerListener.onConfirmMsgSendSucceeded(peer, id, soFar, total);
+            }
+
+            @Override
             public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
                 peerListener.onMsgSendFailed(peer, id, msg, exception);
+            }
+
+            @Override
+            public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
+                peerListener.onConfirmMsgSendFailed(peer, id, soFar, total, msg, exception);
+
             }
 
             @Override
@@ -230,6 +251,11 @@ public class ServerNode implements INode {
             @Override
             public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
                 peerListener.onIncomingMsgReadFailed(peer, id, total, soFar);
+            }
+
+            @Override
+            public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
+                peerListener.onIncomingConfirmMsg(peer, id, soFar, total);
             }
         });
         serverListener.onIncomingClient(peer);

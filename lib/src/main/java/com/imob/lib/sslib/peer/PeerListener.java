@@ -37,6 +37,6 @@ public interface PeerListener {
 
     void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar);
 
-    void onIncomingConfirmMsg(Peer, String id, int soFar, int total);
+    void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total);
 
 }

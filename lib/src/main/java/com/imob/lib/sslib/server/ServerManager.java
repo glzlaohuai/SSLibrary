@@ -91,9 +91,21 @@ public class ServerManager {
         }
 
         @Override
+        public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onConfirmMsgIntoQueue: id: " + id + ", soFar: " + soFar + ", total: " + total);
+            base.onConfirmMsgIntoQueue(peer, id, soFar, total);
+        }
+
+        @Override
         public void onMsgSendStart(Peer peer, String id) {
             Logger.i(TAG, "onMsgSendStart: " + id);
             base.onMsgSendStart(peer, id);
+        }
+
+        @Override
+        public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onConfirmMsgSendStart: id: " + id + ", soFar: " + soFar + ", total: " + total);
+            base.onConfirmMsgSendStart(peer, id, soFar, total);
         }
 
         @Override
@@ -103,9 +115,22 @@ public class ServerManager {
         }
 
         @Override
+        public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onConfirmMsgSendSucceeded: id: " + id + ", soFar: " + soFar + ", total: " + total);
+
+            base.onConfirmMsgSendSucceeded(peer, id, soFar, total);
+        }
+
+        @Override
         public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
             Logger.i(TAG, "onMsgSendFailed: " + id + ", msg: " + msg + ", exception: " + exception);
             base.onMsgSendFailed(peer, id, msg, exception);
+        }
+
+        @Override
+        public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
+            Logger.i(TAG, "onConfirmMsgSendFailed: " + id + ", soFar: " + soFar + ", total: " + total + ", msg: " + msg + ", exception: " + exception);
+            base.onConfirmMsgSendFailed(peer, id, soFar, total, msg, exception);
         }
 
         @Override
@@ -163,7 +188,6 @@ public class ServerManager {
         @Override
         public void onIncomingMsgReadSucceeded(Peer peer, String id) {
             Logger.i(TAG, "onIncomingMsgReadSucceeded, id: " + id);
-
             base.onIncomingMsgReadSucceeded(peer, id);
         }
 
@@ -171,6 +195,12 @@ public class ServerManager {
         public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
             Logger.i(TAG, "onIncomingMsgReadFailed, id: " + id + ", total: " + total + ", soFar: " + soFar);
             base.onIncomingMsgReadFailed(peer, id, total, soFar);
+        }
+
+        @Override
+        public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
+            Logger.i(TAG, "onIncomingConfirmMsg, id: " + id + ", soFar: " + soFar + ", total: " + total);
+            base.onIncomingConfirmMsg(peer, id, soFar, total);
         }
     }
 

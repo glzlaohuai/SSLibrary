@@ -107,7 +107,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
             public void onMsgSendStart(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
 
             }
 
@@ -117,7 +127,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
             public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
 
             }
 
@@ -168,6 +188,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
+
+            }
+
+            @Override
+            public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
 
             }
         });
@@ -255,7 +280,17 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
+                            public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
+
+                            }
+
+                            @Override
                             public void onMsgSendStart(Peer peer, String id) {
+
+                            }
+
+                            @Override
+                            public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
 
                             }
 
@@ -265,7 +300,17 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
+                            public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
+
+                            }
+
+                            @Override
                             public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
+
+                            }
+
+                            @Override
+                            public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
 
                             }
 
@@ -316,6 +361,11 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
+
+                            }
+
+                            @Override
+                            public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
 
                             }
                         });

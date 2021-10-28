@@ -137,6 +137,7 @@ public class Peer {
     }
 
     public void sendMessage(final Msg msg) {
+        msgQueue.add(msg);
         msgInQueueService.execute(new Runnable() {
             @Override
             public void run() {
@@ -158,7 +159,6 @@ public class Peer {
             return;
         }
 
-        msgQueue.add(msg);
         Logger.i(tag, "awake msg queue loop thread after adding msg into msg queue.");
         callbackMsgIntoQueue(msg);
         notify();

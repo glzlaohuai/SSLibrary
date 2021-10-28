@@ -90,7 +90,7 @@ public class ClientManager {
 
         @Override
         public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
-            Logger.i(TAG, "onMsgSendSucceeded, id: " + id + ", msg: " + msg + ", exception: " + exception);
+            Logger.i(TAG, "onMsgSendFailed, id: " + id + ", msg: " + msg + ", exception: " + exception);
 
             base.onMsgSendFailed(peer, id, msg, exception);
         }

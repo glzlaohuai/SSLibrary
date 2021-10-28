@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
             if (logWatcher != null) {
                 logWatcher.log(info);
             }
+
+            android.util.Log.i(tag, msg);
         }
     }
 

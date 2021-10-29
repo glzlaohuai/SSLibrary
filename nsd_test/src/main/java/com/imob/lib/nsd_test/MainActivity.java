@@ -16,6 +16,7 @@ import com.imob.lib.sslib.server.ServerManager;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -28,6 +29,25 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static WifiManager.MulticastLock multicastLock;
+    private static JmDNS jmdns;
+
+    private static void stopScan() {
+        try {
+            if (jmdns != null) {
+                Log.i(TAG, "Stopping ZeroConf probe....");
+                jmdns.unregisterAllServices();
+                jmdns.close();
+                jmdns = null;
+            }
+            if (multicastLock != null) {
+                Log.i(TAG, "Releasing Mutlicast Lock...");
+                multicastLock.release();
+                multicastLock = null;
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,9 +201,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static JmDNS jmdns;
-
-
     private InetAddress getDeviceIpAddress(WifiManager wifi) {
         InetAddress result = null;
         try {
@@ -195,6 +212,8 @@ public class MainActivity extends AppCompatActivity {
             int intaddr = wifiinfo.getIpAddress();
             byte[] byteaddr = new byte[]{(byte) (intaddr & 0xff), (byte) (intaddr >> 8 & 0xff),
                     (byte) (intaddr >> 16 & 0xff), (byte) (intaddr >> 24 & 0xff)};
+
+            Log.i(TAG, "getDeviceIpAddress: " + Arrays.toString(byteaddr));
             result = InetAddress.getByAddress(byteaddr);
         } catch (UnknownHostException ex) {
             Log.w(TAG, String.format("getDeviceIpAddress Error: %s", ex.getMessage()));
@@ -208,24 +227,32 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "Starting Mutlicast Lock...");
             WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             // get the device ip address
-            final InetAddress deviceIpAddress = getDeviceIpAddress(wifi);
+
+
+            final InetAddress deviceIpAddress = InetAddress.getLocalHost();
+            InetAddress x = getDeviceIpAddress(wifi);
+
+
+            Log.i(TAG, "doRegister: " + deviceIpAddress.toString());
+            Log.i(TAG, "doRegister - 2: " + x);
             multicastLock = wifi.createMulticastLock(getClass().getName());
             multicastLock.setReferenceCounted(true);
             multicastLock.acquire();
 
             Log.i(TAG, "Starting ZeroConf probe....");
-            jmdns = JmDNS.create(deviceIpAddress, "xxx-hostname");
+            jmdns = JmDNS.create(x, "xxx-hostname");
             jmdns.addServiceTypeListener(new ServiceTypeListener() {
                 @Override
                 public void serviceTypeAdded(ServiceEvent serviceEvent) {
+
+                    Log.i(TAG, "serviceTypeAdded: " + serviceEvent);
                 }
 
                 @Override
                 public void subTypeForServiceTypeAdded(ServiceEvent serviceEvent) {
                 }
             });
-
-            ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "example - " + Build.DEVICE, 1234, "path=index.html");
+            ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local", "example - " + Build.DEVICE, 1234, "path=index.html");
             jmdns.registerService(serviceInfo);
 
         } catch (IOException ex) {
@@ -234,27 +261,12 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Started ZeroConf probe....");
     }
 
-
-    private static void stopScan() {
-        try {
-            if (jmdns != null) {
-                Log.i(TAG, "Stopping ZeroConf probe....");
-                jmdns.unregisterAllServices();
-                jmdns.close();
-                jmdns = null;
-            }
-            if (multicastLock != null) {
-                Log.i(TAG, "Releasing Mutlicast Lock...");
-                multicastLock.release();
-                multicastLock = null;
-            }
-        } catch (Exception ex) {
-            Log.e(TAG, ex.getMessage(), ex);
-        }
-    }
-
-
     public void registerService(int port) throws IOException {
-        doRegister();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                doRegister();
+            }
+        }).start();
     }
 }

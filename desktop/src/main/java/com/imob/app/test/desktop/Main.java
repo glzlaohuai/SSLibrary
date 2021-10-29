@@ -25,7 +25,7 @@ public class Main {
                 try {
                     JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
                     // Register a service
-                    ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "example - ", ServerManager.getManagedServerNode().getPort(), "path=index.html");
+                    ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "example - desktop", ServerManager.getManagedServerNode().getPort(), "path=index.html");
                     jmdns.registerService(serviceInfo);
                 } catch (IOException e) {
                     e.printStackTrace();

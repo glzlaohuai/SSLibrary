@@ -60,6 +60,30 @@ public class NsdManager {
             Logger.i(TAG, "onDestroyed, nsdManager: " + nsdManager);
             base.onDestroyed(nsdManager);
         }
+
+        @Override
+        public void onRegisterServiceFailed(NsdManager nsdManager, String type, String name, int port, String text, String msg, Exception e) {
+            Logger.i(TAG, "onRegisterServiceFailed, nsgManager: " + nsdManager + ", type:" + type + ", name: " + name + ", txt: " + text + ", port: " + port + ", msg: " + msg + ", exception: " + e);
+            base.onRegisterServiceFailed(nsdManager, type, name, port, text, msg, e);
+        }
+
+        @Override
+        public void onServiceDiscoveryed(NsdManager nsdManager, ServiceEvent event) {
+            Logger.i(TAG, "onServiceDiscoveryed, nsdManager: " + nsdManager + ", event: " + event);
+            base.onServiceDiscoveryed(nsdManager, event);
+        }
+
+        @Override
+        public void onServiceInWatch(NsdManager nsdManager, String type, String name) {
+            Logger.i(TAG, "onServiceInWatch, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name);
+            base.onServiceInWatch(nsdManager, type, name);
+        }
+
+        @Override
+        public void onSuccessfullyRegisterService(NsdManager nsdManager, String type, String name, String text, int port) {
+            Logger.i(TAG, "onSuccessfullyRegisterService, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name + ", text: " + text + ", port: " + port);
+            base.onSuccessfullyRegisterService(nsdManager, type, name, text, port);
+        }
     }
 
     public NsdManager(JmDNS jmDNS, INsdExtraActionPerformer performer, NsdEventListener listener) {
@@ -77,14 +101,14 @@ public class NsdManager {
         } else {
             //valid arguments, go on
             if (inetAddress != null && hostName != null && !hostName.equals("")) {
-                wrapper.onInitFailed(ERROR_INIT_FAILED_INVALID_ARGUMENT, null);
-            } else {
                 initExecutorService.execute(new Runnable() {
                     @Override
                     public void run() {
                         doSetupStuff(nsdExtraActionPerformer, inetAddress, hostName, wrapper);
                     }
                 });
+            } else {
+                wrapper.onInitFailed(ERROR_INIT_FAILED_INVALID_ARGUMENT, null);
             }
         }
     }
@@ -198,6 +222,7 @@ public class NsdManager {
                                     }
                                 }
                             });
+                            listener.onServiceInWatch(NsdManager.this, type, name);
                         } else {
 
                         }
@@ -212,14 +237,15 @@ public class NsdManager {
     private void doRegisterService(String type, String name, String text, int port) {
         synchronized (lock) {
             if (jmDNS != null) {
-                listener.onRegisterServiceFailed(this, type, name, port, text, ERROR_REGISTER_SERVICE_FAILED_NO_INSTANCE_FOUND, null);
-            } else {
                 try {
                     jmDNS.registerService(ServiceInfo.create(type, name, port, text));
+                    listener.onSuccessfullyRegisterService(this, type, name, text, port);
                 } catch (IOException e) {
                     Logger.e(e);
                     listener.onRegisterServiceFailed(this, type, name, port, text, ERROR_REGISTER_SERVICE_FAILED_ERROR_OCCURED, e);
                 }
+            } else {
+                listener.onRegisterServiceFailed(this, type, name, port, text, ERROR_REGISTER_SERVICE_FAILED_NO_INSTANCE_FOUND, null);
             }
         }
     }

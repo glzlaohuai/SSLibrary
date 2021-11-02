@@ -1,4 +1,4 @@
-package com.imob.lib.sslib.utils;
+package com.imob.lib.lib_common;
 
 import java.io.Closeable;
 import java.io.IOException;

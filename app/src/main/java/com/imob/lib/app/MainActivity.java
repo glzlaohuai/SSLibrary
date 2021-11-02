@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.imob.lib.app.utils.DialogUtils;
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListener;
 import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
@@ -16,7 +17,6 @@ import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.server.ServerListener;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
-import com.imob.lib.sslib.utils.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;

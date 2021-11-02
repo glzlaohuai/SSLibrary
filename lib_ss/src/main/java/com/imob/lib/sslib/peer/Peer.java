@@ -1,12 +1,12 @@
 package com.imob.lib.sslib.peer;
 
+import com.imob.lib.lib_common.Closer;
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.INode;
 import com.imob.lib.sslib.msg.Chunk;
 import com.imob.lib.sslib.msg.ConfirmMsg;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.MsgQueue;
-import com.imob.lib.sslib.utils.Closer;
-import com.imob.lib.sslib.utils.Logger;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

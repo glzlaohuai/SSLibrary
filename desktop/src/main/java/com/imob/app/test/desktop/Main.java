@@ -7,14 +7,42 @@ import com.imob.lib.sslib.server.ServerManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
 
 public class Main {
+    public static String getIPAddress() {
+        try {
+            for (Enumeration<NetworkInterface> enNetI = NetworkInterface
+                    .getNetworkInterfaces(); enNetI.hasMoreElements(); ) {
+                NetworkInterface netI = enNetI.nextElement();
 
-    public static void main(String[] args) {
-        registerService();
+                for (Enumeration<InetAddress> enumIpAddr = netI
+                        .getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    System.out.println(inetAddress.getHostAddress() + ", " + inetAddress.toString());
+                    //                    if (inetAddress instanceof Inet4Address && !inetAddress.isLoopbackAddress()) {
+                    //                        return inetAddress.getHostAddress();
+                    //                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        InetAddress inetAddress = InetAddress.getLocalHost();
+        System.out.println("IP Address:- " + inetAddress.getHostAddress());
+        System.out.println("Host Name:- " + inetAddress.getHostName());
     }
 
     private static void registerService() {
@@ -27,6 +55,24 @@ public class Main {
                     // Register a service
                     ServiceInfo serviceInfo = ServiceInfo.create("_http._tcp.local.", "example - desktop", ServerManager.getManagedServerNode().getPort(), "path=index.html");
                     jmdns.registerService(serviceInfo);
+
+                    jmdns.addServiceListener("_http._tcp.local.", new ServiceListener() {
+                        @Override
+                        public void serviceAdded(ServiceEvent event) {
+                            System.out.println("serviceAdded: " + event);
+
+                        }
+
+                        @Override
+                        public void serviceRemoved(ServiceEvent event) {
+                            System.out.println("service removed: " + event);
+                        }
+
+                        @Override
+                        public void serviceResolved(ServiceEvent event) {
+                            System.out.println("service resolved: " + event);
+                        }
+                    });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

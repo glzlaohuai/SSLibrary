@@ -8,6 +8,8 @@ java {
 }
 
 dependencies {
-    implementation files('libs/jmdns-3.5.7.jar')
+    implementation 'org.jmdns:jmdns:3.5.7'
+    implementation project(path: ':lib_ss')
+    implementation project(path: ':lib_common')
 }
 

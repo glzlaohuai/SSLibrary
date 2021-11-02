@@ -1,8 +1,8 @@
 package com.imob.lib.sslib.client;
 
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
-import com.imob.lib.sslib.utils.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;

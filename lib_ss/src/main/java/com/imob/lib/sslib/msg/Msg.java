@@ -1,7 +1,7 @@
 package com.imob.lib.sslib.msg;
 
-import com.imob.lib.sslib.utils.Closer;
-import com.imob.lib.sslib.utils.Logger;
+import com.imob.lib.lib_common.Closer;
+import com.imob.lib.lib_common.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;

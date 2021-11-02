@@ -1,8 +1,8 @@
 package com.imob.lib.sslib.server;
 
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
-import com.imob.lib.sslib.utils.Logger;
 
 public class ServerManager {
 

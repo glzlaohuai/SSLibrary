@@ -14,7 +14,10 @@ public interface NsdEventListener {
 
     void onServiceDiscoveryed(NsdManager nsdManager, ServiceEvent event);
 
-    void onServiceInWatch(NsdManager nsdManager, String type, String name);
+    void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name);
+
+    void onWatchServiceFailed(NsdManager nsdManager, String type, String name, String msg, Exception e);
+
 
     void onSuccessfullyRegisterService(NsdManager nsdManager, String type, String name, String text, int port);
 }

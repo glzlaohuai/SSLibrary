@@ -20,6 +20,7 @@ public class NsdManager {
     public static final String ERROR_INIT_FAILED_EXTRA_PERFORMER_FAILED = "nsd manager setup failed due to error occured during extra performer in action";
 
     public static final String ERROR_REGISTER_SERVICE_FAILED_NO_INSTANCE_FOUND = "register service failed due to no JmDns instance found, maybe it's already been destroyed.";
+    public static final String ERROR_WATCH_SERVICE_FAILED_NO_INSTANCE_FOUND = "watch service failed due to no jmDNS instance found.";
     public static final String ERROR_REGISTER_SERVICE_FAILED_ERROR_OCCURED = "register service failed due to error occured.";
 
     private static final String TAG = "NsdManager";
@@ -74,9 +75,15 @@ public class NsdManager {
         }
 
         @Override
-        public void onServiceInWatch(NsdManager nsdManager, String type, String name) {
+        public void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name) {
             Logger.i(TAG, "onServiceInWatch, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name);
-            base.onServiceInWatch(nsdManager, type, name);
+            base.onSuccessfullyWatchService(nsdManager, type, name);
+        }
+
+        @Override
+        public void onWatchServiceFailed(NsdManager nsdManager, String type, String name, String msg, Exception e) {
+            Logger.i(TAG, "onWatchServiceFailed, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name + ", msg: " + msg + ", exception: " + e);
+            base.onWatchServiceFailed(nsdManager, type, name, msg, e);
         }
 
         @Override
@@ -192,7 +199,7 @@ public class NsdManager {
                             jmDNS.addServiceListener(type, new ServiceListener() {
                                 @Override
                                 public void serviceAdded(final ServiceEvent event) {
-                                    if (event != null && event.getName() != null && event.getName().equals(name) && isThisInstanceStillInUse()) {
+                                    if (event != null && event.getName() != null && (name == null || event.getName().equals(name)) && isThisInstanceStillInUse()) {
                                         synchronized (lock) {
                                             retrieveServiceInfoService.execute(new Runnable() {
                                                 @Override
@@ -222,9 +229,9 @@ public class NsdManager {
                                     }
                                 }
                             });
-                            listener.onServiceInWatch(NsdManager.this, type, name);
+                            listener.onSuccessfullyWatchService(NsdManager.this, type, name);
                         } else {
-
+                            listener.onWatchServiceFailed(NsdManager.this, type, name, ERROR_WATCH_SERVICE_FAILED_NO_INSTANCE_FOUND, null);
                         }
                     }
                 }

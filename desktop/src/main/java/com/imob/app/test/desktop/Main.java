@@ -65,7 +65,12 @@ public class Main {
                     }
 
                     @Override
-                    public void onServiceInWatch(NsdManager nsdManager, String type, String name) {
+                    public void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name) {
+
+                    }
+
+                    @Override
+                    public void onWatchServiceFailed(NsdManager nsdManager, String type, String name, String msg, Exception e) {
 
                     }
 

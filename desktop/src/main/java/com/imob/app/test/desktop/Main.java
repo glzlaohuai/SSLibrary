@@ -6,10 +6,12 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.server.ServerListener;
 import com.imob.lib.sslib.server.ServerManager;
+import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 import javax.jmdns.ServiceEvent;
 
@@ -17,14 +19,175 @@ public class Main {
 
     public static final String SERVICE_TYPE = "_paste-everywhere._tcp.local";
 
-
     public static void main(String[] args) throws IOException {
-        InetAddress inetAddress = InetAddress.getLocalHost();
-        System.out.println("IP Address:- " + inetAddress.getHostAddress());
-        System.out.println("Host Name:- " + inetAddress.getHostName());
-
-        registerService();
+        monitorKeyInput();
     }
+
+    private static void monitorKeyInput() {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("Options:\n1 - Create Server\n2 - Stop Server\n3 - Create Client\n 4 - Destroy Client");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    createServer();
+                    break;
+                case 2:
+                    destroyServer();
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+            }
+        }
+    }
+
+
+    private static void destroyServer() {
+        ServerNode managedServerNode = ServerManager.getManagedServerNode();
+        if (managedServerNode != null) {
+            managedServerNode.destroy();
+        }
+    }
+
+    private static void createServer() {
+        ServerManager.createServerNode(new ServerListener() {
+            @Override
+            public void onCreated() {
+
+            }
+
+            @Override
+            public void onCreateFailed(Exception exception) {
+
+            }
+
+            @Override
+            public void onDestroyed() {
+
+            }
+
+            @Override
+            public void onCorrupted(String msg, Exception e) {
+
+            }
+
+            @Override
+            public void onIncomingClient(Peer peer) {
+
+            }
+        }, new PeerListener() {
+            @Override
+            public void onMsgIntoQueue(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onMsgSendStart(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onMsgSendSucceeded(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
+
+            }
+
+            @Override
+            public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+
+            }
+
+            @Override
+            public void onIOStreamOpened(Peer peer) {
+
+            }
+
+            @Override
+            public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
+
+            }
+
+            @Override
+            public void onCorrupted(Peer peer, String msg, Exception e) {
+
+            }
+
+            @Override
+            public void onDestroy(Peer peer) {
+
+            }
+
+            @Override
+            public void onIncomingMsg(Peer peer, String id, int available) {
+
+            }
+
+            @Override
+            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+
+            }
+
+            @Override
+            public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+
+            }
+
+            @Override
+            public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
+
+            }
+
+            @Override
+            public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
+
+            }
+
+            @Override
+            public void onMsgSendPending(Peer peer, String id) {
+
+            }
+        });
+    }
+
 
     private static void registerService() {
 

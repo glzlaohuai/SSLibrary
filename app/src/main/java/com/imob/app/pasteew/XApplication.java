@@ -4,12 +4,13 @@ import android.app.Application;
 import android.content.Context;
 
 import com.imob.app.pasteew.utils.Constants;
-import com.imob.app.pasteew.utils.SPUtils;
+import com.imob.app.pasteew.utils.SPWrapper;
+import com.imob.app.pasteew.utils.ServiceRegister;
+import com.imob.lib.common.android.SPUtils;
 
 public class XApplication extends Application {
 
     public static Context context;
-
 
     public static Context getContext() {
         return context;
@@ -26,6 +27,8 @@ public class XApplication extends Application {
 
 
     private void registerServiceIfHasSetName() {
-
+        if (SPWrapper.hasSetServiceName()) {
+            ServiceRegister.startServiceRegisterStuff();
+        }
     }
 }

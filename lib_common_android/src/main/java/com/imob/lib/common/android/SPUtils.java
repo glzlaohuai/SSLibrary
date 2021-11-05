@@ -1,4 +1,4 @@
-package com.imob.app.pasteew.utils;
+package com.imob.lib.common.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;

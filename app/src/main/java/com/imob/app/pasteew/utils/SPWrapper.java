@@ -2,6 +2,8 @@ package com.imob.app.pasteew.utils;
 
 import android.text.TextUtils;
 
+import com.imob.lib.common.android.SPUtils;
+
 public class SPWrapper {
 
     private static final String KEY_SERVICE_NAME = "service_name";

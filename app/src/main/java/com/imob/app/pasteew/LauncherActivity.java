@@ -20,7 +20,8 @@ public class LauncherActivity extends AppCompatActivity {
 
     private void route() {
         if (SPWrapper.hasSetServiceName()) {
-
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
         } else {
             //has no serviceName set, goto setServiceName activityt
             Intent intent = new Intent(this, SetServiceNameActivity.class);

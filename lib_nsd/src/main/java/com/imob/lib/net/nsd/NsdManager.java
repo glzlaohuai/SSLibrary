@@ -14,14 +14,14 @@ import javax.jmdns.ServiceListener;
 
 public class NsdManager {
 
-    public static final String ERROR_INIT_FAILED_INVALID_ARGUMENT = "nsd manager setup failed due to invalid arguments.";
-    public static final String ERROR_INIT_FAILED_ALREADY_HAS_A_INSTANCE = "nsd manager setup failed, there already has a running instance, no need to resetup";
-    public static final String ERROR_INIT_FAILED_ERROR_OCCURED = "nsd manager setup failed due to error occured";
-    public static final String ERROR_INIT_FAILED_EXTRA_PERFORMER_FAILED = "nsd manager setup failed due to error occured during extra performer in action";
+    private static final String ERROR_INIT_FAILED_INVALID_ARGUMENT = "nsd manager setup failed due to invalid arguments.";
+    private static final String ERROR_INIT_FAILED_ALREADY_HAS_A_INSTANCE = "nsd manager setup failed, there already has a running instance, no need to resetup";
+    private static final String ERROR_INIT_FAILED_ERROR_OCCURED = "nsd manager setup failed due to error occured";
+    private static final String ERROR_INIT_FAILED_EXTRA_PERFORMER_FAILED = "nsd manager setup failed due to error occured during extra performer in action";
 
-    public static final String ERROR_REGISTER_SERVICE_FAILED_NO_INSTANCE_FOUND = "register service failed due to no JmDns instance found, maybe it's already been destroyed.";
-    public static final String ERROR_WATCH_SERVICE_FAILED_NO_INSTANCE_FOUND = "watch service failed due to no jmDNS instance found.";
-    public static final String ERROR_REGISTER_SERVICE_FAILED_ERROR_OCCURED = "register service failed due to error occured.";
+    private static final String ERROR_REGISTER_SERVICE_FAILED_NO_INSTANCE_FOUND = "register service failed due to no JmDns instance found, maybe it's already been destroyed.";
+    private static final String ERROR_WATCH_SERVICE_FAILED_NO_INSTANCE_FOUND = "watch service failed due to no jmDNS instance found.";
+    private static final String ERROR_REGISTER_SERVICE_FAILED_ERROR_OCCURED = "register service failed due to error occured.";
 
     private static final String TAG = "NsdManager";
 

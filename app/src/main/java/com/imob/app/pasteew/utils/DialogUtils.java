@@ -1,4 +1,4 @@
-package com.imob.lib.app.utils;
+package com.imob.app.pasteew.utils;
 
 import android.app.Activity;
 import android.content.DialogInterface;

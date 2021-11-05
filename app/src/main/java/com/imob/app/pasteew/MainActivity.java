@@ -1,11 +1,11 @@
-package com.imob.lib.app;
+package com.imob.app.pasteew;
 
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
-import com.imob.lib.app.utils.DialogUtils;
+import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListener;
 import com.imob.lib.sslib.client.ClientManager;

@@ -76,7 +76,7 @@ public class NsdManager {
 
         @Override
         public void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name) {
-            Logger.i(TAG, "onServiceInWatch, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name);
+            Logger.i(TAG, "onSuccessfullyWatchService, nsdManager: " + nsdManager + ", type: " + type + ", name: " + name);
             base.onSuccessfullyWatchService(nsdManager, type, name);
         }
 
@@ -159,7 +159,6 @@ public class NsdManager {
     }
 
     /**
-     *
      * @param type
      * @param name
      * @return true - has running jmDNs instance && arguments invalid, false - the opposite
@@ -184,7 +183,6 @@ public class NsdManager {
 
 
     /**
-     *
      * @param type
      * @param name
      * @return true - has a running jmDNS instance && valid arguments | false - the opposite
@@ -280,7 +278,6 @@ public class NsdManager {
 
 
     /**
-     *
      * @return true - has jmDns instance, false - the opposite
      */
     public boolean destroy() {

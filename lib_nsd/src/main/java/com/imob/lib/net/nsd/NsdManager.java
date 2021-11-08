@@ -144,6 +144,7 @@ public class NsdManager {
                     }
                 }
                 try {
+                    Logger.i(TAG, "create JMDNS: " + netAddress + ", " + hostName);
                     JmDNS jmDNS = JmDNS.create(netAddress, hostName);
                     nsdManager = new NsdManager(jmDNS, performer, wrapper);
 

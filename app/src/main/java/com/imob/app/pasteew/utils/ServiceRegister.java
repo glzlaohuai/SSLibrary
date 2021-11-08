@@ -1,10 +1,12 @@
 package com.imob.app.pasteew.utils;
 
 import android.content.Context;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.imob.app.pasteew.XApplication;
 import com.imob.lib.common.android.NetworkUtils;
@@ -33,7 +35,13 @@ public class ServiceRegister {
     private static final int MSG_CREATE_SERVER = 0x0;
     private static final int RETRY_SERVER_CREATE_INTERVAL = 10 * 1000;
 
+    private static WifiManager wifiManager;
+
     private static final String TAG = "ServiceRegister";
+
+    static {
+        wifiManager = (WifiManager) XApplication.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    }
 
     private final static Handler mainHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -77,6 +85,34 @@ public class ServiceRegister {
     }
 
 
+    private static InetAddress getDeviceIpAddress(WifiManager wifi) {
+        InetAddress result = null;
+        try {
+            // default to Android localhost
+            result = InetAddress.getByName("10.0.0.2");
+
+            // figure out our wifi address, otherwise bail
+            WifiInfo wifiinfo = wifi.getConnectionInfo();
+            int intaddr = wifiinfo.getIpAddress();
+            byte[] byteaddr = new byte[]{(byte) (intaddr & 0xff), (byte) (intaddr >> 8 & 0xff),
+                    (byte) (intaddr >> 16 & 0xff), (byte) (intaddr >> 24 & 0xff)};
+            result = InetAddress.getByAddress(byteaddr);
+        } catch (UnknownHostException ex) {
+            Log.w(TAG, String.format("getDeviceIpAddress Error: %s", ex.getMessage()));
+        }
+
+        return result;
+    }
+
+    private final static InetAddress getRealLocalHost(WifiManager wifiManager) {
+        InetAddress local = getLocalHost();
+        if (local == null || local.toString().contains("127.0.0.1")) {
+            local = getDeviceIpAddress(wifiManager);
+        }
+        return local;
+    }
+
+
     private final static InetAddress getLocalHost() {
         InetAddress localHost = null;
         try {
@@ -117,10 +153,11 @@ public class ServiceRegister {
                                 lock = null;
                             }
                         }
-                    }, getLocalHost(), SERVICE_HOST_NAME, new NsdEventListener() {
+                    }, getRealLocalHost(wifiManager), SERVICE_HOST_NAME, new NsdEventListener() {
                         @Override
                         public void onInitSucceeded(NsdManager nsdManager) {
-                            nsdManager.registerService(SERVICE_TYPE, "{a name } - " + UUID.randomUUID().toString().hashCode(), null, ServerManager.getManagedServerNode().getPort());
+                            nsdManager.registerService(SERVICE_TYPE, "{ a name } - " + UUID.randomUUID().toString().hashCode(), null, ServerManager.getManagedServerNode().getPort());
+                            nsdManager.watchService(SERVICE_TYPE, null);
                         }
 
                         @Override

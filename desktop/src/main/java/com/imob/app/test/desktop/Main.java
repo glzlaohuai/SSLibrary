@@ -58,7 +58,7 @@ public class Main {
         ServerManager.createServerNode(new ServerListener() {
             @Override
             public void onCreated() {
-
+                System.out.println(ServerManager.getManagedServerNode().getServerSocketInfo());
             }
 
             @Override

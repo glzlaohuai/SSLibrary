@@ -6,6 +6,8 @@ import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +44,8 @@ public class ClientNode implements INode {
                     @Override
                     public void run() {
                         try {
-                            Socket socket = new Socket(ip, port);
+                            Socket socket = new Socket();
+                            socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
                             peer = new Peer(socket, ClientNode.this, listener);
                         } catch (IOException | IllegalArgumentException e) {
                             Logger.e(e);

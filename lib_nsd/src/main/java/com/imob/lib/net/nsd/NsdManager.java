@@ -238,8 +238,8 @@ public class NsdManager {
         return false;
     }
 
-
     private void doRegisterService(String type, String name, String text, int port) {
+        text = text == null ? "" : text;
         synchronized (lock) {
             if (jmDNS != null) {
                 try {

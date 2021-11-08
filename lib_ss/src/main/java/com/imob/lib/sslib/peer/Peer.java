@@ -236,14 +236,10 @@ public class Peer {
             }
             callbackMsgSendStart(msg);
 
+            //if msg instance confirMsg, then available is a negotiated negative number
             int available = msg.getAvailable();
 
-            if (msg instanceof ConfirmMsg) {
-                //just in order to pass check
-                available = 1;
-            }
-
-            if (available <= 0) {
+            if (available <= 0 && !(msg instanceof ConfirmMsg)) {
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
                 msg.destroy();
                 continue;
@@ -252,17 +248,20 @@ public class Peer {
             //go there only if available > 0
             try {
                 dos.writeUTF(msg.getId());
+                dos.writeInt(available);
 
                 if (msg instanceof ConfirmMsg) {
-                    dos.writeInt(msg.getAvailable());
+                    Logger.i(S_TAG, "write confirmMsg to dos, " + msg.getId());
                     dos.writeInt(((ConfirmMsg) msg).getSoFar());
                     dos.writeInt(((ConfirmMsg) msg).getTotal());
                 } else {
-                    dos.writeInt(available);
-
                     int readed = 0;
+                    int round = 1;
                     while (readed < available) {
                         Chunk chunk = msg.readChunk(bytes);
+
+                        Logger.i(S_TAG, "write normal msg to dos, round: " + round + ", chunkSize: " + chunk.getSize() + ", total: " + available);
+
                         //eof, should never go there
                         if (chunk.getSize() == -1) {
 
@@ -278,6 +277,7 @@ public class Peer {
 
                             listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
                         }
+                        round++;
                     }
                 }
                 callbackMsgSendSucceeded(msg);

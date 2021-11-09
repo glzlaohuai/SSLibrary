@@ -12,9 +12,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,9 +22,7 @@ public class Peer {
 
     private static final String S_TAG = "Peer";
 
-    private final static Map<String, Long> chunkSendingTime = new ConcurrentHashMap<>();
-
-    public static final int CHUNK_BYTE_LEN = 1024 * 1024;
+    public static final int CHUNK_BYTE_LEN = 1024 * 512;
 
     private static final String MSG_SEND_ERROR_PEER_IS_DESTROIED = "send failed, peer is already destroied";
     private static final String MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT = "no available bytes found";
@@ -50,6 +48,8 @@ public class Peer {
     private boolean destroyCallbacked = false;
     private boolean corruptedCallbacked = false;
     private boolean isTimeoutCheckRunning = false;
+
+    private Map<String, Long> chunkSendingTime = new HashMap<>();
 
     private INode localNode;
 
@@ -181,6 +181,7 @@ public class Peer {
                     try {
                         timeoutLock.wait();
                         Logger.i(tag, "msg chunk sending msg map is empty now, just wait until it's not empty to resume the timeout check process.");
+                        continue;
                     } catch (InterruptedException e) {
                         Logger.e(e);
                     }
@@ -303,9 +304,9 @@ public class Peer {
         });
     }
 
-
     private void addItemToChunkSendingTime(String id, int soFar) {
         chunkSendingTime.put(id + " # " + soFar, System.currentTimeMillis());
+
     }
 
     private void removeItemFromChunkSendingTime(String id, int soFar) {
@@ -437,7 +438,10 @@ public class Peer {
                             int total = dis.readInt();
 
                             listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
-                            removeItemFromChunkSendingTime(id, soFar);
+                            synchronized (timeoutLock) {
+                                removeItemFromChunkSendingTime(id, soFar);
+                                timeoutLock.notify();
+                            }
                         }
                     }
 

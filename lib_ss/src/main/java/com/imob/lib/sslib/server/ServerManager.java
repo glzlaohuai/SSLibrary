@@ -12,15 +12,14 @@ public class ServerManager {
     private static final String TAG = "ServerManager";
 
     /**
-     *
      * @return true - create a new server node instance, false - has a running server node already, create failed
      */
-    public synchronized static boolean createServerNode(ServerListener serverListener, PeerListener peerListener) {
+    public synchronized static boolean createServerNode(ServerListener serverListener, PeerListener peerListener, long timeout) {
         if (serverNode != null && serverNode.isInUsing()) {
             return false;
         } else {
             serverNode = new ServerNode(new ServerListenerWrapper(serverListener), new PeerListenerWrapper(peerListener));
-            return serverNode.create();
+            return serverNode.create(timeout);
         }
     }
 
@@ -160,6 +159,13 @@ public class ServerManager {
         public void onDestroy(Peer peer) {
             Logger.i(TAG, "onDestroy");
             base.onDestroy(peer);
+        }
+
+        @Override
+        public void onTimeoutOccured(Peer peer) {
+            Logger.i(TAG, "onTimeoutOccured");
+
+            base.onTimeoutOccured(peer);
         }
 
         @Override

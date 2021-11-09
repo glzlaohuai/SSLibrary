@@ -27,6 +27,8 @@ public interface PeerListener {
 
     void onDestroy(Peer peer);
 
+    void onTimeoutOccured(Peer peer);
+
     void onIncomingMsg(Peer peer, String id, int available);
 
     void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id);

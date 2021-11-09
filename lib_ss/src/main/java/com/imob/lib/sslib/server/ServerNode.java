@@ -9,8 +9,8 @@ import com.imob.lib.sslib.peer.PeerListener;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,7 +31,9 @@ public class ServerNode implements INode {
     private ServerListener serverListener;
     private PeerListener peerListener;
 
-    private List<Peer> connectedPeers = new ArrayList<>();
+    private Queue<Peer> connectedPeers = new ConcurrentLinkedQueue<>();
+
+    private long timeout;
 
     public ServerNode(ServerListener serverListener, PeerListener peerListener) {
         this.serverListener = serverListener;
@@ -42,11 +44,12 @@ public class ServerNode implements INode {
         return (isCreating || isRunning()) && !isDestroyed;
     }
 
-    public boolean create() {
+    public boolean create(long timeout) {
 
         if (isCreating || isRunning() || isDestroyed()) {
             return false;
         }
+        this.timeout = timeout;
 
         handleCreate();
         return true;
@@ -142,7 +145,6 @@ public class ServerNode implements INode {
 
 
     /**
-     *
      * @param msg
      * @return true - has connected peers, false - has no connected peers
      */
@@ -154,7 +156,7 @@ public class ServerNode implements INode {
         return true;
     }
 
-    public List<Peer> getConnectedPeers() {
+    public Queue<Peer> getConnectedPeers() {
         return connectedPeers;
     }
 
@@ -229,6 +231,11 @@ public class ServerNode implements INode {
             }
 
             @Override
+            public void onTimeoutOccured(Peer peer) {
+                peerListener.onTimeoutOccured(peer);
+            }
+
+            @Override
             public void onIncomingMsg(Peer peer, String id, int available) {
                 peerListener.onIncomingMsg(peer, id, available);
             }
@@ -268,6 +275,7 @@ public class ServerNode implements INode {
                 peerListener.onMsgSendPending(peer, id);
             }
         });
+        peer.setTimeout(timeout);
         serverListener.onIncomingClient(peer);
         connectedPeers.add(peer);
     }

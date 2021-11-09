@@ -139,6 +139,12 @@ public class ClientManager {
         }
 
         @Override
+        public void onTimeoutOccured(Peer peer) {
+            Logger.i(TAG, "onTimeoutOccured");
+            base.onTimeoutOccured(peer);
+        }
+
+        @Override
         public void onIncomingMsg(Peer peer, String id, int available) {
             Logger.i(TAG, "onIncomingMsg, id: " + id + ", available: " + available);
 
@@ -192,20 +198,19 @@ public class ClientManager {
         }
     }
 
-
     /**
      * @param ip
      * @param port
      * @param clientListener
      * @return true - valid parameters
      */
-    public static boolean createClient(String ip, int port, ClientListener clientListener) {
+    public static boolean createClient(String ip, int port, ClientListener clientListener, long timeout) {
         if (ip == null || ip.equals("") || port <= 0) {
             return false;
         } else {
             ClientNode clientNode = new ClientNode(ip, port, new ClientListenerWrapper(clientListener));
             addClientToInUsingMap(clientNode);
-            clientNode.create();
+            clientNode.create(timeout);
             return true;
         }
     }

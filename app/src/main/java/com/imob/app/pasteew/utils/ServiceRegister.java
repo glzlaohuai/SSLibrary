@@ -288,6 +288,11 @@ public class ServiceRegister {
                 }
 
                 @Override
+                public void onTimeoutOccured(Peer peer) {
+
+                }
+
+                @Override
                 public void onIncomingMsg(Peer peer, String id, int available) {
 
                 }
@@ -326,7 +331,7 @@ public class ServiceRegister {
                 public void onMsgSendPending(Peer peer, String id) {
 
                 }
-            });
+            }, 10 * 1000);
         }
     }
 }

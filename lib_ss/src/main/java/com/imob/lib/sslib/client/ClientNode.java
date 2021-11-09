@@ -34,7 +34,11 @@ public class ClientNode implements INode {
         this.listener = clientListener;
     }
 
-    public synchronized void create() {
+
+    /**
+     * @param timeout pass a positive number to take effect
+     */
+    public synchronized void create(final long timeout) {
         if (ip == null || ip.equals("") || port <= 0) {
             listener.onClientCreateFailed(this, ERROR_INVALID_PARAMETERS, null);
         } else {
@@ -47,6 +51,7 @@ public class ClientNode implements INode {
                             Socket socket = new Socket();
                             socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
                             peer = new Peer(socket, ClientNode.this, listener);
+                            peer.setTimeout(timeout);
                         } catch (IOException | IllegalArgumentException e) {
                             Logger.e(e);
                             listener.onClientCreateFailed(ClientNode.this, "create client failed due to error occured", e);

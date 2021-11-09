@@ -19,11 +19,7 @@ import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -169,6 +165,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onTimeoutOccured(Peer peer) {
+
+            }
+
+            @Override
             public void onIncomingMsg(Peer peer, String id, int available) {
 
             }
@@ -207,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
             public void onMsgSendPending(Peer peer, String id) {
 
             }
-        });
+        }, 10 * 1000);
     }
 
     public void printServerInfo(View view) {
@@ -216,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             ServerNode serverNode = ServerManager.getManagedServerNode();
 
             String serverSocketInfo = serverNode.getServerSocketInfo();
-            List<Peer> connectedPeers = serverNode.getConnectedPeers();
+            Queue<Peer> connectedPeers = serverNode.getConnectedPeers();
 
             Log.i(TAG, "serverInfo: socketInfo: " + serverSocketInfo + ", connectedPeers: " + connectedPeers.size());
 
@@ -358,6 +359,11 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
+                            public void onTimeoutOccured(Peer peer) {
+
+                            }
+
+                            @Override
                             public void onIncomingMsg(Peer peer, String id, int available) {
 
                             }
@@ -396,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onMsgSendPending(Peer peer, String id) {
 
                             }
-                        });
+                        }, 10 * 1000);
                     }
                 });
             }

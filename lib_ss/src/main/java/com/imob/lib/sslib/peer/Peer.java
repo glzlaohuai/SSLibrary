@@ -12,12 +12,17 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Peer {
 
     private static final String S_TAG = "Peer";
+
+    private final static Map<String, Long> chunkSendingTime = new ConcurrentHashMap<>();
 
     public static final int CHUNK_BYTE_LEN = 1024 * 1024;
 
@@ -38,14 +43,19 @@ public class Peer {
     private ExecutorService msgSendService = Executors.newSingleThreadExecutor();
     private ExecutorService monitorIncomingMsgService = Executors.newSingleThreadExecutor();
     private ExecutorService msgInQueueService = Executors.newSingleThreadExecutor();
+    private ExecutorService timeoutCheckService = Executors.newSingleThreadExecutor();
+
+    private Byte timeoutLock = 0x0;
 
     private boolean destroyCallbacked = false;
     private boolean corruptedCallbacked = false;
+    private boolean isTimeoutCheckRunning = false;
 
     private INode localNode;
 
     private String tag;
 
+    private long timeout;
 
     public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
@@ -123,6 +133,79 @@ public class Peer {
         }
     }
 
+    /**
+     * @param timeout timeout in milliseconds, none positive value will be dropped and will not take effect
+     */
+    public void setTimeout(long timeout) {
+        if (timeout <= 0) return;
+        this.timeout = timeout;
+        if (!isDestroyed() && !isTimeoutCheckRunning) {
+            synchronized (timeoutLock) {
+                if (!isDestroyed() && !isTimeoutCheckRunning) {
+                    isTimeoutCheckRunning = true;
+                    timeoutCheckService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            kickOffTimeoutCheck();
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+
+    private long findFirstAddedChunkSendTime() {
+        long minTime = Long.MAX_VALUE;
+
+        Set<String> keys = chunkSendingTime.keySet();
+        for (String msgKey : keys) {
+
+            Long aLong = chunkSendingTime.get(msgKey);
+            if (aLong != null) {
+                minTime = Math.min(aLong, minTime);
+            }
+        }
+        return minTime;
+    }
+
+    private void callbackTimeout() {
+        listener.onTimeoutOccured(this);
+        destroy();
+    }
+
+    private void kickOffTimeoutCheck() {
+        while (!isDestroyed()) {
+            synchronized (timeoutLock) {
+                if (chunkSendingTime.isEmpty()) {
+                    try {
+                        timeoutLock.wait();
+                        Logger.i(tag, "msg chunk sending msg map is empty now, just wait until it's not empty to resume the timeout check process.");
+                    } catch (InterruptedException e) {
+                        Logger.e(e);
+                    }
+                } else {
+                    long currentTime = System.currentTimeMillis();
+                    //find the minimum time in chunkSendingTimeMap
+                    long minimumTime = findFirstAddedChunkSendTime();
+
+                    if (currentTime < minimumTime || (currentTime - minimumTime) >= timeout) {
+                        //timeout occur
+                        callbackTimeout();
+                    } else {
+                        try {
+                            //wait at least this time long, or be notified due to a new msg chunk send time was put into chunkSendingTimeMap
+                            timeoutLock.wait(currentTime - minimumTime);
+                        } catch (InterruptedException e) {
+                            Logger.e(e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     private void doDestroyStuff() {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
@@ -161,7 +244,7 @@ public class Peer {
             return;
         }
 
-        if (isDestroyed) {
+        if (isDestroyed()) {
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
             msg.destroy();
             return;
@@ -220,9 +303,18 @@ public class Peer {
         });
     }
 
+
+    private void addItemToChunkSendingTime(String id, int soFar) {
+        chunkSendingTime.put(id + " # " + soFar, System.currentTimeMillis());
+    }
+
+    private void removeItemFromChunkSendingTime(String id, int soFar) {
+        chunkSendingTime.remove(id + " # " + soFar);
+    }
+
     private synchronized void loopMsgQueue() {
         final byte[] bytes = new byte[CHUNK_BYTE_LEN];
-        while (!isDestroyed) {
+        while (!isDestroyed()) {
             Msg msg = msgQueue.poll();
             Logger.i(tag, "poll msg: " + msg);
             if (msg == null) {
@@ -276,6 +368,12 @@ public class Peer {
                             dos.write(chunk.getBytes(), 0, chunk.getSize());
 
                             listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
+
+                            //保存chunk发出的时间
+                            synchronized (timeoutLock) {
+                                addItemToChunkSendingTime(msg.getId(), readed);
+                                timeoutLock.notify();
+                            }
                         }
                         round++;
                     }
@@ -305,7 +403,7 @@ public class Peer {
             @Override
             public void run() {
                 try {
-                    while (!isDestroyed) {
+                    while (!isDestroyed()) {
                         String id = dis.readUTF();
                         int available = dis.readInt();
 
@@ -339,6 +437,7 @@ public class Peer {
                             int total = dis.readInt();
 
                             listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
+                            removeItemFromChunkSendingTime(id, soFar);
                         }
                     }
 

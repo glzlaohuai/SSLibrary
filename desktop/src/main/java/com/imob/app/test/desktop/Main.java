@@ -50,7 +50,7 @@ public class Main {
     private static void destroyServer() {
         ServerNode managedServerNode = ServerManager.getManagedServerNode();
         if (managedServerNode != null) {
-            managedServerNode.destroy();
+            ServerManager.getManagedServerNode().destroy();
         }
     }
 
@@ -147,6 +147,11 @@ public class Main {
             }
 
             @Override
+            public void onTimeoutOccured(Peer peer) {
+
+            }
+
+            @Override
             public void onIncomingMsg(Peer peer, String id, int available) {
 
             }
@@ -185,7 +190,7 @@ public class Main {
             public void onMsgSendPending(Peer peer, String id) {
 
             }
-        });
+        }, 10 * 1000);
     }
 
 
@@ -337,6 +342,11 @@ public class Main {
             }
 
             @Override
+            public void onTimeoutOccured(Peer peer) {
+
+            }
+
+            @Override
             public void onIncomingMsg(Peer peer, String id, int available) {
 
             }
@@ -375,7 +385,7 @@ public class Main {
             public void onMsgSendPending(Peer peer, String id) {
 
             }
-        });
+        }, 10 * 1000);
 
     }
 

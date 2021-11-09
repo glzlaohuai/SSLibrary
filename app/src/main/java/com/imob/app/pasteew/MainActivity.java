@@ -19,7 +19,12 @@ import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -280,9 +285,7 @@ public class MainActivity extends AppCompatActivity {
                             port.set(ServerManager.getManagedServerNode().getPort());
                         }
 
-                        Log.i(TAG, "create client: " + ip + ", port: " + port.get());
-
-                        ClientManager.createClient(ip, port.get(), new ClientListener() {
+                        boolean result = ClientManager.createClient(ip, port.get(), new ClientListener() {
                             @Override
                             public void onClientCreated(ClientNode clientNode) {
 
@@ -403,6 +406,9 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         }, 10 * 1000);
+
+                        Log.i(TAG, "create client: " + ip + ", port: " + port.get() + ", result: " + result);
+
                     }
                 });
             }

@@ -148,7 +148,6 @@ public class ServerNode implements INode {
 
 
     /**
-     *
      * @param id
      * @param msg
      * @return true - msg is valid and has connected peers
@@ -324,7 +323,7 @@ public class ServerNode implements INode {
 
     public String getServerSocketInfo() {
         if (isRunning()) {
-            return serverSocket.getInetAddress().toString() + " : " + serverSocket.getLocalPort();
+            return serverSocket.getLocalSocketAddress().toString();
         } else {
             return "server is not running";
         }

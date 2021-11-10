@@ -34,6 +34,9 @@ public class ClientNode implements INode {
         this.listener = clientListener;
     }
 
+    public Peer getPeer() {
+        return peer;
+    }
 
     /**
      * @param timeout pass a positive number to take effect
@@ -50,6 +53,7 @@ public class ClientNode implements INode {
                         try {
                             Socket socket = new Socket();
                             socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
+                            listener.onClientCreated(ClientNode.this);
                             peer = new Peer(socket, ClientNode.this, listener);
                             peer.setTimeout(timeout);
                         } catch (IOException | IllegalArgumentException e) {

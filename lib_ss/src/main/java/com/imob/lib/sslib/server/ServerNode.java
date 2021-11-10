@@ -2,10 +2,13 @@ package com.imob.lib.sslib.server;
 
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.INode;
-import com.imob.lib.sslib.msg.Msg;
+import com.imob.lib.sslib.msg.FileMsg;
+import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -145,16 +148,39 @@ public class ServerNode implements INode {
 
 
     /**
+     *
+     * @param id
      * @param msg
-     * @return  false - has no connected peers or msg is null or invalid | true - the opposite
+     * @return true - msg is valid and has connected peers
      */
-    public boolean broadcast(Msg msg) {
-        if (connectedPeers.size() <= 0 || msg == null || !msg.isValid()) return false;
-        for (Peer peer : connectedPeers) {
-            peer.sendMessage(msg);
+    public boolean broadcastStringMsg(String id, String msg) {
+        if (connectedPeers.size() <= 0 || id == null || msg == null || id.isEmpty() || msg.isEmpty()) {
+            return false;
+        } else {
+            for (Peer peer : connectedPeers) {
+                peer.sendMessage(StringMsg.create(id, msg));
+            }
         }
         return true;
     }
+
+
+    public boolean broadcastFileMsg(String id, String filePath) {
+        if (connectedPeers.size() <= 0 || id == null || filePath == null || id.isEmpty() || filePath.isEmpty() || !new File(filePath).exists() || !new File(filePath).canRead() || new File(filePath).isDirectory()) {
+            return false;
+        } else {
+            for (Peer peer : connectedPeers) {
+                try {
+                    peer.sendMessage(FileMsg.create(id, filePath));
+                } catch (FileNotFoundException e) {
+                    Logger.e(e);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     public Queue<Peer> getConnectedPeers() {
         return connectedPeers;

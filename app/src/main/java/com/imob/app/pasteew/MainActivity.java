@@ -6,18 +6,20 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.imob.app.pasteew.utils.DialogUtils;
+import com.imob.app.pasteew.utils.FileUtils;
+import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListener;
 import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
-import com.imob.lib.sslib.msg.Msg;
-import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.server.ServerListener;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "Demo";
     private TextView logView;
+
+    private File testFile;
 
     public void clearLog(View view) {
         logView.setText("");
@@ -98,12 +102,38 @@ public class MainActivity extends AppCompatActivity {
         logView = findViewById(R.id.logView);
         logView.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-//        Logger.setLogWatcher(new Logger.LogWatcher() {
-        //            @Override
-        //            public void log(String log) {
-        //                appendLog(log);
-        //            }
-        //        });
+        testFile = new File(getCacheDir(), "a_test_file_name");
+        copyTestFileToAppSandboxDirectory();
+    }
+
+
+    private void copyTestFileToAppSandboxDirectory() {
+
+        if (!testFile.exists()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    InputStream inputStream = null;
+                    FileOutputStream fos = null;
+
+                    try {
+                        inputStream = getAssets().open("test.apk");
+                        if (!testFile.exists()) {
+                            testFile.createNewFile();
+                        }
+
+                        fos = new FileOutputStream(testFile);
+                        FileUtils.inputToOutput(inputStream, fos);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        Closer.close(fos);
+                        Closer.close(inputStream);
+                    }
+                }
+            }).start();
+
+        }
     }
 
     private void appendLog(String log) {
@@ -271,35 +301,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void broadcastStringMsg(View view) {
-        if (ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().getConnectedPeers().size() > 0) {
-            for (Peer peer : ServerManager.getManagedServerNode().getConnectedPeers()) {
-                peer.sendMessage(StringMsg.build(UUID.randomUUID().toString(), "this is a test msg send from server"));
-            }
-        } else {
-            Log.i(TAG, "has no available server instance or connected clients");
-        }
+        boolean result = ServerManager.broadcastStringMsg(UUID.randomUUID().toString(), "a test msg from server");
+        Log.i(TAG, "broadcast string msg to all connected clients: " + result);
     }
 
-
-    private Msg createTestFileMsg() throws IOException {
-        Msg msg = new Msg(UUID.randomUUID().toString(), getAssets().open("test.apk"));
-        return msg;
-    }
 
     public void broadcastFileMsg(View view) {
-        try {
-            if (ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().getConnectedPeers().size() > 0) {
-                for (Peer peer : ServerManager.getManagedServerNode().getConnectedPeers()) {
-                    peer.sendMessage(createTestFileMsg());
-                }
-            } else {
-                Log.i(TAG, "has no available server instance or connected clients");
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.i(TAG, "create msg failed");
-        }
+        boolean result = ServerManager.broadcastFileMsg(UUID.randomUUID().toString(), testFile.getAbsolutePath());
+        Log.i(TAG, "broadcast file msg to all connected clients: " + result);
     }
 
     public void createClient(View view) {
@@ -449,7 +458,6 @@ public class MainActivity extends AppCompatActivity {
                         }, 10 * 1000);
 
                         Log.i(TAG, "create client: " + ip + ", port: " + port.get() + ", result: " + result);
-
                     }
                 });
             }
@@ -457,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void printConnectedClientsInfo(View view) {
-        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getConnectedClientMap();
         Set<String> keySet = inUsingClientMap.keySet();
 
         Log.i(TAG, "connected clients key in map: " + keySet);
@@ -468,18 +476,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void sendMsgToServer(View view) {
-        boolean result = ClientManager.sendMsgByAllClients(StringMsg.build(UUID.randomUUID().toString(), "a test msg send to connected server"));
-        Log.i(TAG, "send msg to server: " + result);
+        boolean result = ClientManager.sendOutStringMsgByAllConnectedClients(UUID.randomUUID().toString(), "a test msg from client");
+        Log.i(TAG, "send string msg to server: " + result);
     }
 
     public void sendLargeMsgToServer(View view) {
-        try {
-            boolean result = ClientManager.sendMsgByAllClients(createTestFileMsg());
-            Log.i(TAG, "send msg to server: " + result);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.i(TAG, "create file msg failed: " + e);
-        }
+        boolean result = ClientManager.sendOutFileMsgByAllConnectedClients(UUID.randomUUID().toString(), testFile.getAbsolutePath());
+        Log.i(TAG, "send file msg to server: " + result);
     }
 
 
@@ -492,10 +495,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void destroyClient(View view) {
-        if (ClientManager.getInUsingClientMap().isEmpty()) {
+        if (ClientManager.getConnectedClientMap().isEmpty()) {
             Log.i(TAG, "destroyClient, found no clients");
         } else {
-            Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+            Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getConnectedClientMap();
             Set<String> keySet = inUsingClientMap.keySet();
 
             List<String> items = new ArrayList<>();

@@ -1,9 +1,12 @@
 package com.imob.lib.sslib.client;
 
 import com.imob.lib.lib_common.Logger;
-import com.imob.lib.sslib.msg.Msg;
+import com.imob.lib.sslib.msg.FileMsg;
+import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,7 +15,7 @@ import java.util.Set;
 public class ClientManager {
     private static final String TAG = "ClientManager";
 
-    private final static Map<String, Set<ClientNode>> inUsingClientMap = new HashMap<>();
+    private final static Map<String, Set<ClientNode>> connectedClientMap = new HashMap<>();
 
     private static class ClientListenerWrapper implements ClientListener {
 
@@ -25,6 +28,7 @@ public class ClientManager {
         @Override
         public void onClientCreated(ClientNode clientNode) {
             Logger.i(TAG, "onClientCreated");
+            addClientToInUsingMap(clientNode);
             base.onClientCreated(clientNode);
         }
 
@@ -34,12 +38,12 @@ public class ClientManager {
             if (clientNode == null) return;
 
             synchronized (ClientManager.class) {
-                Set<ClientNode> clientNodes = inUsingClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                Set<ClientNode> clientNodes = connectedClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
                 if (clientNodes != null) {
                     clientNodes.remove(clientNode);
                 }
                 if (clientNodes.size() == 0) {
-                    inUsingClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                    connectedClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
                 }
             }
         }
@@ -210,7 +214,6 @@ public class ClientManager {
             return false;
         } else {
             ClientNode clientNode = new ClientNode(ip, port, new ClientListenerWrapper(clientListener));
-            addClientToInUsingMap(clientNode);
             clientNode.create(timeout);
             return true;
         }
@@ -218,17 +221,22 @@ public class ClientManager {
 
     private static void addClientToInUsingMap(ClientNode clientNode) {
         String key = generateClientKeyInMap(clientNode.getIp(), clientNode.getPort());
-        Set<ClientNode> clientNodes = inUsingClientMap.get(key);
+        Set<ClientNode> clientNodes = connectedClientMap.get(key);
         if (clientNodes == null) {
             clientNodes = new HashSet<>();
-            inUsingClientMap.put(key, clientNodes);
+            connectedClientMap.put(key, clientNodes);
         }
         clientNodes.add(clientNode);
     }
 
 
-    public static Set<ClientNode> getClients(String ip, int port) {
-        return inUsingClientMap.get(generateClientKeyInMap(ip, port));
+    /**
+     * @param ip remote ip
+     * @param port remote port
+     * @return all clientNodes that connected to the passed ip and port
+     */
+    public static Set<ClientNode> getConnectedClients(String ip, int port) {
+        return connectedClientMap.get(generateClientKeyInMap(ip, port));
     }
 
 
@@ -236,36 +244,54 @@ public class ClientManager {
         return ip + " # " + port;
     }
 
-    public synchronized static Map<String, Set<ClientNode>> getInUsingClientMap() {
-        return inUsingClientMap;
+    public synchronized static Map<String, Set<ClientNode>> getConnectedClientMap() {
+        return connectedClientMap;
     }
 
 
     /**
+     *
+     * @param id
      * @param msg
-     * @return true - has connected clients | false - has none connected clients
+     * @return true - msg is valid (id && msg has has content) and has at least one connected client
      */
-    public static boolean sendMsgByAllClients(Msg msg) {
-        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
-
-        if (inUsingClientMap == null || inUsingClientMap.isEmpty()) {
+    public static boolean sendOutStringMsgByAllConnectedClients(String id, String msg) {
+        if (id == null || id.isEmpty() || msg == null || msg.isEmpty() || !hasConnectedClients()) {
             return false;
+        } else {
+            for (ClientNode clientNode : getAllConnectedClients()) {
+                clientNode.sendMsg(StringMsg.create(id, msg));
+            }
         }
+        return true;
+    }
 
-        Set<String> keySet = inUsingClientMap.keySet();
-        for (String key : keySet) {
-            Set<ClientNode> clientNodes = inUsingClientMap.get(key);
-            if (clientNodes != null) {
-                for (ClientNode clientNode : clientNodes) {
-                    clientNode.sendMsg(msg);
+
+    /**
+     *
+     * @param id
+     * @param filePath
+     * @return true - has connected clients and msg is valid (id && filePath has content, file exists && file readable && file is not directory && createFileMsg succeeded) | false - the opposite
+     */
+    public static boolean sendOutFileMsgByAllConnectedClients(String id, String filePath) {
+        if (id == null || id.isEmpty() || filePath == null || filePath.isEmpty() || !new File(filePath).exists() || !new File(filePath).canRead() || new File(filePath).isDirectory() || !hasConnectedClients()) {
+            return false;
+        } else {
+            for (ClientNode clientNode : getAllConnectedClients()) {
+                try {
+                    clientNode.sendMsg(FileMsg.create(id, filePath));
+                } catch (FileNotFoundException e) {
+                    Logger.e(e);
+                    return false;
                 }
             }
         }
         return true;
     }
 
-    public static Set<ClientNode> getAllConnectedClientNodes() {
-        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+
+    public static Set<ClientNode> getAllConnectedClients() {
+        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getConnectedClientMap();
 
         Set<ClientNode> total = new HashSet<>();
         Set<String> keySet = inUsingClientMap.keySet();
@@ -279,8 +305,8 @@ public class ClientManager {
         return total;
     }
 
-    public static boolean hasConnectedClientNodes() {
-        return getAllConnectedClientNodes().size() > 0;
+    public static boolean hasConnectedClients() {
+        return getAllConnectedClients().size() > 0;
     }
 
 

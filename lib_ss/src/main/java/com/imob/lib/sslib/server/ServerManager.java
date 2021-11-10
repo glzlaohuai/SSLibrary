@@ -24,6 +24,33 @@ public class ServerManager {
     }
 
 
+    /**
+     * @param id
+     * @param msg
+     * @return true - serverNode is not null and {@link ServerNode#broadcastStringMsg(String, String)} return true | false - the opposite
+     */
+    public static boolean broadcastStringMsg(String id, String msg) {
+        if (getManagedServerNode() != null) {
+            return getManagedServerNode().broadcastStringMsg(id, msg);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @param id
+     * @param filePath
+     * @return true - serverNode is not null and {@link ServerNode#broadcastFileMsg(String, String)}} return true | false - the opposite
+     */
+    public static boolean broadcastFileMsg(String id, String filePath) {
+        if (getManagedServerNode() != null) {
+            return getManagedServerNode().broadcastFileMsg(id, filePath);
+        } else {
+            return false;
+        }
+    }
+
+
     private synchronized static void nullServerNodeAfterDestroyCallback() {
         serverNode = null;
     }

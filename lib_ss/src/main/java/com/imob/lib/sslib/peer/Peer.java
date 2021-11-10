@@ -50,11 +50,8 @@ public class Peer {
     private boolean isTimeoutCheckRunning = false;
 
     private Map<String, Long> chunkSendingTime = new HashMap<>();
-
     private INode localNode;
-
     private String tag;
-
     private long timeout;
 
 
@@ -70,7 +67,7 @@ public class Peer {
 
         init();
 
-        tag = S_TAG + " - " + (localNode.isServerNode() ? "server" : "client") + " # " + hashCode();
+        tag = S_TAG + " - " + (localNode.isServerNode() ? "server" : "client") + ", remote: " + socket.getRemoteSocketAddress() + ", local: " + socket.getLocalSocketAddress();
     }
 
     public INode getLocalNode() {
@@ -465,4 +462,5 @@ public class Peer {
     public Socket getSocket() {
         return socket;
     }
+
 }

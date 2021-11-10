@@ -77,7 +77,15 @@ public class ClientNode implements INode {
     }
 
 
+    /**
+     *
+     * @param msg
+     * @return true - has peer and msg is not null and valid | false - the opposite
+     */
     public boolean sendMsg(Msg msg) {
+        //without any callback if msg is null
+        if (msg == null || !msg.isValid()) return false;
+
         if (peer == null) {
             listener.onMsgSendFailed(null, msg.getId(), ERROR_SEND_MSG_NULL_PEER, null);
             return false;

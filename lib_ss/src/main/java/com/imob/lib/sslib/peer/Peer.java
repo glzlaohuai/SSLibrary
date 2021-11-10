@@ -134,7 +134,7 @@ public class Peer {
             callbackMsgSendStart(msg);
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
 
-            msg.destroy();
+            msg.destroy(this);
         }
     }
 
@@ -226,6 +226,7 @@ public class Peer {
     }
 
     public void sendMessage(final Msg msg) {
+        msg.addPeerHolder(this);
         msgQueue.add(msg);
         callbackMsgSendPending(msg);
         msgInQueueService.execute(new Runnable() {
@@ -252,7 +253,7 @@ public class Peer {
 
         if (isDestroyed()) {
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
-            msg.destroy();
+            msg.destroy(this);
             return;
         }
 
@@ -339,7 +340,7 @@ public class Peer {
 
             if (available <= 0 && !(msg instanceof ConfirmMsg)) {
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
-                msg.destroy();
+                msg.destroy(this);
                 continue;
             }
 
@@ -358,15 +359,16 @@ public class Peer {
                     while (readed < available) {
                         Chunk chunk = msg.readChunk(bytes);
 
-                        Logger.i(S_TAG, "write normal msg to dos, round: " + round + ", chunkSize: " + chunk.getSize() + ", total: " + available);
+                        Logger.i(tag, "write normal msg to dos, round: " + round + ", chunkSize: " + chunk.getSize() + ", total: " + available + ", e: " + chunk.getException());
 
                         //eof, should never go there
                         if (chunk.getSize() == -1) {
 
                         } else if (chunk.getSize() == 0) {
                             //exception occured
-                            callbackMsgSendFailed(msg, MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT, null);
+                            callbackMsgSendFailed(msg, MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT, chunk.getException());
                             dos.writeInt(0);
+                            break;
                         } else {
                             readed += chunk.getSize();
 
@@ -393,7 +395,7 @@ public class Peer {
                 callbackCorrupted("corrupted due to exception occured while sending msg to peer", e);
 
             } finally {
-                msg.destroy();
+                msg.destroy(this);
             }
         }
 

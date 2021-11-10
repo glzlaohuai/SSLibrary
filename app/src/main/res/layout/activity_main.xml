@@ -23,7 +23,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="broadcastMsg"
+        android:onClick="broadcastStringMsg"
         android:text="broadcast msg" />
 
 
@@ -73,6 +73,12 @@
         android:onClick="destroyClient"
         android:text="destroy client" />
 
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="testIt"
+        android:text="some test" />
 
     <FrameLayout
         android:layout_width="match_parent"

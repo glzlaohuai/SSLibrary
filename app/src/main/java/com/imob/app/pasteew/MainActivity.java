@@ -19,6 +19,7 @@ import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,44 @@ public class MainActivity extends AppCompatActivity {
         logView.setText("");
     }
 
+    public void testIt(View view) throws IOException {
+        doTest();
+    }
+
+
+    private void doTest() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                byte[] bytes = new byte[1024 * 512];
+                for (int i = 0; i < 3; i++) {
+
+                    try {
+                        InputStream inputStream = getAssets().open("test.apk");
+
+                        int available = inputStream.available();
+                        int readed = 0;
+
+                        while (readed < available) {
+                            try {
+                                readed += inputStream.read(bytes);
+                                System.out.println("readed - " + i + ": " + readed);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+
+            }
+        }).start();
+    }
 
     static class Log {
         public static void i(String tag, String msg) {
@@ -59,12 +98,12 @@ public class MainActivity extends AppCompatActivity {
         logView = findViewById(R.id.logView);
         logView.setMovementMethod(ScrollingMovementMethod.getInstance());
 
-        Logger.setLogWatcher(new Logger.LogWatcher() {
-            @Override
-            public void log(String log) {
-                appendLog(log);
-            }
-        });
+//        Logger.setLogWatcher(new Logger.LogWatcher() {
+        //            @Override
+        //            public void log(String log) {
+        //                appendLog(log);
+        //            }
+        //        });
     }
 
     private void appendLog(String log) {
@@ -231,9 +270,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void broadcastMsg(View view) {
-        Msg msg = StringMsg.build(UUID.randomUUID().toString(), "this is a test msg send from server");
-        doBroadcastMsg(msg);
+    public void broadcastStringMsg(View view) {
+        if (ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().getConnectedPeers().size() > 0) {
+            for (Peer peer : ServerManager.getManagedServerNode().getConnectedPeers()) {
+                peer.sendMessage(StringMsg.build(UUID.randomUUID().toString(), "this is a test msg send from server"));
+            }
+        } else {
+            Log.i(TAG, "has no available server instance or connected clients");
+        }
     }
 
 
@@ -244,20 +288,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void broadcastFileMsg(View view) {
         try {
-            Msg msg = createTestFileMsg();
-            doBroadcastMsg(msg);
+            if (ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().getConnectedPeers().size() > 0) {
+                for (Peer peer : ServerManager.getManagedServerNode().getConnectedPeers()) {
+                    peer.sendMessage(createTestFileMsg());
+                }
+            } else {
+                Log.i(TAG, "has no available server instance or connected clients");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             Log.i(TAG, "create msg failed");
-        }
-    }
-
-    private void doBroadcastMsg(Msg msg) {
-        if (ServerManager.getManagedServerNode() != null) {
-            boolean result = ServerManager.getManagedServerNode().broadcast(msg);
-            Log.i(TAG, "broadcastMsg, result: " + result);
-        } else {
-            Log.i(TAG, "broadcastMsg: has no server node instance");
         }
     }
 

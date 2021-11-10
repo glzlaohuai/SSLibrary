@@ -146,10 +146,10 @@ public class ServerNode implements INode {
 
     /**
      * @param msg
-     * @return true - has connected peers, false - has no connected peers
+     * @return  false - has no connected peers or msg is null or invalid | true - the opposite
      */
     public boolean broadcast(Msg msg) {
-        if (connectedPeers.size() <= 0) return false;
+        if (connectedPeers.size() <= 0 || msg == null || !msg.isValid()) return false;
         for (Peer peer : connectedPeers) {
             peer.sendMessage(msg);
         }

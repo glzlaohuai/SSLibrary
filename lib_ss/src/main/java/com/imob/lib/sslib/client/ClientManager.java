@@ -41,9 +41,9 @@ public class ClientManager {
                 Set<ClientNode> clientNodes = connectedClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
                 if (clientNodes != null) {
                     clientNodes.remove(clientNode);
-                }
-                if (clientNodes.size() == 0) {
-                    connectedClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                    if (clientNodes.size() == 0) {
+                        connectedClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                    }
                 }
             }
         }

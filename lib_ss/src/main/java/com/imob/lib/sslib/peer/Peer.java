@@ -57,6 +57,11 @@ public class Peer {
 
     private long timeout;
 
+
+    public String getTag() {
+        return tag;
+    }
+
     public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
         this.listener = listener;

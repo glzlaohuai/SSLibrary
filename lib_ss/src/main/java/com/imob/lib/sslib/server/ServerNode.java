@@ -174,7 +174,7 @@ public class ServerNode implements INode {
 
             @Override
             public void onMsgSendStart(Peer peer, String id) {
-                peerListener.onMsgIntoQueue(peer, id);
+                peerListener.onMsgSendStart(peer, id);
             }
 
             @Override

@@ -30,14 +30,17 @@ public class ClientManager {
 
 
         private synchronized void removeClientNodeFromMap(ClientNode clientNode) {
+
             if (clientNode == null) return;
 
-            Set<ClientNode> clientNodes = inUsingClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
-            if (clientNodes != null) {
-                clientNodes.remove(clientNode);
-            }
-            if (clientNodes.size() == 0) {
-                inUsingClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+            synchronized (ClientManager.class) {
+                Set<ClientNode> clientNodes = inUsingClientMap.get(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                if (clientNodes != null) {
+                    clientNodes.remove(clientNode);
+                }
+                if (clientNodes.size() == 0) {
+                    inUsingClientMap.remove(generateClientKeyInMap(clientNode.getIp(), clientNode.getPort()));
+                }
             }
         }
 
@@ -172,26 +175,26 @@ public class ClientManager {
 
         @Override
         public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
-            Logger.i(TAG, "onIncomingMsgReadFailed, peer: "+peer.getTag()+", id: " + id + ", total: " + total + ", soFar: " + soFar);
+            Logger.i(TAG, "onIncomingMsgReadFailed, peer: " + peer.getTag() + ", id: " + id + ", total: " + total + ", soFar: " + soFar);
 
             base.onIncomingMsgReadFailed(peer, id, total, soFar);
         }
 
         @Override
         public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
-            Logger.i(TAG, "onIncomingConfirmMsg, peer: "+peer.getTag()+", id: " + id + ", total: " + total + ", soFar: " + soFar);
+            Logger.i(TAG, "onIncomingConfirmMsg, peer: " + peer.getTag() + ", id: " + id + ", total: " + total + ", soFar: " + soFar);
             base.onIncomingConfirmMsg(peer, id, total, soFar);
         }
 
         @Override
         public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
-            Logger.i(TAG, "onConfirmMsgSendPending, peer: "+peer.getTag()+", id: " + id + ", total: " + total + ", soFar: " + soFar);
+            Logger.i(TAG, "onConfirmMsgSendPending, peer: " + peer.getTag() + ", id: " + id + ", total: " + total + ", soFar: " + soFar);
             base.onConfirmMsgSendPending(peer, id, soFar, total);
         }
 
         @Override
         public void onMsgSendPending(Peer peer, String id) {
-            Logger.i(TAG, "onMsgSendPending, peer: "+peer.getTag()+", id: " + id);
+            Logger.i(TAG, "onMsgSendPending, peer: " + peer.getTag() + ", id: " + id);
             base.onMsgSendPending(peer, id);
         }
     }
@@ -233,7 +236,7 @@ public class ClientManager {
         return ip + " # " + port;
     }
 
-    public static Map<String, Set<ClientNode>> getInUsingClientMap() {
+    public synchronized static Map<String, Set<ClientNode>> getInUsingClientMap() {
         return inUsingClientMap;
     }
 
@@ -260,4 +263,25 @@ public class ClientManager {
         }
         return true;
     }
+
+    public static Set<ClientNode> getAllConnectedClientNodes() {
+        Map<String, Set<ClientNode>> inUsingClientMap = ClientManager.getInUsingClientMap();
+
+        Set<ClientNode> total = new HashSet<>();
+        Set<String> keySet = inUsingClientMap.keySet();
+        for (String key : keySet) {
+            Set<ClientNode> clientNodes = inUsingClientMap.get(key);
+            if (clientNodes != null) {
+                total.addAll(clientNodes);
+            }
+        }
+
+        return total;
+    }
+
+    public static boolean hasConnectedClientNodes() {
+        return getAllConnectedClientNodes().size() > 0;
+    }
+
+
 }

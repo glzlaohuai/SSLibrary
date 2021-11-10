@@ -219,7 +219,7 @@ public class ServerManager {
         }
     }
 
-    public static ServerNode getManagedServerNode() {
+    public synchronized static ServerNode getManagedServerNode() {
         return serverNode;
     }
 }

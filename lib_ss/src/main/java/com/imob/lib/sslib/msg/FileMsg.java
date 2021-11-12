@@ -23,4 +23,8 @@ public class FileMsg extends Msg {
     }
 
 
+    @Override
+    public byte getMsgType() {
+        return Msg.TYPE_NORMAL;
+    }
 }

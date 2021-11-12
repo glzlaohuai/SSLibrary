@@ -202,9 +202,9 @@ public class ServerManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
-            Logger.i(TAG, "onIncomingMsgChunkReadFailedDueToPeerIOFailed, peer:" + peer.getTag() + ",id: " + id);
-            base.onIncomingMsgChunkReadFailedDueToPeerIOFailed(peer, id);
+        public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
+            Logger.i(TAG, "onIncomingMsgChunkReadFailed, peer:" + peer.getTag() + ",id: " + id + ", errorMsg: " + errorMsg);
+            base.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
 
         }
 

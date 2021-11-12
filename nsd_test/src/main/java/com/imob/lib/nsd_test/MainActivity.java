@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
     }
 
     public void createServer(View view) {
@@ -187,12 +186,17 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
+                public void onTimeoutOccured(Peer peer) {
+
+                }
+
+                @Override
                 public void onIncomingMsg(Peer peer, String id, int available) {
 
                 }
 
                 @Override
-                public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+                public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
 
                 }
 
@@ -225,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onMsgSendPending(Peer peer, String id) {
 
                 }
-            });
+            }, 10 * 1000);
         }
     }
 

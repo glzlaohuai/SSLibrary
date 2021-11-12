@@ -27,7 +27,15 @@ public class Peer {
     private static final String MSG_SEND_ERROR_PEER_IS_DESTROIED = "send failed, peer is already destroied";
     private static final String MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT = "no available bytes found";
     private static final String MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT = "error occured while reading byte chunk from input stream";
+    private static final String MSG_SEND_ERROR_CANCELED = "send failed, msg send was canceled during sending progress";
+    private static final String MSG_SEND_ERROR_EOF = "send failed, eof occured";
     private static final String MSG_SEND_ERROR_CONNECTION_LOST = "connection lost";
+
+    private static final String ERROR_MSG_CHUNK_READ_FAILED_EOF = "read msg chunk failed due to peer send error occured, eof";
+    private static final String ERROR_MSG_CHUNK_READ_FAILED_CANCELED = "read msg chunk failed due to peer send error occured, canceled";
+    private static final String ERROR_MSG_CHUNK_READ_FAILED_IO = "read msg chunk failed due to peer send error occured, io error";
+
+
     private Socket socket;
     private PeerListener listener;
 
@@ -54,7 +62,9 @@ public class Peer {
     private String tag;
     private long timeout;
 
-
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
 
     public String getTag() {
         return tag;
@@ -173,7 +183,9 @@ public class Peer {
     }
 
     private void callbackTimeout() {
-        listener.onTimeoutOccured(this);
+        if (!isDestroyed()) {
+            listener.onTimeoutOccured(this);
+        }
         destroy();
     }
 
@@ -209,10 +221,17 @@ public class Peer {
         }
     }
 
-
     private void doDestroyStuff() {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
+        stopAllExecutorService();
+    }
+
+    private void stopAllExecutorService() {
+        msgSendService.shutdown();
+        monitorIncomingMsgService.shutdown();
+        msgInQueueService.shutdown();
+        timeoutCheckService.shutdown();
     }
 
 
@@ -335,55 +354,70 @@ public class Peer {
 
             //if msg instance confirMsg, then available is a negotiated negative number
             int available = msg.getAvailable();
+            int msgType = msg.getMsgType();
 
-            if (available <= 0 && !(msg instanceof ConfirmMsg)) {
+            if (available <= 0 && msgType == Msg.TYPE_NORMAL) {
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
                 msg.destroy(this);
                 continue;
             }
 
-            //go there only if available > 0
             try {
-                dos.writeUTF(msg.getId());
-                dos.writeInt(available);
+                //add a prefix, so peer can check if is a valid msgID after readed from io stream
+                dos.writeUTF(Msg.MSG_ID_PREFIX + msg.getId());
+                dos.writeInt(msg.getMsgType());
 
-                if (msg instanceof ConfirmMsg) {
-                    Logger.i(S_TAG, "write confirmMsg to dos, " + msg.getId());
-                    dos.writeInt(((ConfirmMsg) msg).getSoFar());
-                    dos.writeInt(((ConfirmMsg) msg).getTotal());
-                } else {
-                    int readed = 0;
-                    int round = 1;
-                    while (readed < available) {
-                        Chunk chunk = msg.readChunk(bytes);
+                switch (msgType) {
+                    case Msg.TYPE_NORMAL:
+                        dos.writeInt(available);
 
-                        Logger.i(tag, "write normal msg to dos, round: " + round + ", chunkSize: " + chunk.getSize() + ", total: " + available + ", e: " + chunk.getException());
+                        int readed = 0;
+                        int round = 1;
 
-                        //eof, should never go there
-                        if (chunk.getSize() == -1) {
+                        while (readed < available) {
+                            Chunk chunk = msg.readChunk(bytes);
+                            int state = chunk.getState();
+                            dos.writeInt(state);
+                            Logger.i(tag, "write normal msg to dos, round: " + round + ", state: " + state + " , chunkSize: " + chunk.getSize() + ", total: " + available + ", e: " + chunk.getException());
 
-                        } else if (chunk.getSize() == 0) {
-                            //exception occured
-                            callbackMsgSendFailed(msg, MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT, chunk.getException());
-                            dos.writeInt(0);
-                            break;
-                        } else {
-                            readed += chunk.getSize();
+                            switch (state) {
+                                case Chunk.STATE_OK:
+                                    readed += chunk.getSize();
+                                    dos.writeInt(chunk.getSize());
+                                    dos.write(chunk.getBytes(), 0, chunk.getSize());
 
-                            dos.writeInt(chunk.getSize());
-                            dos.write(chunk.getBytes(), 0, chunk.getSize());
+                                    listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
 
-                            listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
-
-                            //保存chunk发出的时间
-                            synchronized (timeoutLock) {
-                                addItemToChunkSendingTime(msg.getId(), readed);
-                                timeoutLock.notify();
+                                    //保存chunk发出的时间
+                                    synchronized (timeoutLock) {
+                                        addItemToChunkSendingTime(msg.getId(), readed);
+                                        timeoutLock.notify();
+                                    }
+                                    break;
+                                //should never happen
+                                case Chunk.STATE_EOF:
+                                    callbackMsgSendFailed(msg, MSG_SEND_ERROR_EOF, chunk.getException());
+                                    break;
+                                case Chunk.STATE_CANCELED:
+                                    callbackMsgSendFailed(msg, MSG_SEND_ERROR_CANCELED, chunk.getException());
+                                    break;
+                                case Chunk.STATE_ERROR:
+                                    callbackMsgSendFailed(msg, MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT, chunk.getException());
+                                    break;
+                            }
+                            round++;
+                            if (state != Chunk.STATE_OK) {
+                                break;
                             }
                         }
-                        round++;
-                    }
+                        break;
+                    case Msg.TYPE_CONFIRM:
+                        Logger.i(S_TAG, "write confirmMsg to dos, " + msg.getId());
+                        dos.writeInt(((ConfirmMsg) msg).getSoFar());
+                        dos.writeInt(((ConfirmMsg) msg).getTotal());
+                        break;
                 }
+
                 callbackMsgSendSucceeded(msg);
             } catch (IOException e) {
                 Logger.e(e);
@@ -410,43 +444,82 @@ public class Peer {
             public void run() {
                 try {
                     while (!isDestroyed()) {
+
                         String id = dis.readUTF();
-                        int available = dis.readInt();
+                        int msgType = dis.readInt();
 
-                        if (available > 0) {
-                            listener.onIncomingMsg(Peer.this, id, available);
-                            int readed = 0;
+                        if (id == null || id.equals("") || !id.startsWith(Msg.MSG_ID_PREFIX)) {
+                            throw new IOException("read msgID from stream failed, something went wrong, io connection might already corrupted");
+                        }
 
-                            while (readed < available) {
-                                int chunkSize = dis.readInt();
-                                readed += chunkSize;
+                        id = id.substring(Msg.MSG_ID_PREFIX.length());
 
-                                if (chunkSize == 0) {
-                                    listener.onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer.this, id);
-                                    break;
-                                } else {
-                                    dis.readFully(buffer, 0, chunkSize);
-                                    listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, chunkSize, readed, buffer);
-                                    //send confirm(ack) msg
-                                    sendMessage(ConfirmMsg.build(id, readed, available));
+                        switch (msgType) {
+                            case Msg.TYPE_NORMAL:
+                                int available = dis.readInt();
+                                if (available <= 0) {
+                                    throwIOException("got a unexpected available value from peer, connection corrupted.");
                                 }
-                            }
 
-                            if (readed == available) {
-                                listener.onIncomingMsgReadSucceeded(Peer.this, id);
-                            } else {
-                                listener.onIncomingMsgReadFailed(Peer.this, id, available, readed);
-                            }
-                        } else if (available == ConfirmMsg.AVAILABLE_SIZE_CONFIRM) {
-                            //incoming confirm msg
-                            int soFar = dis.readInt();
-                            int total = dis.readInt();
+                                listener.onIncomingMsg(Peer.this, id, available);
+                                int readed = 0;
 
-                            listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
-                            synchronized (timeoutLock) {
-                                removeItemFromChunkSendingTime(id, soFar);
-                                timeoutLock.notify();
-                            }
+                                while (readed < available) {
+                                    int state = dis.readInt();
+
+                                    switch (state) {
+                                        case Chunk.STATE_CANCELED:
+                                            listener.onIncomingMsgChunkReadFailed(Peer.this, id, ERROR_MSG_CHUNK_READ_FAILED_CANCELED);
+                                            break;
+                                        case Chunk.STATE_EOF:
+                                            listener.onIncomingMsgChunkReadFailed(Peer.this, id, ERROR_MSG_CHUNK_READ_FAILED_EOF);
+                                            break;
+                                        case Chunk.STATE_ERROR:
+                                            listener.onIncomingMsgChunkReadFailed(Peer.this, id, ERROR_MSG_CHUNK_READ_FAILED_IO);
+                                            break;
+                                        case Chunk.STATE_OK:
+                                            int size = dis.readInt();
+                                            if (size <= 0) {
+                                                throw new IOException("got a unexpected chunk size from peer, connection corrupted.");
+                                            }
+                                            readed += size;
+                                            dis.readFully(buffer, 0, size);
+                                            listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, size, readed, buffer);
+                                            //send confirm(ack) msg
+                                            sendMessage(ConfirmMsg.build(id, readed, available));
+                                            break;
+                                        default:
+                                            throw new IOException("got a unexpected chunk state from peer, connection coruppted");
+                                    }
+                                }
+
+                                if (readed == available) {
+                                    listener.onIncomingMsgReadSucceeded(Peer.this, id);
+                                } else {
+                                    listener.onIncomingMsgReadFailed(Peer.this, id, available, readed);
+                                }
+
+
+                                break;
+                            case Msg.TYPE_CONFIRM:
+                                //incoming confirm msg
+                                int soFar = dis.readInt();
+                                int total = dis.readInt();
+
+                                if (soFar <= 0 || total <= 0) {
+                                    throwIOException("got unexpected confirm soFar or total value from peer, connection corrupted.");
+                                }
+
+                                listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
+                                synchronized (timeoutLock) {
+                                    removeItemFromChunkSendingTime(id, soFar);
+                                    timeoutLock.notify();
+                                }
+                                break;
+
+                            default:
+                                throwIOException("got a unexpected msg type from peer, connection corrupted.");
+                                break;
                         }
                     }
 
@@ -457,6 +530,11 @@ public class Peer {
                 }
             }
         });
+    }
+
+
+    private void throwIOException(String errorMsg) throws IOException {
+        throw new IOException(errorMsg);
     }
 
 

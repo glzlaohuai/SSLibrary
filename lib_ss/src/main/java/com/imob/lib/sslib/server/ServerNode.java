@@ -266,8 +266,8 @@ public class ServerNode implements INode {
             }
 
             @Override
-            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
-                peerListener.onIncomingMsgChunkReadFailedDueToPeerIOFailed(peer, id);
+            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
+                peerListener.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
             }
 
             @Override

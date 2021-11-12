@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
 
             }
 
@@ -422,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+                            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
 
                             }
 

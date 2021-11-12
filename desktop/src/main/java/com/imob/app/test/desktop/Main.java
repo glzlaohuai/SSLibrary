@@ -157,9 +157,10 @@ public class Main {
             }
 
             @Override
-            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
 
             }
+
 
             @Override
             public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
@@ -352,9 +353,10 @@ public class Main {
             }
 
             @Override
-            public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
+            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
 
             }
+
 
             @Override
             public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {

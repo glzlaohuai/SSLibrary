@@ -157,10 +157,9 @@ public class ClientManager {
         }
 
         @Override
-        public void onIncomingMsgChunkReadFailedDueToPeerIOFailed(Peer peer, String id) {
-            Logger.i(TAG, "onIncomingMsgChunkReadFailedDueToPeerIOFailed, peer: " + peer.getTag() + ", id: " + id);
-
-            base.onIncomingMsgChunkReadFailedDueToPeerIOFailed(peer, id);
+        public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMessage) {
+            Logger.i(TAG, "onIncomingMsgChunkReadFailed, peer: " + peer.getTag() + ", id: " + id+", errorMsg: "+errorMessage);
+            base.onIncomingMsgChunkReadFailed(peer, id, errorMessage);
         }
 
         @Override

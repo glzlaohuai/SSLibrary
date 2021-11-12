@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
+import com.imob.app.pasteew.utils.ServiceRegister;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListener;
@@ -80,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }).start();
+    }
+
+    public void createAndRegisterService(View view) {
+        ServiceRegister.startServiceRegisterStuff();
     }
 
     static class Log {

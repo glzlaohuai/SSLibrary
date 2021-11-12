@@ -26,7 +26,7 @@ public class NsdManager {
     private static final String TAG = "NsdManager";
 
     private static final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
-    private static final ExecutorService retrieveServiceInfoService = Executors.newSingleThreadExecutor();
+    private static final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
 
     private final static Byte lock = 0x0;
 
@@ -277,6 +277,18 @@ public class NsdManager {
         }
     }
 
+    public void triggerServiceInfoResolve(final String type, final String name) {
+        if (jmDNS != null) {
+            retrieveServiceInfoService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (jmDNS != null) {
+                        jmDNS.getServiceInfo(type, name);
+                    }
+                }
+            });
+        }
+    }
 
     /**
      * @return true - has jmDns instance, false - the opposite

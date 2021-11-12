@@ -3,6 +3,7 @@ package com.imob.app.pasteew.utils;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -156,7 +157,7 @@ public class ServiceRegister {
                     }, getRealLocalHost(wifiManager), SERVICE_HOST_NAME, new NsdEventListener() {
                         @Override
                         public void onInitSucceeded(NsdManager nsdManager) {
-                            nsdManager.registerService(SERVICE_TYPE, "{ a name } - " + UUID.randomUUID().toString().hashCode(), null, ServerManager.getManagedServerNode().getPort());
+                            nsdManager.registerService(SERVICE_TYPE, Build.BRAND + " - " + UUID.randomUUID().toString().hashCode(), null, ServerManager.getManagedServerNode().getPort());
                             nsdManager.watchService(SERVICE_TYPE, null);
                         }
 

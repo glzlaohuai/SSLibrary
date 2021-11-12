@@ -70,7 +70,7 @@ public class NsdManager {
 
         @Override
         public void onServiceDiscoveryed(NsdManager nsdManager, ServiceEvent event) {
-            Logger.i(TAG, "onServiceDiscoveryed, nsdManager: " + nsdManager + ", event: " + event);
+            Logger.i(TAG, "onServiceDiscoveryed, nsdManager: " + nsdManager + ", event: " + event.getInfo());
             base.onServiceDiscoveryed(nsdManager, event);
         }
 

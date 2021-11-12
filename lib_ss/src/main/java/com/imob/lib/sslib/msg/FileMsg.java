@@ -14,6 +14,7 @@ public class FileMsg extends Msg {
         this(id, new FileInputStream(new File(filePath)));
     }
 
+
     public static FileMsg create(String id, String filePath) throws FileNotFoundException {
         if (id == null || id.equals("") || filePath == null || filePath.equals("") || !new File(filePath).exists()) {
             return null;

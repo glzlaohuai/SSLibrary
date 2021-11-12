@@ -62,7 +62,12 @@ public class Peer {
     private String tag;
     private long timeout;
 
+
+    /**
+     * @param tag a none empty string, or else no effects
+     */
     public void setTag(String tag) {
+        if (tag == null || tag.isEmpty()) return;
         this.tag = tag;
     }
 

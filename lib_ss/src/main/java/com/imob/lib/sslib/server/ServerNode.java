@@ -329,6 +329,20 @@ public class ServerNode implements INode {
         }
     }
 
+    public Peer findPeerByTag(String tag) {
+        if (tag == null || tag.equals("")) {
+            return null;
+        } else {
+            for (Peer peer : connectedPeers) {
+                if (peer.getTag().equals(tag)) {
+                    return peer;
+                }
+            }
+        }
+        return null;
+    }
+
+
     @Override
     public boolean isServerNode() {
         return true;

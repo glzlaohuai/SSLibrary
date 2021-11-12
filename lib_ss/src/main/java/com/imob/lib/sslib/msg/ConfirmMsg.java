@@ -2,8 +2,6 @@ package com.imob.lib.sslib.msg;
 
 public class ConfirmMsg extends Msg {
 
-    public static final int AVAILABLE_SIZE_CONFIRM = -0xff;
-
     @Override
     public byte getMsgType() {
         return Msg.TYPE_CONFIRM;

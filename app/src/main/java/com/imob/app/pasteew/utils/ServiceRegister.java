@@ -29,7 +29,7 @@ public class ServiceRegister {
 
     private static final String SERVICE_HOST_NAME = UUID.randomUUID().toString();
 
-    private static final String SERVICE_TYPE = "_http._tcp.local.";
+    private static final String SERVICE_TYPE = "_pasteanywhere._tcp.local.";
 
 
     private static final int MSG_CREATE_SERVER = 0x0;

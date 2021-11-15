@@ -294,17 +294,21 @@ public class NsdManager {
      * @return true - has jmDns instance, false - the opposite
      */
     public boolean destroy() {
-        if (jmDNS != null) {
-            initExecutorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    doDestroy();
+        synchronized (lock) {
+            try {
+                if (jmDNS != null) {
+                    initExecutorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            doDestroy();
+                        }
+                    });
+                    return true;
                 }
-            });
-
-            // assign null to indicate that there has no running nsd manager instance, you need to recall setup() before run any of other methods.
-            NsdManager.nsdManager = null;
-            return true;
+            } finally {
+                // assign null to indicate that there has no running nsd manager instance, you need to recall setup() before run any of other methods.
+                NsdManager.nsdManager = null;
+            }
         }
         return false;
     }

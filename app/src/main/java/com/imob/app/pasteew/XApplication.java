@@ -5,7 +5,6 @@ import android.content.Context;
 
 import com.imob.app.pasteew.utils.Constants;
 import com.imob.app.pasteew.utils.SPWrapper;
-import com.imob.app.pasteew.utils.ServiceRegister;
 import com.imob.lib.common.android.SPUtils;
 
 public class XApplication extends Application {
@@ -28,7 +27,7 @@ public class XApplication extends Application {
 
     private void registerServiceIfHasSetName() {
         if (SPWrapper.hasSetServiceName()) {
-            ServiceRegister.startServiceRegisterStuff();
+            //            ServiceRegister.startServiceRegisterStuff();
         }
     }
 }

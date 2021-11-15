@@ -61,8 +61,10 @@ public class ServerNode implements INode {
             return false;
         }
         this.timeout = timeout;
+        this.isCreating = true;
 
         handleCreate();
+        Logger.i(tag, "create");
         return true;
     }
 
@@ -126,7 +128,9 @@ public class ServerNode implements INode {
 
     public void destroy() {
         if (!isDestroyed) {
+            Logger.i(tag, "destroy called");
             synchronized (createLock) {
+                Logger.i(tag, "do destroy stuff");
                 isDestroyed = true;
                 doDestroyStuff();
                 callbackDestroyed();
@@ -368,6 +372,10 @@ public class ServerNode implements INode {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return tag;
+    }
 
     @Override
     public boolean isServerNode() {

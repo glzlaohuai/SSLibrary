@@ -22,7 +22,7 @@ public class NsdNode {
     private static final String ERROR_WATCH_SERVICE_FAILED_NO_INSTANCE_FOUND = "watch service failed due to no jmDNS instance found.";
     private static final String ERROR_REGISTER_SERVICE_FAILED_ERROR_OCCURED = "register service failed due to error occured.";
 
-    private static final String TAG = "NsdNode";
+    private static final String S_TAG = "NsdNode";
 
     private static final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
     private static final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
@@ -39,11 +39,15 @@ public class NsdNode {
     private boolean isDestroyed;
     private boolean isCreating;
 
+    private String tag;
+
     public NsdNode(INsdExtraActionPerformer performer, InetAddress inetAddress, String hostName, NsdEventListener listener) {
         this.performer = performer;
         this.inetAddress = inetAddress;
         this.hostName = hostName;
         this.listener = listener;
+
+        tag = S_TAG + " # " + hashCode();
     }
 
     public boolean isRunning() {
@@ -51,32 +55,36 @@ public class NsdNode {
     }
 
     public boolean isInUsing() {
+        System.out.println(toString()+", creating: "+isCreating+", "+isRunning());
         return isCreating || isRunning();
     }
 
 
     public boolean create() {
         //valid arguments, go on
-        if (inetAddress != null && hostName != null && !hostName.equals("") && !isCreating && !isRunning() && !isDestroyed) {
-            initExecutorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    doCreateStuff();
-                }
-            });
-            return true;
-        } else {
-            listener.onCreateFailed(ERROR_INIT_FAILED_INVALID_ARGUMENT_STATE, null);
-            return false;
+        synchronized (lock) {
+            if (inetAddress != null && hostName != null && !hostName.equals("") && !isCreating && !isRunning() && !isDestroyed) {
+                isCreating = true;
+                initExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        doCreateStuff();
+                    }
+                });
+                return true;
+            } else {
+                listener.onCreateFailed(ERROR_INIT_FAILED_INVALID_ARGUMENT_STATE, null);
+                return false;
+            }
         }
     }
 
     private void doCreateStuff() {
+        Logger.i(tag, "create");
         synchronized (lock) {
-            if (isCreating || isRunning() || isDestroyed) {
+            if (isRunning() || isDestroyed) {
                 return;
             } else {
-                isCreating = true;
                 try {
                     if (performer != null) {
                         try {
@@ -93,7 +101,7 @@ public class NsdNode {
                         }
                     }
                     try {
-                        Logger.i(TAG, "create JMDNS: " + inetAddress + ", " + hostName);
+                        Logger.i(tag, "create JMDNS: " + inetAddress + ", " + hostName);
                         jmDNS = JmDNS.create(inetAddress, hostName);
 
                         listener.onCreated(NsdNode.this);
@@ -194,6 +202,7 @@ public class NsdNode {
     }
 
     private void doDestroy() {
+        Logger.i(tag, "destroy stuff called");
         synchronized (lock) {
             if (jmDNS != null) {
                 try {
@@ -237,6 +246,7 @@ public class NsdNode {
      */
     public boolean destroy() {
         if (!isDestroyed) {
+            Logger.i(tag, "destroy");
             isDestroyed = true;
             synchronized (lock) {
                 if (jmDNS != null) {
@@ -254,8 +264,12 @@ public class NsdNode {
         return false;
     }
 
-
     public boolean isDestroyed() {
         return isDestroyed;
+    }
+
+    @Override
+    public String toString() {
+        return tag;
     }
 }

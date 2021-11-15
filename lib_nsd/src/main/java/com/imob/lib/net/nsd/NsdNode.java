@@ -55,7 +55,6 @@ public class NsdNode {
     }
 
     public boolean isInUsing() {
-        System.out.println(toString()+", creating: "+isCreating+", "+isRunning());
         return isCreating || isRunning();
     }
 

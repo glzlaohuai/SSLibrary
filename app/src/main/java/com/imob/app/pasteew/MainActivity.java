@@ -291,9 +291,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void printServerInfo(View view) {
-        if (ServerManager.getManagedServerNode() != null) {
+        if (ServerManager.getServerNode() != null) {
 
-            ServerNode serverNode = ServerManager.getManagedServerNode();
+            ServerNode serverNode = ServerManager.getServerNode();
 
             String serverSocketInfo = serverNode.getServerSocketInfo();
             Queue<Peer> connectedPeers = serverNode.getConnectedPeers();
@@ -336,8 +336,8 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        if (port.get() == 0 && ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().isRunning()) {
-                            port.set(ServerManager.getManagedServerNode().getPort());
+                        if (port.get() == 0 && ServerManager.getServerNode() != null && ServerManager.getServerNode().isRunning()) {
+                            port.set(ServerManager.getServerNode().getPort());
                         }
 
                         boolean result = ClientManager.createClient(ip, port.get(), new ClientListener() {
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void destroyServer(View view) {
-        ServerNode managedServerNode = ServerManager.getManagedServerNode();
+        ServerNode managedServerNode = ServerManager.getServerNode();
         if (managedServerNode != null) {
             managedServerNode.destroy();
         }

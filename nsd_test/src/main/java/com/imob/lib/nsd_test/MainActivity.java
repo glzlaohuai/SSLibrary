@@ -83,9 +83,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createServer(View view) {
-        if (ServerManager.getManagedServerNode() != null && ServerManager.getManagedServerNode().isRunning()) {
+        if (ServerManager.getServerNode() != null && ServerManager.getServerNode().isRunning()) {
             try {
-                registerService(ServerManager.getManagedServerNode().getPort());
+                registerService(ServerManager.getServerNode().getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onCreated() {
                     try {
-                        registerService(ServerManager.getManagedServerNode().getPort());
+                        registerService(ServerManager.getServerNode().getPort());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
             //                public void subTypeForServiceTypeAdded(ServiceEvent serviceEvent) {
             //                }
             //            });
-            ServiceInfo serviceInfo = ServiceInfo.create(SERVICE_TYPE, "example - " + Build.DEVICE, ServerManager.getManagedServerNode().getPort(), "path=index.html");
+            ServiceInfo serviceInfo = ServiceInfo.create(SERVICE_TYPE, "example - " + Build.DEVICE, ServerManager.getServerNode().getPort(), "path=index.html");
             jmdns.registerService(serviceInfo);
             jmdns.addServiceListener(SERVICE_TYPE, new ServiceListener() {
                 @Override

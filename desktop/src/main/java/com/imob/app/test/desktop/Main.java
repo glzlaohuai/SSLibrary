@@ -52,7 +52,7 @@ public class Main {
     }
 
     private static void createNSDService() {
-        if (ServerManager.getManagedServerNode() != null) {
+        if (ServerManager.getServerNode() != null) {
             try {
                 doCreateNSDService();
             } catch (UnknownHostException e) {
@@ -78,7 +78,7 @@ public class Main {
         NsdManager.create(null, InetAddress.getLocalHost(), "default host name", new NsdEventListener() {
             @Override
             public void onCreated(NsdNode nsdNode) {
-                nsdNode.registerService(SERVICE_TYPE, "a test name", null, ServerManager.getManagedServerNode().getPort());
+                nsdNode.registerService(SERVICE_TYPE, "a test name", null, ServerManager.getServerNode().getPort());
             }
 
             @Override
@@ -119,9 +119,9 @@ public class Main {
 
 
     private static void destroyServer() {
-        ServerNode managedServerNode = ServerManager.getManagedServerNode();
+        ServerNode managedServerNode = ServerManager.getServerNode();
         if (managedServerNode != null) {
-            ServerManager.getManagedServerNode().destroy();
+            ServerManager.getServerNode().destroy();
         }
     }
 
@@ -129,7 +129,7 @@ public class Main {
         ServerManager.createServerNode(new ServerListener() {
             @Override
             public void onCreated() {
-                System.out.println(ServerManager.getManagedServerNode().getServerSocketInfo());
+                System.out.println(ServerManager.getServerNode().getServerSocketInfo());
             }
 
             @Override

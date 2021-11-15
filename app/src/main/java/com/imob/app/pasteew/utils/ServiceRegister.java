@@ -83,7 +83,7 @@ public class ServiceRegister {
     }
 
     private static void doStartServerAndRegisterService() {
-        if (ServerManager.getManagedServerNode() == null || !ServerManager.getManagedServerNode().isInUsing()) {
+        if (ServerManager.getServerNode() == null || !ServerManager.getServerNode().isInUsing()) {
             ServerManager.createServerNode(new ServerListenerAdapter() {
                 @Override
                 public void onCreated() {
@@ -116,7 +116,7 @@ public class ServiceRegister {
                         @Override
                         public void onCreated(NsdNode nsdNode) {
                             super.onCreated(nsdNode);
-                            nsdNode.registerService(SERVICE_TYPE, Build.BRAND, null, ServerManager.getManagedServerNode().getPort());
+                            nsdNode.registerService(SERVICE_TYPE, Build.BRAND, null, ServerManager.getServerNode().getPort());
                             nsdNode.watchService(SERVICE_TYPE, null);
                         }
                     });

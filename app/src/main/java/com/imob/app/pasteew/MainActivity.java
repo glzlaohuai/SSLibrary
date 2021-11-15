@@ -14,8 +14,8 @@ import com.imob.lib.sslib.client.ClientListener;
 import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
 import com.imob.lib.sslib.peer.Peer;
-import com.imob.lib.sslib.peer.PeerListener;
-import com.imob.lib.sslib.server.ServerListener;
+import com.imob.lib.sslib.peer.PeerListenerAdapter;
+import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
 
@@ -152,142 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void createServer(View view) {
-        ServerManager.createServerNode(new ServerListener() {
-            @Override
-            public void onCreated() {
-
-            }
-
-            @Override
-            public void onCreateFailed(Exception exception) {
-
-            }
-
-            @Override
-            public void onDestroyed() {
-
-            }
-
-            @Override
-            public void onCorrupted(String msg, Exception e) {
-
-            }
-
-            @Override
-            public void onIncomingClient(Peer peer) {
-
-            }
-        }, new PeerListener() {
-            @Override
-            public void onMsgIntoQueue(Peer peer, String id) {
-
-            }
-
-            @Override
-            public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
-
-            }
-
-            @Override
-            public void onMsgSendStart(Peer peer, String id) {
-
-            }
-
-            @Override
-            public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
-
-            }
-
-            @Override
-            public void onMsgSendSucceeded(Peer peer, String id) {
-
-            }
-
-            @Override
-            public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
-
-            }
-
-            @Override
-            public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
-
-            }
-
-            @Override
-            public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
-
-            }
-
-            @Override
-            public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
-
-            }
-
-            @Override
-            public void onIOStreamOpened(Peer peer) {
-
-            }
-
-            @Override
-            public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
-
-            }
-
-            @Override
-            public void onCorrupted(Peer peer, String msg, Exception e) {
-
-            }
-
-            @Override
-            public void onDestroy(Peer peer) {
-
-            }
-
-            @Override
-            public void onTimeoutOccured(Peer peer) {
-
-            }
-
-            @Override
-            public void onIncomingMsg(Peer peer, String id, int available) {
-
-            }
-
-            @Override
-            public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
-
-            }
-
-            @Override
-            public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-
-            }
-
-            @Override
-            public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-
-            }
-
-            @Override
-            public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
-
-            }
-
-            @Override
-            public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
-
-            }
-
-            @Override
-            public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
-
-            }
-
-            @Override
-            public void onMsgSendPending(Peer peer, String id) {
-
-            }
-        }, 10 * 1000);
+        ServerManager.createServerNode(new ServerListenerAdapter(), new PeerListenerAdapter(), 10 * 1000);
     }
 
     public void printServerInfo(View view) {

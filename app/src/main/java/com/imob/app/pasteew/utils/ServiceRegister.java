@@ -16,6 +16,7 @@ import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerManager;
+import com.imob.lib.sslib.server.ServerNode;
 
 import java.util.UUID;
 
@@ -86,8 +87,8 @@ public class ServiceRegister {
         if (ServerManager.getServerNode() == null || !ServerManager.getServerNode().isInUsing()) {
             ServerManager.createServerNode(new ServerListenerAdapter() {
                 @Override
-                public void onCreated() {
-                    super.onCreated();
+                public void onCreated(ServerNode serverNode) {
+                    super.onCreated(serverNode);
 
                     NsdManager.create(new INsdExtraActionPerformer() {
                         private WifiManager.MulticastLock lock;

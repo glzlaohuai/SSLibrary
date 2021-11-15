@@ -4,13 +4,13 @@ import com.imob.lib.sslib.peer.Peer;
 
 public interface ServerListener {
 
-    void onCreated();
+    void onCreated(ServerNode serverNode);
 
     void onCreateFailed(Exception exception);
 
-    void onDestroyed();
+    void onDestroyed(ServerNode serverNode);
 
-    void onCorrupted(String msg, Exception e);
+    void onCorrupted(ServerNode serverNode, String msg, Exception e);
 
-    void onIncomingClient(Peer peer);
+    void onIncomingClient(ServerNode serverNode, Peer peer);
 }

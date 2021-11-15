@@ -39,7 +39,6 @@ public class NsdNode {
     private boolean isDestroyed;
     private boolean isCreating;
 
-
     public NsdNode(INsdExtraActionPerformer performer, InetAddress inetAddress, String hostName, NsdEventListener listener) {
         this.performer = performer;
         this.inetAddress = inetAddress;
@@ -256,4 +255,7 @@ public class NsdNode {
     }
 
 
+    public boolean isDestroyed() {
+        return isDestroyed;
+    }
 }

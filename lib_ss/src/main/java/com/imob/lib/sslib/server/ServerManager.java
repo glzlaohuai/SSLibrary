@@ -1,8 +1,11 @@
 package com.imob.lib.sslib.server;
 
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.PeerListener;
 
 public class ServerManager {
+
+    private static final String TAG = "ServerManager";
 
     private static ServerNode serverNode;
 
@@ -13,7 +16,17 @@ public class ServerManager {
         if (serverNode != null && serverNode.isInUsing()) {
             return false;
         } else {
-            serverNode = new ServerNode(new ServerListenerWrapper(serverListener), new PeerListenerWrapper(peerListener));
+            serverNode = new ServerNode(new ServerListenerWrapper(serverListener) {
+                @Override
+                public void onCreated(ServerNode serverNode) {
+                    super.onCreated(serverNode);
+
+                    if (serverNode != ServerManager.serverNode && !serverNode.isDestroyed()) {
+                        Logger.i(TAG, "onCreated called, but the server node from the callback paramater not equals the holded static instance, and it's not destroyed, something went wrong here.");
+                        serverNode.destroy();
+                    }
+                }
+            }, new PeerListenerWrapper(peerListener));
             return serverNode.create(timeout);
         }
     }

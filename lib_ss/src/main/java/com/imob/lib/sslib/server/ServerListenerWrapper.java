@@ -13,10 +13,10 @@ class ServerListenerWrapper implements ServerListener {
     }
 
     @Override
-    public void onCreated() {
-        Logger.i(TAG, "onCreated");
+    public void onCreated(ServerNode serverNode) {
+        Logger.i(TAG, "onCreated, serverNode: " + serverNode);
 
-        base.onCreated();
+        base.onCreated(serverNode);
     }
 
     @Override
@@ -27,23 +27,23 @@ class ServerListenerWrapper implements ServerListener {
     }
 
     @Override
-    public void onDestroyed() {
-        Logger.i(TAG, "onDestroyed");
+    public void onDestroyed(ServerNode serverNode) {
+        Logger.i(TAG, "onDestroyed, serverNode: " + serverNode);
 
-        base.onDestroyed();
+        base.onDestroyed(serverNode);
     }
 
     @Override
-    public void onCorrupted(String msg, Exception e) {
-        Logger.i(TAG, "onCorrupted, msg: " + msg + ", exception: " + e);
+    public void onCorrupted(ServerNode serverNode, String msg, Exception e) {
+        Logger.i(TAG, "onCorrupted, serverNode: " + serverNode + ", msg: " + msg + ", exception: " + e);
 
-        base.onCorrupted(msg, e);
+        base.onCorrupted(serverNode, msg, e);
     }
 
     @Override
-    public void onIncomingClient(Peer peer) {
-        Logger.i(TAG, "onIncomingClient: " + peer.getSocket());
+    public void onIncomingClient(ServerNode serverNode, Peer peer) {
+        Logger.i(TAG, "onIncomingClient, serverNode: " + serverNode + ", peer: " + peer.getTag());
 
-        base.onIncomingClient(peer);
+        base.onIncomingClient(serverNode, peer);
     }
 }

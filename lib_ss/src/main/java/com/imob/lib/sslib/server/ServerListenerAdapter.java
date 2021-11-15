@@ -4,7 +4,7 @@ import com.imob.lib.sslib.peer.Peer;
 
 public class ServerListenerAdapter implements ServerListener {
     @Override
-    public void onCreated() {
+    public void onCreated(ServerNode serverNode) {
 
     }
 
@@ -14,17 +14,17 @@ public class ServerListenerAdapter implements ServerListener {
     }
 
     @Override
-    public void onDestroyed() {
+    public void onDestroyed(ServerNode serverNode) {
 
     }
 
     @Override
-    public void onCorrupted(String msg, Exception e) {
+    public void onCorrupted(ServerNode serverNode, String msg, Exception e) {
 
     }
 
     @Override
-    public void onIncomingClient(Peer peer) {
+    public void onIncomingClient(ServerNode serverNode, Peer peer) {
 
     }
 }

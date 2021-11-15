@@ -90,7 +90,7 @@ public class ServerNode implements INode {
             try {
                 serverSocket = new ServerSocket(0);
                 isCreating = false;
-                serverListener.onCreated();
+                serverListener.onCreated(this);
 
                 startMonitorIncomingClients();
 
@@ -137,14 +137,14 @@ public class ServerNode implements INode {
     private void callbackCorrupted(String msg, Exception e) {
         if (!isCorruptedCallbacked) {
             isCorruptedCallbacked = true;
-            serverListener.onCorrupted(msg, e);
+            serverListener.onCorrupted(this, msg, e);
         }
     }
 
 
     private void callbackDestroyed() {
         if (!isDestroyedCallbacked) {
-            serverListener.onDestroyed();
+            serverListener.onDestroyed(this);
         }
     }
 
@@ -327,7 +327,7 @@ public class ServerNode implements INode {
             }
         });
         peer.setTimeout(timeout);
-        serverListener.onIncomingClient(peer);
+        serverListener.onIncomingClient(this, peer);
         connectedPeers.add(peer);
     }
 

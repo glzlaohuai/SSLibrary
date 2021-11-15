@@ -4,20 +4,20 @@ import javax.jmdns.ServiceEvent;
 
 public interface NsdEventListener {
 
-    void onInitSucceeded(NsdManager nsdManager);
+    void onCreated(NsdNode nsdNode);
 
-    void onInitFailed(String msg, Exception e);
+    void onCreateFailed(String msg, Exception e);
 
-    void onDestroyed(NsdManager nsdManager);
+    void onDestroyed(NsdNode nsdNode);
 
-    void onRegisterServiceFailed(NsdManager nsdManager, String type, String name, int port, String text, String msg, Exception e);
+    void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e);
 
-    void onServiceDiscoveryed(NsdManager nsdManager, ServiceEvent event);
+    void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event);
 
-    void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name);
+    void onSuccessfullyWatchService(NsdNode nsdNode, String type, String name);
 
-    void onWatchServiceFailed(NsdManager nsdManager, String type, String name, String msg, Exception e);
+    void onWatchServiceFailed(NsdNode nsdNode, String type, String name, String msg, Exception e);
 
 
-    void onSuccessfullyRegisterService(NsdManager nsdManager, String type, String name, String text, int port);
+    void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port);
 }

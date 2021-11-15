@@ -2,6 +2,7 @@ package com.imob.app.test.desktop;
 
 import com.imob.lib.net.nsd.NsdEventListener;
 import com.imob.lib.net.nsd.NsdManager;
+import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
@@ -74,44 +75,44 @@ public class Main {
 
 
     private static void doCreateNSDService() throws UnknownHostException {
-        NsdManager.setup(null, InetAddress.getLocalHost(), "default host name", new NsdEventListener() {
+        NsdManager.create(null, InetAddress.getLocalHost(), "default host name", new NsdEventListener() {
             @Override
-            public void onInitSucceeded(NsdManager nsdManager) {
-                nsdManager.registerService(SERVICE_TYPE, "a test name", null, ServerManager.getManagedServerNode().getPort());
+            public void onCreated(NsdNode nsdNode) {
+                nsdNode.registerService(SERVICE_TYPE, "a test name", null, ServerManager.getManagedServerNode().getPort());
             }
 
             @Override
-            public void onInitFailed(String msg, Exception e) {
-
-            }
-
-            @Override
-            public void onDestroyed(NsdManager nsdManager) {
+            public void onCreateFailed(String msg, Exception e) {
 
             }
 
             @Override
-            public void onRegisterServiceFailed(NsdManager nsdManager, String type, String name, int port, String text, String msg, Exception e) {
-            }
-
-            @Override
-            public void onServiceDiscoveryed(NsdManager nsdManager, ServiceEvent event) {
+            public void onDestroyed(NsdNode nsdNode) {
 
             }
 
             @Override
-            public void onSuccessfullyWatchService(NsdManager nsdManager, String type, String name) {
+            public void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e) {
+            }
+
+            @Override
+            public void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event) {
 
             }
 
             @Override
-            public void onWatchServiceFailed(NsdManager nsdManager, String type, String name, String msg, Exception e) {
+            public void onSuccessfullyWatchService(NsdNode nsdNode, String type, String name) {
 
             }
 
             @Override
-            public void onSuccessfullyRegisterService(NsdManager nsdManager, String type, String name, String text, int port) {
-                nsdManager.watchService(SERVICE_TYPE, null);
+            public void onWatchServiceFailed(NsdNode nsdNode, String type, String name, String msg, Exception e) {
+
+            }
+
+            @Override
+            public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
+                nsdNode.watchService(SERVICE_TYPE, null);
             }
         });
     }

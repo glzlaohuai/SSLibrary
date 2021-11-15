@@ -8,7 +8,6 @@ public class ServerManager {
 
     private static ServerNode serverNode;
 
-
     private static final String TAG = "ServerManager";
 
     /**
@@ -54,6 +53,13 @@ public class ServerManager {
     private synchronized static void nullServerNodeAfterDestroyCallback() {
         serverNode = null;
     }
+
+    public static synchronized void destroyServer() {
+        if (getManagedServerNode() != null) {
+            getManagedServerNode().destroy();
+        }
+    }
+
 
     private static class ServerListenerWrapper implements ServerListener {
 
@@ -249,4 +255,5 @@ public class ServerManager {
     public synchronized static ServerNode getManagedServerNode() {
         return serverNode;
     }
+
 }

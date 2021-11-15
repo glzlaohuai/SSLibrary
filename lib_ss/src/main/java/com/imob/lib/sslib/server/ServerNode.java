@@ -23,6 +23,7 @@ public class ServerNode implements INode {
 
     private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor();
 
+    private Byte createLock = 0x0;
 
     private boolean isCreating = false;
     private boolean isDestroyed = false;
@@ -38,9 +39,16 @@ public class ServerNode implements INode {
 
     private long timeout;
 
+
+    private static final String S_TAG = "ServerNode";
+    private String tag;
+
+
     public ServerNode(ServerListener serverListener, PeerListener peerListener) {
         this.serverListener = serverListener;
         this.peerListener = peerListener;
+
+        tag = S_TAG + " # " + hashCode();
     }
 
     public boolean isInUsing() {
@@ -62,21 +70,37 @@ public class ServerNode implements INode {
         createExecutorService.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    serverSocket = new ServerSocket(0);
-                    isCreating = false;
-                    serverListener.onCreated();
-
-                    startMonitorIncomingClients();
-
-                } catch (IOException e) {
-                    Logger.e(e);
-                    serverListener.onCreateFailed(e);
-                } finally {
-                    isCreating = false;
-                }
+                doCreateStuff();
             }
         });
+    }
+
+    private void doCreateStuff() {
+        if (isDestroyed()) {
+            Logger.i(tag, "do create stuff, it's already destroyed, no need to take further actions, just stop creating process");
+            return;
+        }
+        synchronized (createLock) {
+
+            if (isDestroyed()) {
+                Logger.i(tag, "do create stuff, it's already destroyed, no need to take further actions, just stop creating process");
+                return;
+            }
+
+            try {
+                serverSocket = new ServerSocket(0);
+                isCreating = false;
+                serverListener.onCreated();
+
+                startMonitorIncomingClients();
+
+            } catch (IOException e) {
+                Logger.e(e);
+                serverListener.onCreateFailed(e);
+            } finally {
+                isCreating = false;
+            }
+        }
     }
 
 
@@ -102,9 +126,11 @@ public class ServerNode implements INode {
 
     public void destroy() {
         if (!isDestroyed) {
-            isDestroyed = true;
-            doDestroyStuff();
-            callbackDestroyed();
+            synchronized (createLock) {
+                isDestroyed = true;
+                doDestroyStuff();
+                callbackDestroyed();
+            }
         }
     }
 

@@ -60,6 +60,7 @@ public class NsdNode {
 
 
     public boolean create() {
+        Logger.i(tag, "create");
         //valid arguments, go on
         synchronized (lock) {
             if (inetAddress != null && hostName != null && !hostName.equals("") && !isCreating && !isRunning() && !isDestroyed) {
@@ -79,7 +80,7 @@ public class NsdNode {
     }
 
     private void doCreateStuff() {
-        Logger.i(tag, "create");
+        Logger.i(tag, "do create stuff");
         synchronized (lock) {
             if (isRunning() || isDestroyed) {
                 return;

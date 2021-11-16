@@ -32,7 +32,7 @@ public class ServerNode implements INode {
     private boolean isCorruptedCallbacked = false;
 
     private ServerSocket serverSocket;
-    private ServerListener serverListener;
+    private ServerListenerGroup serverListenerGroup = new ServerListenerGroup();
     private PeerListener peerListener;
 
     private Queue<Peer> connectedPeers = new ConcurrentLinkedQueue<>();
@@ -45,7 +45,7 @@ public class ServerNode implements INode {
 
 
     public ServerNode(ServerListener serverListener, PeerListener peerListener) {
-        this.serverListener = serverListener;
+        this.serverListenerGroup.add(serverListener);
         this.peerListener = peerListener;
 
         tag = S_TAG + " # " + hashCode();
@@ -53,6 +53,10 @@ public class ServerNode implements INode {
 
     public boolean isInUsing() {
         return (isCreating || isRunning()) && !isDestroyed;
+    }
+
+    public void monitorServerStatus(ServerListener listener) {
+        serverListenerGroup.add(listener);
     }
 
     public boolean create(long timeout) {
@@ -92,13 +96,13 @@ public class ServerNode implements INode {
             try {
                 serverSocket = new ServerSocket(0);
                 isCreating = false;
-                serverListener.onCreated(this);
+                serverListenerGroup.onCreated(this);
 
                 startMonitorIncomingClients();
 
             } catch (IOException e) {
                 Logger.e(e);
-                serverListener.onCreateFailed(e);
+                serverListenerGroup.onCreateFailed(e);
             } finally {
                 isCreating = false;
             }
@@ -141,14 +145,14 @@ public class ServerNode implements INode {
     private void callbackCorrupted(String msg, Exception e) {
         if (!isCorruptedCallbacked) {
             isCorruptedCallbacked = true;
-            serverListener.onCorrupted(this, msg, e);
+            serverListenerGroup.onCorrupted(this, msg, e);
         }
     }
 
 
     private void callbackDestroyed() {
         if (!isDestroyedCallbacked) {
-            serverListener.onDestroyed(this);
+            serverListenerGroup.onDestroyed(this);
         }
     }
 
@@ -331,7 +335,7 @@ public class ServerNode implements INode {
             }
         });
         peer.setTimeout(timeout);
-        serverListener.onIncomingClient(this, peer);
+        serverListenerGroup.onIncomingClient(this, peer);
         connectedPeers.add(peer);
     }
 

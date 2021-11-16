@@ -1,4 +1,4 @@
-package com.badzzz.pasteany.core;
+package com.badzzz.pasteany.core.interfaces;
 
 public interface IDeviceInfoManager {
 
@@ -7,4 +7,8 @@ public interface IDeviceInfoManager {
     String getDeviceName();
 
     String getDeviceDetailInfo();
+
+    String generateDeviceID();
+
+    void setDeviceName(String deviceName);
 }

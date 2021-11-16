@@ -1,4 +1,4 @@
-package com.badzzz.pasteany.core;
+package com.badzzz.pasteany.core.interfaces;
 
 public interface IPlatformManager {
 

@@ -6,6 +6,7 @@ import com.imob.lib.sslib.msg.FileMsg;
 import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
+import com.imob.lib.sslib.peer.PeerListenerGroup;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,7 +34,7 @@ public class ServerNode implements INode {
 
     private ServerSocket serverSocket;
     private ServerListenerGroup serverListenerGroup = new ServerListenerGroup();
-    private PeerListener peerListener;
+    private PeerListenerGroup peerListenerGroup = new PeerListenerGroup();
 
     private Queue<Peer> connectedPeers = new ConcurrentLinkedQueue<>();
 
@@ -46,7 +47,7 @@ public class ServerNode implements INode {
 
     public ServerNode(ServerListener serverListener, PeerListener peerListener) {
         this.serverListenerGroup.add(serverListener);
-        this.peerListener = peerListener;
+        this.peerListenerGroup.add(peerListener);
 
         tag = S_TAG + " # " + hashCode();
     }
@@ -57,6 +58,10 @@ public class ServerNode implements INode {
 
     public void monitorServerStatus(ServerListener listener) {
         serverListenerGroup.add(listener);
+    }
+
+    public void monitorIncomingPeersStatus(PeerListener peerListener) {
+        peerListenerGroup.add(peerListener);
     }
 
     public boolean create(long timeout) {
@@ -223,115 +228,115 @@ public class ServerNode implements INode {
         Peer peer = new Peer(socket, ServerNode.this, new PeerListener() {
             @Override
             public void onMsgIntoQueue(Peer peer, String id) {
-                peerListener.onMsgIntoQueue(peer, id);
+                peerListenerGroup.onMsgIntoQueue(peer, id);
             }
 
             @Override
             public void onConfirmMsgIntoQueue(Peer peer, String id, int soFar, int total) {
-                peerListener.onConfirmMsgIntoQueue(peer, id, soFar, total);
+                peerListenerGroup.onConfirmMsgIntoQueue(peer, id, soFar, total);
             }
 
             @Override
             public void onMsgSendStart(Peer peer, String id) {
-                peerListener.onMsgSendStart(peer, id);
+                peerListenerGroup.onMsgSendStart(peer, id);
             }
 
             @Override
             public void onConfirmMsgSendStart(Peer peer, String id, int soFar, int total) {
-                peerListener.onConfirmMsgSendStart(peer, id, soFar, total);
+                peerListenerGroup.onConfirmMsgSendStart(peer, id, soFar, total);
             }
 
             @Override
             public void onMsgSendSucceeded(Peer peer, String id) {
-                peerListener.onMsgSendSucceeded(peer, id);
+                peerListenerGroup.onMsgSendSucceeded(peer, id);
             }
 
             @Override
             public void onConfirmMsgSendSucceeded(Peer peer, String id, int soFar, int total) {
-                peerListener.onConfirmMsgSendSucceeded(peer, id, soFar, total);
+                peerListenerGroup.onConfirmMsgSendSucceeded(peer, id, soFar, total);
             }
 
             @Override
             public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
-                peerListener.onMsgSendFailed(peer, id, msg, exception);
+                peerListenerGroup.onMsgSendFailed(peer, id, msg, exception);
             }
 
             @Override
             public void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception) {
-                peerListener.onConfirmMsgSendFailed(peer, id, soFar, total, msg, exception);
+                peerListenerGroup.onConfirmMsgSendFailed(peer, id, soFar, total, msg, exception);
 
             }
 
             @Override
             public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
-                peerListener.onMsgChunkSendSucceeded(peer, id, chunkSize);
+                peerListenerGroup.onMsgChunkSendSucceeded(peer, id, chunkSize);
             }
 
             @Override
             public void onIOStreamOpened(Peer peer) {
-                peerListener.onIOStreamOpened(peer);
+                peerListenerGroup.onIOStreamOpened(peer);
             }
 
             @Override
             public void onIOStreamOpenFailed(Peer peer, String errorMsg, Exception exception) {
-                peerListener.onIOStreamOpenFailed(peer, errorMsg, exception);
+                peerListenerGroup.onIOStreamOpenFailed(peer, errorMsg, exception);
             }
 
             @Override
             public void onCorrupted(Peer peer, String msg, Exception e) {
-                peerListener.onCorrupted(peer, msg, e);
+                peerListenerGroup.onCorrupted(peer, msg, e);
                 removePeer(peer);
             }
 
             @Override
             public void onDestroy(Peer peer) {
-                peerListener.onDestroy(peer);
+                peerListenerGroup.onDestroy(peer);
                 removePeer(peer);
             }
 
             @Override
             public void onTimeoutOccured(Peer peer) {
-                peerListener.onTimeoutOccured(peer);
+                peerListenerGroup.onTimeoutOccured(peer);
             }
 
             @Override
             public void onIncomingMsg(Peer peer, String id, int available) {
-                peerListener.onIncomingMsg(peer, id, available);
+                peerListenerGroup.onIncomingMsg(peer, id, available);
             }
 
             @Override
             public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
-                peerListener.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
+                peerListenerGroup.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
             }
 
             @Override
             public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-                peerListener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
+                peerListenerGroup.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
             }
 
             @Override
             public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-                peerListener.onIncomingMsgReadSucceeded(peer, id);
+                peerListenerGroup.onIncomingMsgReadSucceeded(peer, id);
             }
 
             @Override
             public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
-                peerListener.onIncomingMsgReadFailed(peer, id, total, soFar);
+                peerListenerGroup.onIncomingMsgReadFailed(peer, id, total, soFar);
             }
 
             @Override
             public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
-                peerListener.onIncomingConfirmMsg(peer, id, soFar, total);
+                peerListenerGroup.onIncomingConfirmMsg(peer, id, soFar, total);
             }
 
             @Override
             public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
-                peerListener.onConfirmMsgSendPending(peer, id, soFar, total);
+                peerListenerGroup.onConfirmMsgSendPending(peer, id, soFar, total);
             }
 
             @Override
             public void onMsgSendPending(Peer peer, String id) {
-                peerListener.onMsgSendPending(peer, id);
+                peerListenerGroup.onMsgSendPending(peer, id);
             }
         });
         peer.setTimeout(timeout);

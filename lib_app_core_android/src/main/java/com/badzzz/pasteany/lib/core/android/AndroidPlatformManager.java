@@ -1,9 +1,11 @@
 package com.badzzz.pasteany.lib.core.android;
 
+import android.app.Application;
 import android.content.Context;
 
 import com.badzzz.pasteany.core.interfaces.IAppManager;
 import com.badzzz.pasteany.core.interfaces.IPlatformManager;
+import com.badzzz.pasteany.core.utils.Constants;
 
 public class AndroidPlatformManager implements IPlatformManager {
 
@@ -20,6 +22,11 @@ public class AndroidPlatformManager implements IPlatformManager {
         androidAppManager = new AndroidAppManager(context);
     }
 
+
+    /**
+     * call this in {@link Application#onCreate()}
+     * @param context
+     */
     public static void init(Context context) {
         if (context != null && !inited) {
             synchronized (lock) {
@@ -34,6 +41,11 @@ public class AndroidPlatformManager implements IPlatformManager {
     @Override
     public IAppManager getAppManager() {
         return androidAppManager;
+    }
+
+    @Override
+    public String getPlatformName() {
+        return Constants.Platforms.ANDROID;
     }
 
     public Context getContext() {

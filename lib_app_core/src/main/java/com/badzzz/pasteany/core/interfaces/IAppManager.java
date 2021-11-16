@@ -9,4 +9,6 @@ public interface IAppManager {
     NSDServiceManager getNsdServiceManager();
 
     IPreferenceManager getPreferenceManager();
+
+    INetworkManager getNetworkManager();
 }

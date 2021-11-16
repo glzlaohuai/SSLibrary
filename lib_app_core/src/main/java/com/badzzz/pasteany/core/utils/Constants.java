@@ -18,8 +18,17 @@ public class Constants {
 
     public static final class APIS {
         public static final String PEER_DETAILS = "peerDetails";
-
     }
 
+
+    public static final class NSD {
+        public static final String NSD_SERVICE_NAME_DEFAULT = "hi_paste_anywhere";
+        private static final String NSD_SERVICE_TYPE = "_pasteanywhere._tcp.local.";
+    }
+
+
+    public static final class Others {
+        public static final long TIMEOUT = 10 * 1000;
+    }
 
 }

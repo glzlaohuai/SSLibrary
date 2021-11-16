@@ -1,19 +1,13 @@
 package com.badzzz.pasteany.core;
 
+import com.badzzz.pasteany.core.interfaces.INetworkManager;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.net.nsd.NsdNode;
-import com.imob.lib.sslib.peer.PeerListenerAdapter;
-import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerNode;
 
 public class NSDServiceManager {
 
-    private static final String NSD_SERVICE_TYPE = "_pasteanywhere._tcp.local.";
-
-    //default service name used, if user do not want to set a custom one
-    public static final String NSD_SERVICE_NAME_DEFAULT = "hi_paste_anywhere";
-
-    private static final long TIMEOUT = 10 * 1000l;
 
     private static NSDServiceManager instance = new NSDServiceManager();
 
@@ -37,13 +31,20 @@ public class NSDServiceManager {
         }
     }
 
+    private void startCreateServerNodeAndRegisterServiceStuffIfNetAvailable() {
+        if (PlatformManagerHolder.get().getAppManager().getNetworkManager().isWIFIConnected()) {
+            //network available
+        }
+    }
+
     private void doInitStuff() {
-        serverNode = new ServerNode(new ServerListenerAdapter() {
+
+        PlatformManagerHolder.get().getAppManager().getNetworkManager().monitorNetworkChange(new INetworkManager.NetworkChangeListener() {
             @Override
-            public void onCreated(ServerNode serverNode) {
-                super.onCreated(serverNode);
+            public void onNetworkChanged() {
+                startCreateServerNodeAndRegisterServiceStuffIfNetAvailable();
             }
-        }, new PeerListenerAdapter());
-        serverNode.create(TIMEOUT);
+        });
+        startCreateServerNodeAndRegisterServiceStuffIfNetAvailable();
     }
 }

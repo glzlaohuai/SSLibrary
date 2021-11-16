@@ -24,8 +24,8 @@ public class NsdNode {
 
     private static final String S_TAG = "NsdNode";
 
-    private static final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
-    private static final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
+    private final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
+    private final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
 
     private final static Byte lock = 0x0;
 
@@ -225,6 +225,9 @@ public class NsdNode {
             jmDNS = null;
 
             listener.onDestroyed(this);
+
+            initExecutorService.shutdown();
+            retrieveServiceInfoService.shutdown();
         }
     }
 

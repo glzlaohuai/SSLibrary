@@ -38,7 +38,7 @@ public class Peer {
     private static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
 
     private Socket socket;
-    private PeerListener listener;
+    private PeerListenerGroup listener = new PeerListenerGroup();
 
     private DataInputStream dis;
     private DataOutputStream dos;
@@ -87,21 +87,23 @@ public class Peer {
 
     public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
-        this.listener = listener;
-
-        if (globalPeerListener != null) {
-            if (!(this.listener instanceof PeerListenerGroup)) {
-                this.listener = new PeerListenerGroup();
-                ((PeerListenerGroup) this.listener).add(listener);
-            }
-            ((PeerListenerGroup) this.listener).add(globalPeerListener);
-        }
+        this.listener.add(listener);
+        this.listener.add(globalPeerListener);
 
         this.localNode = localNode;
 
         init();
 
         tag = S_TAG + " - " + (localNode.isServerNode() ? "server" : "client") + ", remote: " + socket.getRemoteSocketAddress() + ", local: " + socket.getLocalSocketAddress();
+    }
+
+
+    public synchronized void registerListener(PeerListener peerListener) {
+        this.listener.add(peerListener);
+    }
+
+    public synchronized void unregisterListener(PeerListener peerListener) {
+        this.listener.remove(peerListener);
     }
 
     public INode getLocalNode() {
@@ -132,7 +134,7 @@ public class Peer {
         });
     }
 
-    public void destroy() {
+    public synchronized void destroy() {
         if (!isDestroyed) {
             isDestroyed = true;
 
@@ -244,7 +246,7 @@ public class Peer {
         }
     }
 
-    private void doDestroyStuff() {
+    private synchronized void doDestroyStuff() {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
         stopAllExecutorService();
@@ -265,7 +267,12 @@ public class Peer {
         Closer.close(socket);
     }
 
-    public void sendMessage(final Msg msg) {
+    public synchronized void sendMessage(final Msg msg) {
+        if (isDestroyed) {
+            callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
+            return;
+        }
+
         msg.addPeerHolder(this);
         msgQueue.add(msg);
         callbackMsgSendPending(msg);

@@ -35,6 +35,7 @@ public abstract class Msg {
         }
     }
 
+
     public void cancel() {
         canceled = true;
     }

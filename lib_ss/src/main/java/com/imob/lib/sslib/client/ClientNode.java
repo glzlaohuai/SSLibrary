@@ -24,7 +24,7 @@ public class ClientNode implements INode {
     private String ip;
     private int port;
 
-    private ClientListener listener;
+    private ClientListenerGroup listener = new ClientListenerGroup();
 
     private boolean isCreating = false;
     private boolean isDestroyed = false;
@@ -40,7 +40,7 @@ public class ClientNode implements INode {
         this.ip = ip;
         this.port = port;
 
-        this.listener = clientListener;
+        this.listener.add(new ClientListenerWrapper(clientListener));
 
         tag = S_TAG + " - " + "ip: " + ip + ", port: " + port + ", hash: " + hashCode();
     }

@@ -15,6 +15,7 @@ import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
+import com.imob.lib.sslib.server.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
@@ -85,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void createAndRegisterService(View view) {
         ServiceRegister.startServiceRegisterStuff();
+    }
+
+    public void setGlobalPeerListener(View view) {
+        Peer.setGlobalPeerListener(new PeerListenerWrapper(new PeerListenerAdapter(), true));
     }
 
     static class Log {

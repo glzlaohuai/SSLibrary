@@ -4,8 +4,8 @@ import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 
-class PeerListenerWrapper implements PeerListener {
-    private static final String TAG = "ServerManager";
+public class PeerListenerWrapper implements PeerListener {
+    private static final String TAG = "PeerListenerWrapper";
     private PeerListener base;
     private boolean printLog;
 

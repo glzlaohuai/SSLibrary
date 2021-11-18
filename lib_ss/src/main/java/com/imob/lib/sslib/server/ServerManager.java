@@ -16,7 +16,7 @@ public class ServerManager {
         if (serverNode != null && serverNode.isInUsing()) {
             return false;
         } else {
-            serverNode = new ServerNode(new ServerListenerWrapper(serverListener) {
+            serverNode = new ServerNode(new ServerListenerWrapper(serverListener, false) {
                 @Override
                 public void onCreated(ServerNode serverNode) {
                     super.onCreated(serverNode);
@@ -26,7 +26,7 @@ public class ServerManager {
                         serverNode.destroy();
                     }
                 }
-            }, new PeerListenerWrapper(peerListener));
+            }, new PeerListenerWrapper(peerListener, false));
             return serverNode.create(timeout);
         }
     }

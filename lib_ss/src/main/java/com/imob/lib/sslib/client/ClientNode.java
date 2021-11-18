@@ -16,6 +16,10 @@ public class ClientNode implements INode {
 
     private static final String ERROR_INVALID_PARAMETERS = "ip or port invalid";
     private static final String ERROR_SEND_MSG_NULL_PEER = "peer is null";
+    private static final String ERROR_ALREADY_BE_DESTROYED = "already be destroyed before create called";
+
+    private static final String S_TAG = "ClientNode";
+
 
     private String ip;
     private int port;
@@ -23,15 +27,27 @@ public class ClientNode implements INode {
     private ClientListener listener;
 
     private boolean isCreating = false;
+    private boolean isDestroyed = false;
+    private boolean isDestroyCallbacked = false;
+
+    private String tag;
+
     private Peer peer;
 
-    private ExecutorService socketCreateService = Executors.newSingleThreadExecutor();
+    private ExecutorService socketStuffService = Executors.newSingleThreadExecutor();
 
     public ClientNode(String ip, int port, ClientListener clientListener) {
         this.ip = ip;
         this.port = port;
 
         this.listener = clientListener;
+
+        tag = S_TAG + " - " + "ip: " + ip + ", port: " + port + ", hash: " + hashCode();
+    }
+
+
+    public String getTag() {
+        return tag;
     }
 
     public Peer getPeer() {
@@ -47,37 +63,64 @@ public class ClientNode implements INode {
         } else {
             if (!isCreating) {
                 isCreating = true;
-                socketCreateService.execute(new Runnable() {
+                socketStuffService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            Socket socket = new Socket();
-                            socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
-                            listener.onClientCreated(ClientNode.this);
-                            peer = new Peer(socket, ClientNode.this, listener);
-                            peer.setTimeout(timeout);
-                        } catch (IOException | IllegalArgumentException e) {
-                            Logger.e(e);
-                            listener.onClientCreateFailed(ClientNode.this, "create client failed due to error occured", e);
-                        } finally {
-                            isCreating = false;
-                        }
+                        doCreateStuff(timeout);
                     }
                 });
             }
         }
     }
 
+    private synchronized void doCreateStuff(long timeout) {
+        if (isDestroyed) {
+            Logger.i(tag, "found that it's already be destroyed before createing stuff kick off, just stop creating and callback createFailed");
+            listener.onClientCreateFailed(this, ERROR_ALREADY_BE_DESTROYED, null);
+            return;
+        }
 
-    public synchronized boolean destroy() {
-        if (isCreating) {
-            return false;
+        try {
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
+            listener.onClientCreated(ClientNode.this);
+            peer = new Peer(socket, ClientNode.this, listener);
+            peer.setTimeout(timeout);
+        } catch (IOException | IllegalArgumentException e) {
+            Logger.e(e);
+            listener.onClientCreateFailed(ClientNode.this, "create client failed due to error occured", e);
+        } finally {
+            isCreating = false;
+        }
+    }
+
+    public void destroy() {
+        socketStuffService.execute(new Runnable() {
+            @Override
+            public void run() {
+                doDestroyStuff();
+            }
+        });
+    }
+
+
+    private synchronized void doDestroyStuff() {
+        if (!isDestroyed) {
+            isDestroyed = true;
+            callbackClientDestroy();
         }
 
         if (peer != null) {
             peer.destroy();
         }
-        return true;
+    }
+
+
+    private void callbackClientDestroy() {
+        if (!isDestroyCallbacked) {
+            isDestroyCallbacked = true;
+            listener.onClientDestroyed(this);
+        }
     }
 
 

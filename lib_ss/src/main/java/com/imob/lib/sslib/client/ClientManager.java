@@ -26,8 +26,15 @@ public class ClientManager {
         }
 
         @Override
+        public void onClientDestroyed(ClientNode clientNode) {
+            Logger.i(TAG, "onClientDestroyed, clientNode: " + clientNode.getTag());
+            removeClientNodeFromMap(clientNode);
+            base.onClientDestroyed(clientNode);
+        }
+
+        @Override
         public void onClientCreated(ClientNode clientNode) {
-            Logger.i(TAG, "onClientCreated");
+            Logger.i(TAG, "onClientCreated, clientNode: " + clientNode.getTag());
             addClientToInUsingMap(clientNode);
             base.onClientCreated(clientNode);
         }
@@ -50,7 +57,7 @@ public class ClientManager {
 
         @Override
         public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
-            Logger.i(TAG, "onClientCreateFailed, msg: " + msg + ", exception: " + exception);
+            Logger.i(TAG, "onClientCreateFailed, clientNode: " + clientNode + ", msg: " + msg + ", exception: " + exception);
             removeClientNodeFromMap(clientNode);
             base.onClientCreateFailed(clientNode, msg, exception);
         }
@@ -158,7 +165,7 @@ public class ClientManager {
 
         @Override
         public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMessage) {
-            Logger.i(TAG, "onIncomingMsgChunkReadFailed, peer: " + peer.getTag() + ", id: " + id+", errorMsg: "+errorMessage);
+            Logger.i(TAG, "onIncomingMsgChunkReadFailed, peer: " + peer.getTag() + ", id: " + id + ", errorMsg: " + errorMessage);
             base.onIncomingMsgChunkReadFailed(peer, id, errorMessage);
         }
 

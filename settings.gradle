@@ -9,7 +9,6 @@ dependencyResolutionManagement {
 rootProject.name = "SSLibrary"
 include ':lib_ss'
 include ':app'
-include ':nsd_test'
 include ':lib_nsd'
 include ':desktop'
 include ':lib_common'

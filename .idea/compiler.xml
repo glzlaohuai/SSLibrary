@@ -3,7 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.7">
       <module name="SSLibrary.app" target="13" />
-      <module name="SSLibrary.lib_app_core_android" target="13" />
+      <module name="SSLibrary.lib_app_android" target="13" />
       <module name="SSLibrary.lib_commin_android" target="13" />
       <module name="SSLibrary.lib_common_android" target="13" />
       <module name="SSLibrary.nsd_test" target="13" />

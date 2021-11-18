@@ -92,18 +92,6 @@ public class MainActivity extends AppCompatActivity {
         Peer.setGlobalPeerListener(new PeerListenerWrapper(new PeerListenerAdapter(), true));
     }
 
-    static class Log {
-        public static void i(String tag, String msg) {
-            String info = tag + " - " + msg;
-            Logger.LogWatcher logWatcher = Logger.getLogWatcher();
-            if (logWatcher != null) {
-                logWatcher.log(info);
-            }
-
-            android.util.Log.i(tag, msg);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
         testFile = new File(getCacheDir(), "a_test_file_name");
         copyTestFileToAppSandboxDirectory();
     }
-
 
     private void copyTestFileToAppSandboxDirectory() {
 
@@ -155,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     public void createServer(View view) {
         ServerManager.createServerNode(new ServerListenerAdapter(), new PeerListenerAdapter(), 10 * 1000);
     }
@@ -179,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         boolean result = ServerManager.broadcastStringMsg(UUID.randomUUID().toString(), "a test msg from server");
         Log.i(TAG, "broadcast string msg to all connected clients: " + result);
     }
-
 
     public void broadcastFileMsg(View view) {
         boolean result = ServerManager.broadcastFileMsg(UUID.randomUUID().toString(), testFile.getAbsolutePath());
@@ -240,14 +225,12 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "send file msg to server: " + result);
     }
 
-
     public void destroyServer(View view) {
         ServerNode managedServerNode = ServerManager.getServerNode();
         if (managedServerNode != null) {
             managedServerNode.destroy();
         }
     }
-
 
     public void destroyClient(View view) {
         if (ClientManager.getConnectedClientMap().isEmpty()) {
@@ -279,6 +262,18 @@ public class MainActivity extends AppCompatActivity {
                     clientNode.destroy();
                 }
             });
+        }
+    }
+
+    static class Log {
+        public static void i(String tag, String msg) {
+            String info = tag + " - " + msg;
+            Logger.LogWatcher logWatcher = Logger.getLogWatcher();
+            if (logWatcher != null) {
+                logWatcher.log(info);
+            }
+
+            android.util.Log.i(tag, msg);
         }
     }
 }

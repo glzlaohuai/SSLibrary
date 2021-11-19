@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.UUID;
 
-public class MsgCreator {
+public class MsgHandler {
 
     private static String createMsgID(String type, String data) {
 

@@ -20,7 +20,7 @@ public class APIHandler {
 
     public static void requestAPI(final Peer peer, String api, final APIRequestListener listener) {
         if (peer != null && api != null) {
-            final Msg apiMsg = MsgCreator.createAPIMsg(api);
+            final Msg apiMsg = MsgHandler.createAPIMsg(api);
             peer.sendMessage(apiMsg);
             listener.start(peer, api);
 

@@ -15,7 +15,7 @@ import java.util.Set;
 
 import javax.jmdns.ServiceEvent;
 
-public class ConnectedPeersHolder {
+public class ConnectedPeersHandler {
 
     private boolean destroyed = false;
 
@@ -60,7 +60,6 @@ public class ConnectedPeersHolder {
         @Override
         public void onIncomingMsg(Peer peer, String id, int available) {
             super.onIncomingMsg(peer, id, available);
-
             handleIncomingMsg(peer, id, available);
         }
 
@@ -93,7 +92,7 @@ public class ConnectedPeersHolder {
 
     }
 
-    public ConnectedPeersHolder() {
+    public ConnectedPeersHandler() {
         Peer.setGlobalPeerListener(peerListener);
     }
 

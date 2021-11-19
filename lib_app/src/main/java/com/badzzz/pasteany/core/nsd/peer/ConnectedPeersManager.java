@@ -11,32 +11,32 @@ import javax.jmdns.ServiceEvent;
 public class ConnectedPeersManager {
 
     private static NsdServiceHandler inUsingServiceHandler;
-    private static Map<NsdServiceHandler, ConnectedPeersHolder> connectedPeersHolderMap = new HashMap<>();
+    private static Map<NsdServiceHandler, ConnectedPeersHandler> relatedConnectedPeersHandlerMap = new HashMap<>();
 
     public static void destroyRelatedConnectedPeerHolder(NsdServiceHandler handler) {
-        ConnectedPeersHolder connectedPeersHolder = connectedPeersHolderMap.get(handler);
-        if (connectedPeersHolder != null) {
-            connectedPeersHolder.destroy();
+        ConnectedPeersHandler connectedPeersHandler = relatedConnectedPeersHandlerMap.get(handler);
+        if (connectedPeersHandler != null) {
+            connectedPeersHandler.destroy();
         }
     }
 
 
     public static void setCurrentlyUsedHandler(NsdServiceHandler handler) {
         ConnectedPeersManager.inUsingServiceHandler = handler;
-        connectedPeersHolderMap.put(handler, new ConnectedPeersHolder());
+        relatedConnectedPeersHandlerMap.put(handler, new ConnectedPeersHandler());
     }
 
 
     public static void afterServiceDiscoveryed(NsdServiceHandler handler, NsdNode nsdNode, ServiceEvent event) {
-        if (inUsingServiceHandler == handler && connectedPeersHolderMap.get(handler) != null && nsdNode != null && event != null && nsdNode.isRunning()) {
-            connectedPeersHolderMap.get(handler).afterServiceDiscoveryed(event);
+        if (inUsingServiceHandler == handler && relatedConnectedPeersHandlerMap.get(handler) != null && nsdNode != null && event != null && nsdNode.isRunning()) {
+            relatedConnectedPeersHandlerMap.get(handler).afterServiceDiscoveryed(event);
         }
     }
 
 
-    public static ConnectedPeersHolder getCurrentlyUsedConnectedPeerHandler() {
+    public static ConnectedPeersHandler getCurrentlyUsedConnectedPeerHandler() {
         if (inUsingServiceHandler != null) {
-            return connectedPeersHolderMap.get(inUsingServiceHandler);
+            return relatedConnectedPeersHandlerMap.get(inUsingServiceHandler);
         }
         return null;
     }

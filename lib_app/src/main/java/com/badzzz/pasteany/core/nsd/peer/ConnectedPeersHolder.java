@@ -56,13 +56,18 @@ public class ConnectedPeersHolder {
             });
         }
 
-        private void callbackPeerDetailInfoGotFailed(Peer peer, String msg, Exception e) {
 
+        @Override
+        public void onIncomingMsg(Peer peer, String id, int available) {
+            super.onIncomingMsg(peer, id, available);
+
+            handleIncomingMsg(peer, id, available);
         }
 
-        private void callbackPeerDetailInfoGot(Peer peer) {
+        @Override
+        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+            super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
         }
-
 
         @Override
         public void onCorrupted(Peer peer, String msg, Exception e) {
@@ -84,6 +89,9 @@ public class ConnectedPeersHolder {
         }
     };
 
+    private void handleIncomingMsg(Peer peer, String id, int available) {
+
+    }
 
     public ConnectedPeersHolder() {
         Peer.setGlobalPeerListener(peerListener);
@@ -99,6 +107,13 @@ public class ConnectedPeersHolder {
 
     private void callbackIncomingNewPeer(Peer peer) {
 
+    }
+
+    private void callbackPeerDetailInfoGotFailed(Peer peer, String msg, Exception e) {
+
+    }
+
+    private void callbackPeerDetailInfoGot(Peer peer) {
     }
 
 

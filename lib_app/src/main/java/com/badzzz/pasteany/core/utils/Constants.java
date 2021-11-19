@@ -31,6 +31,13 @@ public class Constants {
         public static final String NSD_SERVICE_NAME_DEFAULT = "hi_paste_anywhere";
         public static final String NSD_SERVICE_TYPE = "_pasteanywhere._tcp.local.";
         public static final String NSD_HOST_NAME = "badzzz.com";
+
+        public static final class Key {
+            public static final String DEVICE_ID = "device_id";
+            public static final String DEVICE_NAME = "device_name";
+            public static final String SERVICE_NAME = "service_name";
+        }
+
     }
 
 

@@ -32,10 +32,7 @@ public class NsdServiceStarter {
         if (!hasInited) {
             hasInited = true;
 
-            if (PlatformManagerHolder.get().getAppManager().getNetworkManager().isWIFIConnected()) {
-                //start immediately
-                NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne();
-            }
+            NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne();
             PlatformManagerHolder.get().getAppManager().getNetworkManager().monitorNetworkChange(new INetworkManager.NetworkChangeListener() {
                 @Override
                 public void onNetworkChanged() {

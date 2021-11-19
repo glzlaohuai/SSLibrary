@@ -1,13 +1,17 @@
 package com.badzzz.pasteany.core.nsd;
 
+import com.badzzz.pasteany.core.interfaces.IAppManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.net.nsd.NsdEventListener;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerNode;
+
+import org.json.simple.JSONObject;
 
 public class NsdServiceHandler {
 
@@ -47,12 +51,44 @@ public class NsdServiceHandler {
             @Override
             public void onCreateFailed(Exception exception) {
                 super.onCreateFailed(exception);
-                //what's the fuck? this should never happen, but if did, just simply redo it.
-                NsdServiceStarter.redoIfSomethingWentWrong();
+
+                triggerNsdServiceStarterRedoStuff();
             }
 
+            @Override
+            public void onDestroyed(ServerNode serverNode) {
+                super.onDestroyed(serverNode);
+
+                triggerNsdServiceStarterRedoStuff();
+
+            }
+
+            @Override
+            public void onCorrupted(ServerNode serverNode, String msg, Exception e) {
+                super.onCorrupted(serverNode, msg, e);
+
+                triggerNsdServiceStarterRedoStuff();
+            }
+
+            void triggerNsdServiceStarterRedoStuff() {
+                serverNode.monitorServerStatus(this);
+                NsdServiceStarter.redoIfSomethingWentWrong();
+            }
         }, new PeerListenerAdapter());
         serverNode.create(Constants.Others.TIMEOUT);
+    }
+
+
+    private static String createRegisterServiceName() {
+        JSONObject jsonObject = new JSONObject();
+
+        IAppManager appManager = PlatformManagerHolder.get().getAppManager();
+
+        jsonObject.put(Constants.NSD.Key.DEVICE_ID, appManager.getDeviceInfoManager().getDeviceID());
+        jsonObject.put(Constants.NSD.Key.DEVICE_NAME, appManager.getDeviceInfoManager().getDeviceName());
+        jsonObject.put(Constants.NSD.Key.SERVICE_NAME, PreferenceManagerWrapper.getInstance().getServiceName());
+
+        return jsonObject.toJSONString();
     }
 
 
@@ -61,7 +97,10 @@ public class NsdServiceHandler {
             nsdNode = new NsdNode(PlatformManagerHolder.get().getAppManager().getNsdServiceManager().getExtraActionPerformer(), PlatformManagerHolder.get().getAppManager().getNetworkManager().getLocalNotLoopbackAddress(), Constants.NSD.NSD_HOST_NAME, new NsdEventListener() {
                 @Override
                 public void onCreated(NsdNode nsdNode) {
-
+                    if (!nsdNode.isDestroyed()) {
+                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, createRegisterServiceName(), null, serverNode.getPort());
+                        nsdNode.watchService(Constants.NSD.NSD_SERVICE_TYPE, null);
+                    }
                 }
 
                 @Override
@@ -82,7 +121,8 @@ public class NsdServiceHandler {
 
                 @Override
                 public void onServiceDiscoveryed(NsdNode nsdNode, javax.jmdns.ServiceEvent event) {
-
+                    //find a nsdNode, try to connect to it
+                    ConnectedPeersManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, event);
                 }
 
                 @Override
@@ -125,7 +165,7 @@ public class NsdServiceHandler {
     private void doStuffAfterHandlerBeDestroyed(INsdServiceHandlerDestroyListener listener) {
         isDestroyed = true;
         listener.onDestroyed(this);
-        ConnectedPeersManager.destroyAllRelatedPeers(this);
+        ConnectedPeersManager.destroyRelatedConnectedPeerHolder(this);
     }
 
     private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener) {

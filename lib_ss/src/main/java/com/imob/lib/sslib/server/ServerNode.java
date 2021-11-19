@@ -61,6 +61,10 @@ public class ServerNode implements INode {
         serverListenerGroup.add(listener);
     }
 
+    public void unmonitorServerStatus(ServerListener listener){
+        serverListenerGroup.remove(listener);
+    }
+
     public void monitorIncomingPeersStatus(PeerListener peerListener) {
         peerListenerGroup.add(peerListener);
     }

@@ -24,9 +24,6 @@ public class NsdServiceHandler {
     private ServerNode serverNode;
     private NsdNode nsdNode;
 
-
-    private INsdServiceHandlerDestroyListener listener;
-
     public interface INsdServiceHandlerDestroyListener {
         void onDestroyed(NsdServiceHandler handler);
     }

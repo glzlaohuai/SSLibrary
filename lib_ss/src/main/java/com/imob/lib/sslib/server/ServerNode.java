@@ -8,6 +8,7 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerGroup;
+import com.imob.lib.sslib.peer.PeerListenerWrapper;
 
 import java.io.File;
 import java.io.FileNotFoundException;

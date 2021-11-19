@@ -1,12 +1,16 @@
 package com.badzzz.pasteany.core.api;
 
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 
 public class APIHandler {
+
+    private static final String TAG = "APIHandler";
 
     public interface APIRequestListener {
         void start(Peer peer, String api);
@@ -19,6 +23,9 @@ public class APIHandler {
     }
 
     public static void requestAPI(final Peer peer, String api, final APIRequestListener listener) {
+        final String tag = TAG + " # " + UUID.randomUUID().hashCode();
+        Logger.i(tag, "reqeust api, peer: " + peer.getTag() + ", api: " + api);
+
         if (peer != null && api != null) {
             final Msg apiMsg = MsgHandler.createAPIMsg(api);
             peer.sendMessage(apiMsg);
@@ -40,6 +47,7 @@ public class APIHandler {
                         unregisterListener();
                         listener.error(peer, msg, e);
                         listener.after(peer);
+                        Logger.i(tag, "request failed, msg: " + msg + ", exception: " + e);
                     }
                 }
 
@@ -48,6 +56,7 @@ public class APIHandler {
                         isResultCallbacked = true;
                         unregisterListener();
                         listener.response(peer, new String(bos.toByteArray()));
+                        Logger.i(tag, "request succeeded, response: " + new String(bos.toByteArray()));
                     }
                 }
 

@@ -1,4 +1,4 @@
-package com.imob.lib.sslib.server;
+package com.imob.lib.sslib.peer;
 
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;

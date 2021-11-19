@@ -8,6 +8,7 @@ import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.net.nsd.NsdEventListener;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
+import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerNode;
 
@@ -71,7 +72,7 @@ public class NsdServiceHandler {
                 serverNode.monitorServerStatus(this);
                 NsdServiceStarter.redoIfSomethingWentWrong();
             }
-        }, new PeerListenerAdapter());
+        }, new PeerListenerWrapper(new PeerListenerAdapter(), true));
         serverNode.create(Constants.Others.TIMEOUT);
     }
 

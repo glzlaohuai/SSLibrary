@@ -32,4 +32,12 @@ public class ConnectedPeersManager {
             connectedPeersHolderMap.get(handler).afterServiceDiscoveryed(event);
         }
     }
+
+
+    public static ConnectedPeersHolder getCurrentlyUsedConnectedPeerHandler() {
+        if (inUsingServiceHandler != null) {
+            return connectedPeersHolderMap.get(inUsingServiceHandler);
+        }
+        return null;
+    }
 }

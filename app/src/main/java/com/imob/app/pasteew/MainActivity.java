@@ -15,7 +15,7 @@ import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
-import com.imob.lib.sslib.server.PeerListenerWrapper;
+import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;

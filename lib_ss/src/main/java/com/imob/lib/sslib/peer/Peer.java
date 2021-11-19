@@ -13,6 +13,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -44,6 +45,7 @@ public class Peer {
     private DataOutputStream dos;
 
     private MsgQueue msgQueue = new MsgQueue();
+    private Set<IncomingMsgInfo> inProcessingIncomingMsgSet = new HashSet<>();
 
     private boolean isDestroyed = false;
 
@@ -62,6 +64,35 @@ public class Peer {
     private INode localNode;
     private String tag;
     private long timeout;
+
+    class IncomingMsgInfo {
+        private String msgID;
+        private int soFar;
+        private int total;
+
+        public IncomingMsgInfo(String msgID, int soFar, int total) {
+            this.msgID = msgID;
+            this.soFar = soFar;
+            this.total = total;
+        }
+
+        public void setSoFar(int soFar) {
+            this.soFar = soFar;
+        }
+
+
+        public String getMsgID() {
+            return msgID;
+        }
+
+        public int getSoFar() {
+            return soFar;
+        }
+
+        public int getTotal() {
+            return total;
+        }
+    }
 
 
     /**
@@ -160,6 +191,13 @@ public class Peer {
     }
 
 
+    private void clearAllProcessingIncomingMsgSetAndCallbackFailed() {
+        for (IncomingMsgInfo msgInfo : inProcessingIncomingMsgSet) {
+            listener.onIncomingMsgReadFailed(this, msgInfo.getMsgID(), msgInfo.getTotal(), msgInfo.getSoFar());
+        }
+        inProcessingIncomingMsgSet.clear();
+    }
+
     private void clearAllNonePendingMsgAndCallbackFailed() {
         while (!msgQueue.isEmpty()) {
             Msg msg = msgQueue.poll();
@@ -249,8 +287,10 @@ public class Peer {
     private synchronized void doDestroyStuff() {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
+        clearAllProcessingIncomingMsgSetAndCallbackFailed();
         stopAllExecutorService();
     }
+
 
     private void stopAllExecutorService() {
         msgSendService.shutdown();
@@ -493,6 +533,8 @@ public class Peer {
 
                                 listener.onIncomingMsg(Peer.this, id, available);
                                 int readed = 0;
+                                IncomingMsgInfo msgInfo = new IncomingMsgInfo(id, readed, available);
+                                inProcessingIncomingMsgSet.add(msgInfo);
 
                                 while (readed < available) {
                                     int state = dis.readInt();
@@ -528,7 +570,7 @@ public class Peer {
                                 } else {
                                     listener.onIncomingMsgReadFailed(Peer.this, id, available, readed);
                                 }
-
+                                inProcessingIncomingMsgSet.remove(msgInfo);
 
                                 break;
                             case Msg.TYPE_CONFIRM:

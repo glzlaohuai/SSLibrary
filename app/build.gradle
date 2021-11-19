@@ -37,6 +37,8 @@ dependencies {
     implementation project(path: ':lib_nsd')
     implementation project(path: ':lib_common')
     implementation project(path: ':lib_common_android')
+    implementation project(path: ':lib_app')
+    implementation project(path: ':lib_app_android')
     implementation 'org.jmdns:jmdns:3.5.7'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 

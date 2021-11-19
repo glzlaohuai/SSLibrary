@@ -45,12 +45,37 @@ public class NsdServiceStarter {
         }
     }
 
-    private final static synchronized void destroyPreviousNsdServiceHandlerAndCreateANewOne() {
-        if (nsdServiceHandler != null) {
-            nsdServiceHandler.destroy();
+
+    private static boolean isEnvironmentAvailable() {
+        return PlatformManagerHolder.get().getAppManager().getNetworkManager().isWIFIConnected();
+    }
+
+
+    private static void createNsdServiceHandlerIfEnvironmentAvailable() {
+        if (isEnvironmentAvailable()) {
+            nsdServiceHandler = new NsdServiceHandler();
+            nsdServiceHandler.init();
         }
-        nsdServiceHandler = new NsdServiceHandler();
-        nsdServiceHandler.init();
+    }
+
+    public final static void redoIfSomethingWentWrong() {
+        destroyPreviousNsdServiceHandlerAndCreateANewOne();
+    }
+
+    private final static synchronized void destroyPreviousNsdServiceHandlerAndCreateANewOne() {
+        if (nsdServiceHandler == null) {
+            createNsdServiceHandlerIfEnvironmentAvailable();
+        } else {
+            if (!nsdServiceHandler.isDestroyed()) {
+                nsdServiceHandler.destroy(new NsdServiceHandler.INsdServiceHandlerDestroyListener() {
+                    @Override
+                    public void onDestroyed(NsdServiceHandler handler) {
+                        nsdServiceHandler = null;
+                        createNsdServiceHandlerIfEnvironmentAvailable();
+                    }
+                });
+            }
+        }
     }
 
 

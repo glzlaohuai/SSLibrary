@@ -34,7 +34,9 @@ public class NsdNode {
     private INsdExtraActionPerformer performer;
     private InetAddress inetAddress;
     private String hostName;
-    private NsdEventListener listener;
+    private NsdEventListenerGroup listener = new NsdEventListenerGroup();
+
+    private static NsdEventListenerGroup globalListenerGroup = new NsdEventListenerGroup();
 
     private boolean isDestroyed;
     private boolean isCreating;
@@ -45,9 +47,23 @@ public class NsdNode {
         this.performer = performer;
         this.inetAddress = inetAddress;
         this.hostName = hostName;
-        this.listener = listener;
+        this.listener.add(listener);
+        this.listener.add(globalListenerGroup);
 
         tag = S_TAG + " # " + hashCode();
+    }
+
+    public synchronized void registerListener(NsdEventListener listener) {
+        this.listener.add(listener);
+    }
+
+    public synchronized void unregisterListener(NsdEventListener listener) {
+        this.listener.remove(listener);
+    }
+
+    public static void setGlobalListener(NsdEventListener listener) {
+        NsdNode.globalListenerGroup.clear();
+        NsdNode.globalListenerGroup.add(listener);
     }
 
     public boolean isRunning() {

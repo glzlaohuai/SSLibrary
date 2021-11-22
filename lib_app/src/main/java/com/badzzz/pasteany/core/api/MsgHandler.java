@@ -6,7 +6,7 @@ import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.msg.FileMsg;
 import com.imob.lib.sslib.msg.StringMsg;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +36,7 @@ public class MsgHandler {
         jsonObject.put(Constants.PeerMsgKey.type, type);
         jsonObject.put(Constants.PeerMsgKey.data, data);
 
-        return jsonObject.toJSONString();
+        return jsonObject.toString();
     }
 
 

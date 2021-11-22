@@ -40,7 +40,6 @@ dependencies {
     implementation project(path: ':lib_app')
     implementation project(path: ':lib_app_android')
     implementation 'org.jmdns:jmdns:3.5.7'
-    implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -5,6 +5,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdEventListener;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
@@ -16,7 +17,7 @@ import org.json.simple.JSONObject;
 
 public class NsdServiceHandler {
 
-    private static final String TAG = "NsdServiceHandler";
+    private static final String S_TAG = "NsdServiceHandler";
 
     private boolean isInited;
     private boolean isDestroyCalled;
@@ -24,6 +25,8 @@ public class NsdServiceHandler {
 
     private ServerNode serverNode;
     private NsdNode nsdNode;
+
+    private String tag = S_TAG + " # " + hashCode();
 
     public interface INsdServiceHandlerDestroyListener {
         void onDestroyed(NsdServiceHandler handler);
@@ -50,6 +53,7 @@ public class NsdServiceHandler {
             public void onCreateFailed(Exception exception) {
                 super.onCreateFailed(exception);
 
+                Logger.i(tag, "create server node failed, " + exception);
                 triggerNsdServiceStarterRedoStuff();
             }
 
@@ -57,8 +61,8 @@ public class NsdServiceHandler {
             public void onDestroyed(ServerNode serverNode) {
                 super.onDestroyed(serverNode);
 
+                Logger.i(tag, "server node onDestroy callbacked");
                 triggerNsdServiceStarterRedoStuff();
-
             }
 
             @Override
@@ -69,7 +73,8 @@ public class NsdServiceHandler {
             }
 
             void triggerNsdServiceStarterRedoStuff() {
-                serverNode.monitorServerStatus(this);
+                Logger.i(tag, "trigger nsd service start redo stuff");
+                serverNode.unmonitorServerStatus(this);
                 NsdServiceStarter.redoIfSomethingWentWrong();
             }
         }, new PeerListenerWrapper(new PeerListenerAdapter(), true));
@@ -167,7 +172,7 @@ public class NsdServiceHandler {
     }
 
     private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener) {
-        if (serverNode != null) {
+        if (serverNode != null && !serverNode.isDestroyed()) {
             serverNode.monitorServerStatus(new ServerListenerAdapter() {
                 @Override
                 public void onDestroyed(ServerNode serverNode) {

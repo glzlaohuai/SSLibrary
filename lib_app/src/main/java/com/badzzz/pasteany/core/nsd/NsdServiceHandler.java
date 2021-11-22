@@ -37,7 +37,7 @@ public class NsdServiceHandler {
         if (!isDestroyCalled && !isInited) {
             isInited = true;
             ConnectedPeersManager.setCurrentlyUsedHandler(this);
-            doInit();
+            createServerNodeAndCreateNsdNodeAfterServerNodeCreated();
         }
     }
 
@@ -145,11 +145,6 @@ public class NsdServiceHandler {
             });
             nsdNode.create();
         }
-    }
-
-
-    private synchronized void doInit() {
-        createServerNodeAndCreateNsdNodeAfterServerNodeCreated();
     }
 
 

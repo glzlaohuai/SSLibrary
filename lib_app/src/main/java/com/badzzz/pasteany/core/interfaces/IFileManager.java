@@ -44,7 +44,19 @@ public abstract class IFileManager {
         return msgDir;
     }
 
+    public void saveFileChunk(String deviceID, String msgID, int chunkSize, int soFar, int avaavailable, byte[] bytes) {
+        int rangeFrom = soFar - chunkSize;
+        int rangeTo = soFar;
 
- 
+        String fileName = rangeFrom + "-" + rangeTo;
+
+        File chunkFile = new File(getDirWithDeviceIDAndMsgID(deviceID, msgID), fileName);
+
+
+
+
+
+    }
+
 
 }

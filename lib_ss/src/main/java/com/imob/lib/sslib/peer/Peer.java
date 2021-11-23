@@ -556,7 +556,7 @@ public class Peer {
                                             }
                                             readed += size;
                                             dis.readFully(buffer, 0, size);
-                                            listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, size, readed, buffer);
+                                            listener.onIncomingMsgChunkReadSucceeded(Peer.this, id, size, readed,available, buffer);
                                             //send confirm(ack) msg
                                             sendMessage(ConfirmMsg.build(id, readed, available));
                                             break;

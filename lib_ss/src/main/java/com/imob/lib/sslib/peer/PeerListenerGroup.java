@@ -141,9 +141,9 @@ public class PeerListenerGroup implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
         for (PeerListener listener : set) {
-            listener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
+            listener.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available,chunkBytes);
         }
     }
 

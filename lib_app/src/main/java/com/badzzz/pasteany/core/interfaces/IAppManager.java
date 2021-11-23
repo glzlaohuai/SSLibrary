@@ -10,5 +10,6 @@ public interface IAppManager {
 
     INSDServiceManager getNsdServiceManager();
 
+    IFileManager getFileManager();
 
 }

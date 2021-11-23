@@ -108,7 +108,9 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onIOStreamOpened(Peer peer) {
         base.onIOStreamOpened(peer);
-        if (printLog){ Logger.i(TAG, "onIOStreamOpened, peer: " + peer.getTag());}
+        if (printLog) {
+            Logger.i(TAG, "onIOStreamOpened, peer: " + peer.getTag());
+        }
 
     }
 
@@ -124,7 +126,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onCorrupted(Peer peer, String msg, Exception e) {
         base.onCorrupted(peer, msg, e);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onCorrupted, peer: " + peer.getTag() + ", msg: " + msg + ", exception: " + e);
         }
 
@@ -161,7 +163,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
         base.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onIncomingMsgChunkReadFailed, peer:" + peer.getTag() + ",id: " + id + ", errorMsg: " + errorMsg);
 
         }
@@ -169,11 +171,11 @@ public class PeerListenerWrapper implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
 
-        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
-        if (printLog){
-            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, peer: " + peer.getTag() + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + chunkBytes);
+        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available, chunkBytes);
+        if (printLog) {
+            Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, peer: " + peer.getTag() + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", available: " + available + ", chunkBytes: " + chunkBytes);
 
         }
     }
@@ -181,7 +183,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onIncomingMsgReadSucceeded(Peer peer, String id) {
         base.onIncomingMsgReadSucceeded(peer, id);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onIncomingMsgReadSucceeded, peer: " + peer.getTag() + ", id: " + id);
 
         }
@@ -190,7 +192,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
         base.onIncomingMsgReadFailed(peer, id, total, soFar);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onIncomingMsgReadFailed, peer: " + peer.getTag() + ", id: " + id + ", total: " + total + ", soFar: " + soFar);
 
         }
@@ -199,7 +201,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
         base.onIncomingConfirmMsg(peer, id, soFar, total);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onIncomingConfirmMsg, peer: " + peer.getTag() + ", id: " + id + ", soFar: " + soFar + ", total: " + total);
 
         }
@@ -208,7 +210,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total) {
         base.onConfirmMsgSendPending(peer, id, soFar, total);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onConfirmMsgSendPending, peer: " + peer.getTag() + ", id: " + id + ", soFar: " + soFar + ", total: " + total);
 
         }
@@ -217,7 +219,7 @@ public class PeerListenerWrapper implements PeerListener {
     @Override
     public void onMsgSendPending(Peer peer, String id) {
         base.onMsgSendPending(peer, id);
-        if (printLog){
+        if (printLog) {
             Logger.i(TAG, "onMsgSendPending, peer: " + peer.getTag() + ", id: " + id);
 
         }

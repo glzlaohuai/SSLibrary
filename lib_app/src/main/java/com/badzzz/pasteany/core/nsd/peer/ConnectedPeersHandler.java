@@ -1,7 +1,9 @@
 package com.badzzz.pasteany.core.nsd.peer;
 
 import com.badzzz.pasteany.core.api.APIHandler;
+import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
 import com.imob.lib.sslib.client.ClientListenerWrapper;
 import com.imob.lib.sslib.client.ClientNode;
@@ -17,11 +19,15 @@ import javax.jmdns.ServiceEvent;
 
 public class ConnectedPeersHandler {
 
+    private static final String S_TAG = "ConnectedPeersHandler";
+
     private boolean destroyed = false;
 
     private Set<Peer> totalConnectedPeers = new HashSet<>();
     private Set<Peer> detailedInfoPeers = new HashSet<>();
     private Set<ClientNode> clientNodeSet = new HashSet<>();
+
+    private String tag = S_TAG + " # " + hashCode();
 
 
     private PeerListener peerListener = new PeerListenerAdapter() {
@@ -58,14 +64,18 @@ public class ConnectedPeersHandler {
 
 
         @Override
-        public void onIncomingMsg(Peer peer, String id, int available) {
-            super.onIncomingMsg(peer, id, available);
-            handleIncomingMsg(peer, id, available);
+        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
+            super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available, chunkBytes);
+
+            handleIncomingMsgChunk(peer, id, chunkSize, soFar, available, chunkBytes);
         }
 
         @Override
-        public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-            super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
+        public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+            super.onIncomingMsgReadSucceeded(peer, id);
+
+            handleIncomingMsgReadSucceeded(peer,id);
+
         }
 
         @Override
@@ -88,9 +98,34 @@ public class ConnectedPeersHandler {
         }
     };
 
-    private void handleIncomingMsg(Peer peer, String id, int available) {
+
+
+    private void handleIncomingMsgReadSucceeded(Peer peer,String id){
 
     }
+
+    private void handleIncomingMsgChunk(Peer peer, String id, int chunkSize, int soFar, int available, byte[] bytes) {
+        Logger.i(tag, "handle incoming msg chunk, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize+", soFar: "+soFar+", available: "+available);
+        MsgID msgID = MsgID.buildWithJsonString(id);
+        Logger.i(tag, "incoming msg id: " + msgID);
+
+        String type = msgID.getType();
+
+        switch (type) {
+            //delivery only one chunk, so handle it there, take it as the whole msg read completed
+            case Constants.PeerMsgType.TYPE_API:
+
+                break;
+            case Constants.PeerMsgType.TYPE_FILE:
+
+                break;
+
+            case Constants.PeerMsgType.TYPE_STR:
+
+                break;
+        }
+    }
+
 
     public ConnectedPeersHandler() {
         Peer.setGlobalPeerListener(peerListener);

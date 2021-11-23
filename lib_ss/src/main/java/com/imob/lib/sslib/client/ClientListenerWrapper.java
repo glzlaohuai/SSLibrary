@@ -185,8 +185,8 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
+        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar,available, chunkBytes);
         if (printLog) {
             Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, peer: " + peer.getTag() + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + chunkBytes);
 

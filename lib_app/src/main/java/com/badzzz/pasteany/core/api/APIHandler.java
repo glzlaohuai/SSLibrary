@@ -88,8 +88,8 @@ public class APIHandler {
                 }
 
                 @Override
-                public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, byte[] chunkBytes) {
-                    super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, chunkBytes);
+                public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
+                    super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar,available, chunkBytes);
                     if (id.equals(apiMsg.getId())) {
                         bos.write(chunkBytes, 0, chunkSize);
                     }

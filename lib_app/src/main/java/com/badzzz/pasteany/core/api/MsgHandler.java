@@ -13,14 +13,6 @@ import java.io.FileNotFoundException;
 import java.util.UUID;
 
 public class MsgHandler {
-
-
-
-
-
-
-
-
     /**
      *
      * @param type refer to {@link Constants.PeerMsgType} for details

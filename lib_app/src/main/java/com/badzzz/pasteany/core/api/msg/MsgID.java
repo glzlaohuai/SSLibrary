@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 public class MsgID {
 
-
     private String id;
     private String type;
     private String data;
@@ -49,5 +48,15 @@ public class MsgID {
 
     public String getData() {
         return data;
+    }
+
+
+    @Override
+    public String toString() {
+        return "MsgID{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", data='" + data + '\'' +
+                '}';
     }
 }

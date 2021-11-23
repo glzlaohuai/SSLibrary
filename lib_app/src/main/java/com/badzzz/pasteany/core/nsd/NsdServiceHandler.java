@@ -13,7 +13,8 @@ import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerNode;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+
 
 public class NsdServiceHandler {
 
@@ -91,7 +92,7 @@ public class NsdServiceHandler {
         jsonObject.put(Constants.NSD.Key.DEVICE_NAME, appManager.getDeviceInfoManager().getDeviceName());
         jsonObject.put(Constants.NSD.Key.SERVICE_NAME, PreferenceManagerWrapper.getInstance().getServiceName());
 
-        return jsonObject.toJSONString();
+        return jsonObject.toString();
     }
 
 

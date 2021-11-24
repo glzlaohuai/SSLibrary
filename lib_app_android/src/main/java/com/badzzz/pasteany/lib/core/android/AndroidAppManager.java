@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.badzzz.pasteany.core.interfaces.IAppManager;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
+import com.badzzz.pasteany.core.interfaces.IFileManager;
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.badzzz.pasteany.core.interfaces.INetworkManager;
 import com.badzzz.pasteany.core.interfaces.IPreferenceManager;
@@ -14,12 +15,14 @@ public class AndroidAppManager implements IAppManager {
     private INSDServiceManager nsdServiceManager;
     private IPreferenceManager preferenceManager;
     private INetworkManager networkManager;
-
+    private IFileManager fileManager;
 
     public AndroidAppManager(Context context) {
-        deviceInfoManager = new AndroidDeviceInfoManager();
-        nsdServiceManager = new AndroidNsdServiceManager();
+        deviceInfoManager = new AndroidDeviceInfoManager(context);
+        nsdServiceManager = new AndroidNsdServiceManager(context);
         preferenceManager = new AndroidPreferenceManager(context);
+        fileManager = new AndroidFileManager(context);
+        networkManager = new AndroidNetworkManager(context);
     }
 
     @Override
@@ -30,6 +33,11 @@ public class AndroidAppManager implements IAppManager {
     @Override
     public INSDServiceManager getNsdServiceManager() {
         return nsdServiceManager;
+    }
+
+    @Override
+    public IFileManager getFileManager() {
+        return fileManager;
     }
 
     @Override

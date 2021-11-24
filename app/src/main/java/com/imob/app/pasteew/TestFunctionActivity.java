@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
-import com.imob.app.pasteew.utils.ServiceRegister;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
@@ -34,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class TestFunctionActivity extends AppCompatActivity {
 
     private static final String TAG = "Demo";
     private TextView logView;
@@ -85,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void createAndRegisterService(View view) {
-        ServiceRegister.startServiceRegisterStuff();
     }
 
     public void setGlobalPeerListener(View view) {
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.test_function);
 
         logView = findViewById(R.id.logView);
         logView.setMovementMethod(ScrollingMovementMethod.getInstance());
@@ -182,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 String ip = content;
                 AtomicInteger port = new AtomicInteger(0);
 
-                DialogUtils.createInputDialog(MainActivity.this, "port", new DialogUtils.OnDialogInputListener() {
+                DialogUtils.createInputDialog(TestFunctionActivity.this, "port", new DialogUtils.OnDialogInputListener() {
                     @Override
                     public void onInputContent(String content) {
                         try {

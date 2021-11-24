@@ -27,7 +27,7 @@ public class NsdNode {
     private final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
     private final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
 
-    private final static Byte lock = 0x0;
+    private final Byte lock = 0x0;
 
     private JmDNS jmDNS;
 

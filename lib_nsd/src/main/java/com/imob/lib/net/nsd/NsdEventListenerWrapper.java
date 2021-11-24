@@ -6,7 +6,7 @@ import javax.jmdns.ServiceEvent;
 
 public class NsdEventListenerWrapper implements NsdEventListener {
 
-    private static final String TAG = "NsdManager";
+    private static final String TAG = "NsdEventListenerWrapper";
 
     private NsdEventListener base;
     private boolean printLog;

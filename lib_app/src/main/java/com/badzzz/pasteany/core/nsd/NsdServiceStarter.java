@@ -18,7 +18,7 @@ public class NsdServiceStarter {
      * this will be called by {@link IPlatformManager#initPlatform()} if serviceName is set or after serviceName is setted at {@link com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper#saveServiceName(String)}
      */
     public final static void init() {
-        if (PreferenceManagerWrapper.getInstance().hasSavedServiceName()) {
+        if (!PreferenceManagerWrapper.getInstance().hasSavedServiceName()) {
             Logger.i(TAG, "try to init nsd service, but no service name set, something went wrong, ");
         } else {
             Logger.i(TAG, "start nsd service using service name: " + PreferenceManagerWrapper.getInstance().getServiceName());

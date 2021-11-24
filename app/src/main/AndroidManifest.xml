@@ -24,10 +24,6 @@
             android:exported="false"></activity>
 
         <activity
-            android:name=".SetServiceNameActivity"
-            android:exported="false"></activity>
-
-        <activity
             android:name=".TestFunctionActivity"
             android:exported="true">
             <intent-filter>

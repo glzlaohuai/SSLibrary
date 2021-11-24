@@ -40,7 +40,7 @@ public class Constants {
     }
 
     public static final class Preference {
-        public static final String FILE_NAME = "pasteany";
+        public static final String FILE_NAME = "paste_any_where";
 
         public static final String KEY_DEVICEID = Device.KEY_DEVICEID;
         public static final String KEY_DEVICE_NAME = Device.KEY_DEVICE_NAME;

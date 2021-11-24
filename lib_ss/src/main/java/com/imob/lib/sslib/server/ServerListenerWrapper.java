@@ -3,7 +3,7 @@ package com.imob.lib.sslib.server;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;
 
-class ServerListenerWrapper implements ServerListener {
+public class ServerListenerWrapper implements ServerListener {
     private static final String TAG = "ServerNodeListenerWrapper";
 
     private ServerListener base;

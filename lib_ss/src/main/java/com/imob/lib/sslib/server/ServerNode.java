@@ -48,7 +48,7 @@ public class ServerNode implements INode {
 
 
     public ServerNode(ServerListener serverListener, PeerListener incomingPeerEventListener) {
-        this.serverListenerGroup.add(new ServerListenerWrapper(serverListener));
+        this.serverListenerGroup.add(new ServerListenerWrapper(serverListener, false));
         this.peerListenerGroup.add(new PeerListenerWrapper(incomingPeerEventListener, false));
 
         tag = S_TAG + " # " + hashCode();
@@ -62,7 +62,7 @@ public class ServerNode implements INode {
         serverListenerGroup.add(listener);
     }
 
-    public void unmonitorServerStatus(ServerListener listener){
+    public void unmonitorServerStatus(ServerListener listener) {
         serverListenerGroup.remove(listener);
     }
 

@@ -11,6 +11,7 @@ import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
+import com.imob.lib.sslib.server.ServerListenerWrapper;
 import com.imob.lib.sslib.server.ServerNode;
 
 import org.json.JSONObject;
@@ -43,7 +44,7 @@ public class NsdServiceHandler {
     }
 
     private synchronized void createServerNodeAndCreateNsdNodeAfterServerNodeCreated() {
-        serverNode = new ServerNode(new ServerListenerAdapter() {
+        serverNode = new ServerNode(new ServerListenerWrapper(new ServerListenerAdapter() {
             @Override
             public void onCreated(ServerNode serverNode) {
                 super.onCreated(serverNode);
@@ -53,22 +54,13 @@ public class NsdServiceHandler {
             @Override
             public void onCreateFailed(Exception exception) {
                 super.onCreateFailed(exception);
-
-                Logger.i(tag, "create server node failed, " + exception);
                 triggerNsdServiceStarterRedoStuff();
             }
 
             @Override
             public void onDestroyed(ServerNode serverNode) {
                 super.onDestroyed(serverNode);
-
-                Logger.i(tag, "server node onDestroy callbacked");
                 triggerNsdServiceStarterRedoStuff();
-            }
-
-            @Override
-            public void onCorrupted(ServerNode serverNode, String msg, Exception e) {
-                super.onCorrupted(serverNode, msg, e);
             }
 
             void triggerNsdServiceStarterRedoStuff() {
@@ -76,7 +68,7 @@ public class NsdServiceHandler {
                 serverNode.unmonitorServerStatus(this);
                 NsdServiceStarter.redoIfSomethingWentWrong();
             }
-        }, new PeerListenerWrapper(new PeerListenerAdapter(), true));
+        }, true), new PeerListenerWrapper(new PeerListenerAdapter(), true));
         serverNode.create(Constants.Others.TIMEOUT);
     }
 

@@ -10,7 +10,6 @@ public class PlatformManagerHolder {
         PlatformManagerHolder.platformManager = platformManager;
     }
 
-
     public final static IPlatformManager get() {
         return platformManager;
     }

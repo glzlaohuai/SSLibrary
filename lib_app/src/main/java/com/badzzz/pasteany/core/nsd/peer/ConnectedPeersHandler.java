@@ -35,6 +35,32 @@ public class ConnectedPeersHandler {
 
     private String tag = S_TAG + " # " + hashCode();
 
+    private static ConnectedPeerEventListener eventListener;
+
+    public static void setEventListener(ConnectedPeerEventListener eventListener) {
+        ConnectedPeersHandler.eventListener = eventListener;
+    }
+
+    public interface ConnectedPeerEventListener {
+        void onIncomingPeer(ConnectedPeersHandler handler, Peer peer);
+
+        void onPeerDropped(ConnectedPeersHandler handler, Peer peer);
+
+        void onPeerDetailedInfoGot(ConnectedPeersHandler handler, Peer peer);
+
+        void onFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file);
+
+        void onFileChunkSaveFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize);
+
+        void onFileMergeFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID);
+
+        void onFileMerged(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, File finalFile);
+
+        void onIncomingStringMsg(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, String msg);
+
+        void onIncomingMsgReadFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID);
+    }
+
 
     private PeerListener peerNameRetrieveListeenr = new PeerListenerAdapter() {
         @Override
@@ -122,12 +148,12 @@ public class ConnectedPeersHandler {
                 PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, msgID.getData(), new IFileManager.FileMergeListener() {
                     @Override
                     public void onSuccess(File finalFile) {
-                        callbackFileMergeSucceeded(PeerUtils.getDeviceIDFromPeer(peer), id, finalFile);
+                        callbackFileMergeSucceeded(peer, PeerUtils.getDeviceIDFromPeer(peer), id, finalFile);
                     }
 
                     @Override
                     public void onFailed() {
-                        callbackFileMergeFailed(PeerUtils.getDeviceIDFromPeer(peer), id);
+                        callbackFileMergeFailed(peer, PeerUtils.getDeviceIDFromPeer(peer), id);
                     }
                 });
                 break;
@@ -136,34 +162,49 @@ public class ConnectedPeersHandler {
 
     private void handleIncomingMsgReadFailed(Peer peer, String id) {
         Logger.i(tag, "handle incoming msg read failed, id: " + id);
-        callbackMsgReadFailed(PeerUtils.getDeviceIDFromPeer(peer), id);
+        callbackMsgReadFailed(peer, PeerUtils.getDeviceIDFromPeer(peer), id);
     }
 
-    private void callbackMsgReadFailed(String deviceIDFromPeer, String id) {
-
+    private void callbackMsgReadFailed(Peer peer, String deviceID, String id) {
+        eventListener.onIncomingMsgReadFailed(this, peer, deviceID, id);
     }
 
-    private void callbackFileMergeFailed(String deviceID, String msgID) {
-
-    }
-
-
-    private void callbackFileMergeSucceeded(String deviceID, String msgID, File finalFile) {
-
+    private void callbackFileMergeFailed(Peer peer, String deviceID, String msgID) {
+        eventListener.onFileMergeFailed(this, peer, deviceID, msgID);
     }
 
 
-    private void callbackFileChunkSaved(String deviceID, String msgID, File chunkFile, int soFar, int chunkSize) {
-
+    private void callbackFileMergeSucceeded(Peer peer, String deviceID, String msgID, File finalFile) {
+        eventListener.onFileMerged(this, peer, deviceID, msgID, finalFile);
     }
 
 
-    private void callbackFileChunkSaveFailed(String deviceID, String msgID, int soFar, int chunkSize) {
-
+    private void callbackFileChunkSaved(Peer peer, String deviceID, String msgID, File chunkFile, int soFar, int chunkSize) {
+        eventListener.onFileChunkSaved(this, peer, deviceID, msgID, soFar, chunkSize, chunkFile);
     }
 
 
-    private void handleIncomingMsgChunk(Peer peer, final String id, final int chunkSize, final int soFar, int available, byte[] bytes) {
+    private void callbackFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
+        eventListener.onFileChunkSaveFailed(this, peer, deviceID, msgID, soFar, chunkSize);
+    }
+
+    private void callbackPeerDropped(Peer peer) {
+        eventListener.onPeerDropped(this, peer);
+    }
+
+    private void callbackIncomingNewPeer(Peer peer) {
+        eventListener.onIncomingPeer(this, peer);
+    }
+
+    private void callbackPeerDetailInfoGot(Peer peer) {
+        eventListener.onPeerDetailedInfoGot(this, peer);
+    }
+
+    private void callbackStringMsgReaded(Peer peer, String deviceIDFromPeer, String id, String content) {
+        eventListener.onIncomingStringMsg(this, peer, deviceIDFromPeer, id, content);
+    }
+
+    private void handleIncomingMsgChunk(final Peer peer, final String id, final int chunkSize, final int soFar, int available, byte[] bytes) {
         Logger.i(tag, "handle incoming msg chunk, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", available: " + available);
         MsgID msgID = MsgID.buildWithJsonString(id);
         Logger.i(tag, "incoming msg id: " + msgID);
@@ -181,18 +222,18 @@ public class ConnectedPeersHandler {
                 PlatformManagerHolder.get().getAppManager().getFileManager().saveFileChunk(deviceID, id, chunkSize, soFar, available, bytes, new IFileManager.FileChunkSaveListener() {
                     @Override
                     public void onSuccess(File chunkFile) {
-                        callbackFileChunkSaved(deviceID, id, chunkFile, soFar, chunkSize);
+                        callbackFileChunkSaved(peer, deviceID, id, chunkFile, soFar, chunkSize);
                     }
 
                     @Override
                     public void onFailed() {
-                        callbackFileChunkSaveFailed(deviceID, id, soFar, chunkSize);
+                        callbackFileChunkSaveFailed(peer, deviceID, id, soFar, chunkSize);
                     }
                 });
                 break;
             //stringmsg only have one msgChunk
             case Constants.PeerMsgType.TYPE_STR:
-                Logger.i(tag, "incoming msg: " + new String(bytes, 0, chunkSize));
+                callbackStringMsgReaded(peer, PeerUtils.getDeviceIDFromPeer(peer), id, new String(bytes, 0, chunkSize));
                 break;
 
             /**
@@ -213,21 +254,6 @@ public class ConnectedPeersHandler {
 
     public Set<Peer> getTotalConnectedPeers() {
         return totalConnectedPeers;
-    }
-
-    private void callbackPeerDropped(Peer peer) {
-
-    }
-
-    private void callbackIncomingNewPeer(Peer peer) {
-
-    }
-
-    private void callbackPeerDetailInfoGotFailed(Peer peer, String msg, Exception e) {
-
-    }
-
-    private void callbackPeerDetailInfoGot(Peer peer) {
     }
 
 

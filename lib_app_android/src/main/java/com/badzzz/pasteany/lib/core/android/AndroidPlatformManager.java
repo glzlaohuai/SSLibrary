@@ -23,7 +23,6 @@ public class AndroidPlatformManager extends IPlatformManager {
         androidAppManager = new AndroidAppManager(context);
     }
 
-
     /**
      * call this in {@link Application#onCreate()}
      * @param context

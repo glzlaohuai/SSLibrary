@@ -12,7 +12,7 @@ public class PeerUtils {
             String jsonString = peer.getTag();
 
             JSONObject jsonObject = new JSONObject(jsonString);
-            return jsonObject.optString(Constants.Preference.KEY_DEVICEID);
+            return jsonObject.optString(Constants.Device.KEY_DEVICEID);
         }
         return null;
     }

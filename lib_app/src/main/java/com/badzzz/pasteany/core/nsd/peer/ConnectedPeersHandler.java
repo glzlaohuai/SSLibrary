@@ -1,7 +1,8 @@
 package com.badzzz.pasteany.core.nsd.peer;
 
-import com.badzzz.pasteany.core.api.APIHandler;
+import com.badzzz.pasteany.core.api.APIRequester;
 import com.badzzz.pasteany.core.api.msg.MsgID;
+import com.badzzz.pasteany.core.api.response.APIResponserManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
@@ -38,7 +39,7 @@ public class ConnectedPeersHandler {
 
             callbackIncomingNewPeer(peer);
 
-            APIHandler.requestAPI(peer, Constants.PeerMsgAPI.PEER_DETAILS, new APIHandler.APIRequestListener() {
+            APIRequester.requestAPI(peer, Constants.PeerMsgAPI.PEER_DETAILS, new APIRequester.APIRequestListener() {
                 @Override
                 public void start(Peer peer, String api) {
                 }
@@ -74,7 +75,7 @@ public class ConnectedPeersHandler {
         public void onIncomingMsgReadSucceeded(Peer peer, String id) {
             super.onIncomingMsgReadSucceeded(peer, id);
 
-            handleIncomingMsgReadSucceeded(peer,id);
+            handleIncomingMsgReadSucceeded(peer, id);
 
         }
 
@@ -98,14 +99,12 @@ public class ConnectedPeersHandler {
         }
     };
 
-
-
-    private void handleIncomingMsgReadSucceeded(Peer peer,String id){
+    private void handleIncomingMsgReadSucceeded(Peer peer, String id) {
 
     }
 
     private void handleIncomingMsgChunk(Peer peer, String id, int chunkSize, int soFar, int available, byte[] bytes) {
-        Logger.i(tag, "handle incoming msg chunk, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize+", soFar: "+soFar+", available: "+available);
+        Logger.i(tag, "handle incoming msg chunk, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", available: " + available);
         MsgID msgID = MsgID.buildWithJsonString(id);
         Logger.i(tag, "incoming msg id: " + msgID);
 
@@ -113,13 +112,13 @@ public class ConnectedPeersHandler {
 
         switch (type) {
             //delivery only one chunk, so handle it there, take it as the whole msg read completed
-            case Constants.PeerMsgType.TYPE_API:
-
+            case Constants.PeerMsgType.TYPE_API_REQUEST:
+                String api = msgID.getData();
+                APIResponserManager.getResponser(api).response(peer, id);
                 break;
             case Constants.PeerMsgType.TYPE_FILE:
 
                 break;
-
             case Constants.PeerMsgType.TYPE_STR:
 
                 break;

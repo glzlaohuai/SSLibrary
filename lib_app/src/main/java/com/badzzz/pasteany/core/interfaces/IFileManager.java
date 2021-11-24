@@ -1,31 +1,56 @@
 package com.badzzz.pasteany.core.interfaces;
 
+import com.badzzz.pasteany.core.utils.FileUtils;
 import com.badzzz.pasteany.core.utils.Md5;
-import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public abstract class IFileManager {
 
-    private final static ExecutorService saveService = Executors.newCachedThreadPool();
-
-    //用于在incomingMsgReadSuccess之后，判断看是否还有未生成完的
-    private final static Map<String, Set<String>> savingChunkNameMap = new HashMap<>();
 
     public interface FileChunkSaveListener {
         void onSuccess(File chunkFile);
 
         void onFailed();
     }
+
+
+    public interface FileMergeListener {
+        void onSuccess(File finalFile);
+
+        void onFailed();
+    }
+
+
+    private final static class ChunkFileComparator implements Comparator<File> {
+
+        private int getRangeStart(File file) {
+            if (file == null) {
+                return 0;
+            }
+            try {
+                return Integer.parseInt(file.getName().split("-")[0]);
+            } catch (Throwable e) {
+                Logger.e(e);
+            }
+
+            return 0;
+        }
+
+
+        @Override
+        public int compare(File file, File t1) {
+            return getRangeStart(t1) - getRangeStart(file);
+        }
+    }
+
+
+    private final static ChunkFileComparator chunkFileComparator = new ChunkFileComparator();
 
     protected abstract File abstractRealGetRootDir();
 
@@ -65,22 +90,6 @@ public abstract class IFileManager {
         return msgDir;
     }
 
-
-    private final static void addToSavingChunkFileNameMap(String msgID, String fileName) {
-        if (!savingChunkNameMap.containsKey(msgID)) {
-            savingChunkNameMap.put(msgID, new HashSet<String>());
-        }
-        savingChunkNameMap.get(msgID).add(fileName);
-    }
-
-
-    private final static void removeFromSavingChunkFileNameMap(String msgID, String fileName) {
-        if (savingChunkNameMap.containsKey(msgID)) {
-            savingChunkNameMap.get(msgID).remove(fileName);
-        }
-    }
-
-
     public void saveFileChunk(String deviceID, final String msgID, final int chunkSize, int soFar, int available, final byte[] bytes, final FileChunkSaveListener listener) {
 
         int chunkFrom = soFar - chunkSize;
@@ -89,29 +98,29 @@ public abstract class IFileManager {
         final String fileName = chunkFrom + "-" + chunkTo;
 
         final File chunkFile = new File(getDirWithDeviceIDAndMsgID(deviceID, msgID), fileName);
+        if (FileUtils.writeBytesToFile(chunkFile, bytes, 0, chunkSize)) {
+            listener.onSuccess(chunkFile);
+        } else {
+            listener.onFailed();
+        }
+    }
 
-        IFileManager.addToSavingChunkFileNameMap(msgID, fileName);
+    public void mergeAllFileChunks(String deviceID, String msgID, String fileName, int available, FileMergeListener listener) {
+        File dir = getDirWithDeviceIDAndMsgID(deviceID, msgID);
 
-        saveService.execute(new Runnable() {
-            @Override
-            public void run() {
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(chunkFile, false);
-                    fos.write(bytes, 0, chunkSize);
+        File[] files = dir.listFiles();
+        if (files == null) {
+            listener.onFailed();
+        } else {
+            List<File> fileList = Arrays.asList(files);
+            Collections.sort(fileList, chunkFileComparator);
 
-                    listener.onSuccess(chunkFile);
-
-                } catch (IOException e) {
-                    Logger.e(e);
-
-                    listener.onFailed();
-                } finally {
-                    Closer.close(fos);
-                    IFileManager.removeFromSavingChunkFileNameMap(msgID, fileName);
-                }
+            if (FileUtils.mergeFiles(fileList, new File(dir, fileName))) {
+                listener.onSuccess(new File(dir, fileName));
+            } else {
+                listener.onFailed();
             }
-        });
+        }
     }
 
 

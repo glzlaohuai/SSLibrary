@@ -1,5 +1,6 @@
 package com.badzzz.pasteany.core.api;
 
+import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.Md5;
 import com.imob.lib.lib_common.Logger;
@@ -12,19 +13,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.UUID;
 
-public class MsgHandler {
+public class MsgCreator {
+
     /**
-     *
+     * @param id uniqueID
      * @param type refer to {@link Constants.PeerMsgType} for details
      * @param data has different meanings depending on its type, they are: api、 filePath、 msgMd5
      * @return
      */
-    private static String createMsgID(String type, String data) {
+    private static String createMsgID(String id, String type, String data) {
 
-        if (type == null || data == null || type.isEmpty() || data.isEmpty()) return null;
+        if (id == null || id.isEmpty() || type == null || data == null || type.isEmpty() || data.isEmpty())
+            return null;
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Constants.PeerMsgKey.id, UUID.randomUUID().toString());
+        jsonObject.put(Constants.PeerMsgKey.id, id);
         jsonObject.put(Constants.PeerMsgKey.type, type);
         jsonObject.put(Constants.PeerMsgKey.data, data);
 
@@ -32,10 +35,26 @@ public class MsgHandler {
     }
 
 
-    public static StringMsg createAPIMsg(String api) {
-        String msgID = createMsgID(Constants.PeerMsgType.TYPE_API, api);
+    private static String createMsgID(String type, String data) {
+        return createMsgID(UUID.randomUUID().toString(), type, data);
+    }
+
+
+    public static StringMsg createAPIRequestMsg(String api) {
+        String msgID = createMsgID(Constants.PeerMsgType.TYPE_API_REQUEST, api);
         return StringMsg.create(msgID, "unused");
     }
+
+    public static StringMsg createAPIResponseMsg(String originalRequestMsgID, String response) {
+        MsgID msgID = MsgID.buildWithJsonString(originalRequestMsgID);
+
+        String id = msgID.getId();
+        String data = msgID.getData();
+
+        String responseMsgID = createMsgID(id, Constants.PeerMsgType.TYPE_API_RESPONSE, data);
+        return StringMsg.create(responseMsgID, response);
+    }
+
 
     public static StringMsg createNormalStringMsg(String content) {
         String msgID = createMsgID(Constants.PeerMsgType.TYPE_STR, Md5.md5(content));

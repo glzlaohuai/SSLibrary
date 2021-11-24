@@ -18,7 +18,8 @@ public class Constants {
     public static final class PeerMsgType {
         public static final String TYPE_FILE = "file";
         public static final String TYPE_STR = "string";
-        public static final String TYPE_API = "api_string";
+        public static final String TYPE_API_REQUEST = "api_request";
+        public static final String TYPE_API_RESPONSE = "api_response";
     }
 
 

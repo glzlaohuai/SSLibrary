@@ -1,5 +1,7 @@
 package com.badzzz.pasteany.core.api;
 
+import com.badzzz.pasteany.core.api.msg.MsgID;
+import com.badzzz.pasteany.core.utils.Constants;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
@@ -8,9 +10,9 @@ import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
-public class APIHandler {
+public class APIRequester {
 
-    private static final String TAG = "APIHandler";
+    private static final String TAG = "APIRequester";
 
     public interface APIRequestListener {
         void start(Peer peer, String api);
@@ -27,9 +29,11 @@ public class APIHandler {
         Logger.i(tag, "reqeust api, peer: " + peer.getTag() + ", api: " + api);
 
         if (peer != null && api != null) {
-            final Msg apiMsg = MsgHandler.createAPIMsg(api);
+            final Msg apiMsg = MsgCreator.createAPIRequestMsg(api);
             peer.sendMessage(apiMsg);
             listener.start(peer, api);
+
+            final String msgID = MsgID.buildWithJsonString(apiMsg.getId()).getId();
 
             peer.registerListener(new PeerListenerAdapter() {
 
@@ -61,10 +65,15 @@ public class APIHandler {
                 }
 
 
+                private MsgID createMsgID(String id) {
+                    return MsgID.buildWithJsonString(id);
+                }
+
                 @Override
                 public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
                     super.onMsgSendFailed(peer, id, msg, exception);
-                    if (id.equals(apiMsg.getId())) {
+                    MsgID tmp = createMsgID(id);
+                    if (tmp != null && tmp.getId().equals(msgID)) {
                         unregisterListener();
                         listener.error(peer, msg, exception);
                     }
@@ -74,7 +83,8 @@ public class APIHandler {
                 @Override
                 public void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg) {
                     super.onIncomingMsgChunkReadFailed(peer, id, errorMsg);
-                    if (id.equals(apiMsg.getId())) {
+                    MsgID tmp = createMsgID(id);
+                    if (tmp != null && tmp.getId().equals(msgID)) {
                         callbackFailed("response read failed, " + errorMsg, null);
                     }
                 }
@@ -82,7 +92,9 @@ public class APIHandler {
                 @Override
                 public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
                     super.onIncomingMsgReadFailed(peer, id, total, soFar);
-                    if (id.equals(apiMsg.getId())) {
+                    MsgID tmp = createMsgID(id);
+
+                    if (tmp != null && tmp.getId().equals(msgID)) {
                         callbackFailed("response read failed", null);
                     }
                 }
@@ -90,7 +102,9 @@ public class APIHandler {
                 @Override
                 public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
                     super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available, chunkBytes);
-                    if (id.equals(apiMsg.getId())) {
+                    MsgID tmp = createMsgID(id);
+
+                    if (tmp != null && tmp.getId().equals(msgID) && tmp.getType().equals(Constants.PeerMsgType.TYPE_API_RESPONSE)) {
                         bos.write(chunkBytes, 0, chunkSize);
                     }
                 }
@@ -100,7 +114,9 @@ public class APIHandler {
                 public void onIncomingMsgReadSucceeded(Peer peer, String id) {
                     super.onIncomingMsgReadSucceeded(peer, id);
 
-                    if (id.equals(apiMsg.getId())) {
+                    MsgID tmp = createMsgID(id);
+
+                    if (tmp != null && tmp.getId().equals(msgID) && tmp.getType().equals(Constants.PeerMsgType.TYPE_API_RESPONSE)) {
                         callbackSucceeded();
                     }
                 }

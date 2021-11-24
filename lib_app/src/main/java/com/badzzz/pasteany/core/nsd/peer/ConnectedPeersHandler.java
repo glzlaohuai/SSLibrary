@@ -69,6 +69,7 @@ public class ConnectedPeersHandler {
     private PeerListener peerNameRetrieveListeenr = new PeerListenerAdapter() {
         @Override
         public void onIOStreamOpened(Peer peer) {
+            Logger.i(tag, "incoming a new peer, send msg to retrieve its detail device info.");
             totalConnectedPeers.add(peer);
             callbackIncomingNewPeer(peer);
 

@@ -69,8 +69,6 @@ public class NsdServiceHandler {
             @Override
             public void onCorrupted(ServerNode serverNode, String msg, Exception e) {
                 super.onCorrupted(serverNode, msg, e);
-
-                triggerNsdServiceStarterRedoStuff();
             }
 
             void triggerNsdServiceStarterRedoStuff() {

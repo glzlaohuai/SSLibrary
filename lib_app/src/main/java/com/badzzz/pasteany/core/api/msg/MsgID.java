@@ -11,6 +11,7 @@ public class MsgID {
     private String id;
     private String type;
     private String data;
+    private String device;
 
 
     public final static MsgID buildWithJsonString(String jsonString) {
@@ -23,8 +24,9 @@ public class MsgID {
             String id = jsonObject.getString(Constants.PeerMsgKey.id);
             String type = jsonObject.getString(Constants.PeerMsgKey.type);
             String data = jsonObject.getString(Constants.PeerMsgKey.data);
+            String device = jsonObject.getString(Constants.PeerMsgKey.device);
 
-            return new MsgID(id, type, data);
+            return new MsgID(id, type, data, device);
         } catch (JSONException e) {
             Logger.e(e);
         }
@@ -32,10 +34,15 @@ public class MsgID {
     }
 
 
-    private MsgID(String id, String type, String data) {
+    private MsgID(String id, String type, String data, String device) {
         this.id = id;
         this.type = type;
         this.data = data;
+        this.device = device;
+    }
+
+    public String getDevice() {
+        return device;
     }
 
     public String getId() {
@@ -57,6 +64,7 @@ public class MsgID {
                 "id='" + id + '\'' +
                 ", type='" + type + '\'' +
                 ", data='" + data + '\'' +
+                ", device='" + device + '\'' +
                 '}';
     }
 }

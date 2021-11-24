@@ -105,7 +105,7 @@ public abstract class IFileManager {
         }
     }
 
-    public void mergeAllFileChunks(String deviceID, String msgID, String fileName, int available, FileMergeListener listener) {
+    public void mergeAllFileChunks(String deviceID, String msgID, String fileName, FileMergeListener listener) {
         File dir = getDirWithDeviceIDAndMsgID(deviceID, msgID);
 
         File[] files = dir.listFiles();

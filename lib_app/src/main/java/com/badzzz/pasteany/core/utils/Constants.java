@@ -13,6 +13,7 @@ public class Constants {
         public static final String id = "id";
         public static final String type = "type";
         public static final String data = "data";
+        public static final String device = "device";
     }
 
     public static final class PeerMsgType {
@@ -22,11 +23,9 @@ public class Constants {
         public static final String TYPE_API_RESPONSE = "api_response";
     }
 
-
     public static final class PeerMsgAPI {
         public static final String PEER_DETAILS = "peerDetails";
     }
-
 
     public static final class NSD {
         public static final String NSD_SERVICE_NAME_DEFAULT = "hi_paste_anywhere";

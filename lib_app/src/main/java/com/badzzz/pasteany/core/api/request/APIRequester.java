@@ -1,5 +1,6 @@
-package com.badzzz.pasteany.core.api;
+package com.badzzz.pasteany.core.api.request;
 
+import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.imob.lib.lib_common.Logger;

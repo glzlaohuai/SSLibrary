@@ -1,12 +1,25 @@
 package com.badzzz.pasteany.core.interfaces;
 
-public interface IDeviceInfoManager {
+import com.badzzz.pasteany.core.utils.Constants;
 
-    String getDeviceID();
+import org.json.JSONObject;
 
-    String getDeviceName();
+public abstract class IDeviceInfoManager {
 
-    String getDeviceDetailInfo();
+    public abstract String getDeviceID();
 
-    void setDeviceName(String deviceName);
+    public abstract String getDeviceName();
+
+    public String getDeviceDetailInfo() {
+        String deviceID = getDeviceID();
+        String deviceName = getDeviceName();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Constants.Preference.KEY_DEVICEID, deviceID);
+        jsonObject.put(Constants.Preference.KEY_DEVICE_NAME, deviceName);
+
+        return jsonObject.toString();
+    }
+
+    public abstract void setDeviceName(String deviceName);
 }

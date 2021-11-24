@@ -3,6 +3,7 @@ package com.badzzz.pasteany.core.api;
 import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.Md5;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.msg.FileMsg;
 import com.imob.lib.sslib.msg.StringMsg;
@@ -30,6 +31,8 @@ public class MsgCreator {
         jsonObject.put(Constants.PeerMsgKey.id, id);
         jsonObject.put(Constants.PeerMsgKey.type, type);
         jsonObject.put(Constants.PeerMsgKey.data, data);
+
+        jsonObject.put(Constants.PeerMsgKey.device, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceDetailInfo());
 
         return jsonObject.toString();
     }

@@ -6,7 +6,8 @@ import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.lib_common.Logger;
-import com.imob.lib.net.nsd.NsdEventListener;
+import com.imob.lib.net.nsd.NsdEventListenerAdapter;
+import com.imob.lib.net.nsd.NsdEventListenerWrapper;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerWrapper;
@@ -88,7 +89,7 @@ public class NsdServiceHandler {
 
     private synchronized void createNsdNode() {
         if (serverNode != null && serverNode.isInUsing()) {
-            nsdNode = new NsdNode(PlatformManagerHolder.get().getAppManager().getNsdServiceManager().getExtraActionPerformer(), PlatformManagerHolder.get().getAppManager().getNetworkManager().getLocalNotLoopbackAddress(), Constants.NSD.NSD_HOST_NAME, new NsdEventListener() {
+            nsdNode = new NsdNode(PlatformManagerHolder.get().getAppManager().getNsdServiceManager().getExtraActionPerformer(), PlatformManagerHolder.get().getAppManager().getNetworkManager().getLocalNotLoopbackAddress(), Constants.NSD.NSD_HOST_NAME, new NsdEventListenerWrapper(new NsdEventListenerAdapter() {
                 @Override
                 public void onCreated(NsdNode nsdNode) {
                     if (!nsdNode.isDestroyed()) {
@@ -103,37 +104,13 @@ public class NsdServiceHandler {
                     NsdServiceStarter.redoIfSomethingWentWrong();
                 }
 
-                @Override
-                public void onDestroyed(NsdNode nsdNode) {
-
-                }
-
-                @Override
-                public void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e) {
-
-                }
 
                 @Override
                 public void onServiceDiscoveryed(NsdNode nsdNode, javax.jmdns.ServiceEvent event) {
                     //find a nsdNode, try to connect to it
                     ConnectedPeersManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, event);
                 }
-
-                @Override
-                public void onSuccessfullyWatchService(NsdNode nsdNode, String type, String name) {
-
-                }
-
-                @Override
-                public void onWatchServiceFailed(NsdNode nsdNode, String type, String name, String msg, Exception e) {
-
-                }
-
-                @Override
-                public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
-
-                }
-            });
+            }));
             nsdNode.create();
         }
     }

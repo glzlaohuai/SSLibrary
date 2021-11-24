@@ -279,7 +279,7 @@ public class ConnectedPeersHandler {
     }
 
     private synchronized void doDestroy() {
-        Peer.setGlobalPeerListener(null);
+        //        Peer.setGlobalPeerListener(null);
     }
 
     public synchronized void afterServiceDiscoveryed(ServiceEvent event) {

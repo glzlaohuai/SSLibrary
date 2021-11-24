@@ -107,6 +107,10 @@ public class Peer {
         return tag;
     }
 
+    public static PeerListenerGroup getGlobalPeerListener() {
+        return globalPeerListener;
+    }
+
     public static void setGlobalPeerListener(PeerListener globalPeerListener) {
         Peer.globalPeerListener.clear();
         Peer.globalPeerListener.add(globalPeerListener);

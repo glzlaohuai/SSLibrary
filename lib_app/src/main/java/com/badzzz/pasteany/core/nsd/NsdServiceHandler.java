@@ -75,15 +75,13 @@ public class NsdServiceHandler {
 
 
     private static String createRegisterServiceName() {
-        JSONObject jsonObject = new JSONObject();
-
+        JSONObject json = new JSONObject();
         IAppManager appManager = PlatformManagerHolder.get().getAppManager();
 
-        jsonObject.put(Constants.NSD.Key.DEVICE_ID, appManager.getDeviceInfoManager().getDeviceID());
-        jsonObject.put(Constants.NSD.Key.DEVICE_NAME, appManager.getDeviceInfoManager().getDeviceName());
-        jsonObject.put(Constants.NSD.Key.SERVICE_NAME, PreferenceManagerWrapper.getInstance().getServiceName());
+        json.put(Constants.Device.KEY_DEVICEID, appManager.getDeviceInfoManager().getDeviceID());
+        json.put(Constants.NSD.Key.SERVICE_NAME, PreferenceManagerWrapper.getInstance().getServiceName());
 
-        return jsonObject.toString();
+        return json.toString();
     }
 
 

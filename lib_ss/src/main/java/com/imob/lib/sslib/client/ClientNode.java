@@ -40,7 +40,7 @@ public class ClientNode implements INode {
         this.ip = ip;
         this.port = port;
 
-        this.listener.add(new ClientListenerWrapper(clientListener));
+        this.listener.add(new ClientListenerWrapper(clientListener, false));
 
         tag = S_TAG + " - " + "ip: " + ip + ", port: " + port + ", hash: " + hashCode();
     }

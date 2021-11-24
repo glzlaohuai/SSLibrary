@@ -33,9 +33,7 @@ public class Constants {
         public static final String NSD_HOST_NAME = "badzzz.com";
 
         public static final class Key {
-            public static final String DEVICE_ID = Device.KEY_DEVICEID;
-            public static final String DEVICE_NAME = Device.KEY_DEVICE_NAME;
-            public static final String SERVICE_NAME = "service_name";
+            public static final String SERVICE_NAME = "s_name";
         }
     }
 
@@ -48,8 +46,8 @@ public class Constants {
     }
 
     public static final class Device {
-        public static final String KEY_DEVICEID = "device_id";
-        public static final String KEY_DEVICE_NAME = "device_name";
+        public static final String KEY_DEVICEID = "d_id";
+        public static final String KEY_DEVICE_NAME = "d_name";
         public static final String KEY_PLATFORM = "platform";
     }
 

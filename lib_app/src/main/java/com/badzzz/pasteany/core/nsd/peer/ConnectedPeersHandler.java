@@ -7,6 +7,7 @@ import com.badzzz.pasteany.core.interfaces.IFileManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
 import com.imob.lib.sslib.client.ClientListenerWrapper;
@@ -15,6 +16,9 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerGroup;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.net.Inet4Address;
@@ -132,8 +136,6 @@ public class ConnectedPeersHandler {
             super.onIncomingMsgReadFailed(peer, id, total, soFar);
             handleIncomingMsgReadFailed(peer, id);
         }
-
-
     };
 
     private PeerListenerGroup globalListener = new PeerListenerGroup();
@@ -281,22 +283,41 @@ public class ConnectedPeersHandler {
 
     public synchronized void afterServiceDiscoveryed(ServiceEvent event) {
         if (event != null) {
-            Inet4Address inetAddresses = event.getInfo().getInet4Address();
-            int port = event.getInfo().getPort();
 
-            if (inetAddresses != null) {
-                String ip4 = inetAddresses.getHostAddress();
-                if (ip4 != null && !hasClientNodeReferToThisIP(ip4)) {
-                    ClientNode node = new ClientNode(ip4, port, new ClientListenerWrapper(new ClientListenerAdapter() {
-                        @Override
-                        public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
-                            super.onClientCreateFailed(clientNode, msg, exception);
-                            clientNodeSet.remove(clientNode);
-                        }
-                    }, true));
-                    node.create(Constants.Others.TIMEOUT);
-                    clientNodeSet.add(node);
+            String deviceID = null;
+            String serviceName = null;
+
+            try {
+                JSONObject serviceJsonObject = new JSONObject(event.getName());
+                deviceID = serviceJsonObject.getString(Constants.Device.KEY_DEVICEID);
+                serviceName = serviceJsonObject.getString(Constants.NSD.Key.SERVICE_NAME);
+            } catch (JSONException e) {
+                Logger.e(e);
+            }
+
+            if (deviceID != null && !deviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID()) && serviceName != null && serviceName.equals(PreferenceManagerWrapper.getInstance().getServiceName())) {
+                Logger.i(tag, "discoveryed nsd service's name match, and not the one created from localhost, so connect to it.");
+                Inet4Address inetAddresses = event.getInfo().getInet4Address();
+                int port = event.getInfo().getPort();
+
+                if (inetAddresses != null) {
+                    String ip4 = inetAddresses.getHostAddress();
+                    if (ip4 != null && !hasClientNodeReferToThisIP(ip4)) {
+                        ClientNode node = new ClientNode(ip4, port, new ClientListenerWrapper(new ClientListenerAdapter() {
+                            @Override
+                            public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
+                                super.onClientCreateFailed(clientNode, msg, exception);
+                                clientNodeSet.remove(clientNode);
+                            }
+                        }, true));
+                        node.create(Constants.Others.TIMEOUT);
+                        clientNodeSet.add(node);
+                    } else {
+                        Logger.i(tag, "there already has a peer connected to the nsd service, so no need to connect to it again.");
+                    }
                 }
+            } else {
+                Logger.i(tag, "discoveryed nsd service's name mismatch or it's a localhost nsd service, ignore it.");
             }
         }
     }

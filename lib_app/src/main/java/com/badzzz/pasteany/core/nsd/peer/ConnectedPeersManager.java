@@ -27,9 +27,9 @@ public class ConnectedPeersManager {
     }
 
 
-    public static void afterServiceDiscoveryed(NsdServiceHandler handler, NsdNode nsdNode, ServiceEvent event) {
-        if (inUsingServiceHandler == handler && relatedConnectedPeersHandlerMap.get(handler) != null && nsdNode != null && event != null && nsdNode.isRunning()) {
-            relatedConnectedPeersHandlerMap.get(handler).afterServiceDiscoveryed(event);
+    public static void afterServiceDiscoveryed(NsdServiceHandler nsdServiceHandler, NsdNode nsdNode, ServiceEvent event) {
+        if (inUsingServiceHandler == nsdServiceHandler && relatedConnectedPeersHandlerMap.get(nsdServiceHandler) != null && nsdNode != null && event != null && nsdNode.isRunning()) {
+            relatedConnectedPeersHandlerMap.get(nsdServiceHandler).afterServiceDiscoveryed(event);
         }
     }
 

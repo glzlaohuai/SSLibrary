@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SSLibrary">
         <activity
-            android:name=".LauncherActivity"
+            android:name=".TestFuncActivity2"
             android:exported="true">
 
             <intent-filter>

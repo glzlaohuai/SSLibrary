@@ -24,8 +24,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.net.Inet4Address;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.jmdns.ServiceEvent;
 
@@ -35,9 +35,9 @@ public class ConnectedPeersHandler {
 
     private boolean destroyed = false;
 
-    private Set<Peer> totalConnectedPeers = new HashSet<>();
-    private Set<Peer> detailedInfoPeers = new HashSet<>();
-    private Set<ClientNode> clientNodeSet = new HashSet<>();
+    private List<Peer> totalConnectedPeers = new LinkedList<>();
+    private List<Peer> detailedInfoPeers = new LinkedList<>();
+    private List<ClientNode> clientNodeSet = new LinkedList<>();
 
     private String tag = S_TAG + " # " + hashCode();
 
@@ -271,10 +271,13 @@ public class ConnectedPeersHandler {
         Peer.setGlobalPeerListener(globalListener);
     }
 
-    public Set<Peer> getTotalConnectedPeers() {
+    public List<Peer> getTotalConnectedPeers() {
         return totalConnectedPeers;
     }
 
+    public List<Peer> getDetailedInfoPeers() {
+        return detailedInfoPeers;
+    }
 
     public synchronized void destroy() {
         if (!destroyed) {

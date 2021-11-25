@@ -159,6 +159,16 @@ public class TestFuncActivity2 extends AppCompatActivity {
             public void onIncomingMsgReadFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID) {
 
             }
+
+            @Override
+            public void onFileChunkMsgSendConfirmed(Peer peer, String id, int soFar, int total) {
+                
+            }
+
+            @Override
+            public void onStringMsgSendConfirmed(Peer peer, String id, int soFar, int total) {
+
+            }
         });
     }
 

@@ -65,6 +65,10 @@ public class ConnectedPeersHandler {
         void onIncomingStringMsg(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, String msg);
 
         void onIncomingMsgReadFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID);
+
+        void onFileChunkMsgSendConfirmed(Peer peer, String id, int soFar, int total);
+
+        void onStringMsgSendConfirmed(Peer peer, String id, int soFar, int total);
     }
 
 
@@ -139,6 +143,13 @@ public class ConnectedPeersHandler {
             super.onIncomingMsgReadFailed(peer, id, total, soFar);
             handleIncomingMsgReadFailed(peer, id);
         }
+
+        @Override
+        public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
+            super.onIncomingConfirmMsg(peer, id, soFar, total);
+
+
+        }
     };
 
     private PeerListenerGroup globalListener = new PeerListenerGroup();
@@ -164,6 +175,37 @@ public class ConnectedPeersHandler {
                 break;
         }
     }
+
+
+    private void handleIncomingConfirmMsg(Peer peer, String id, int sofar, int total) {
+        Logger.i(tag, "handle incoming confirm msg, id: " + id + ", soFar: " + sofar + ", total: " + total);
+        MsgID msgID = MsgID.buildWithJsonString(id);
+
+        switch (msgID.getType()) {
+            case Constants.PeerMsgType.TYPE_FILE:
+                callbackFileChunkSendConfirmed(peer, id, sofar, total);
+                break;
+            case Constants.PeerMsgType.TYPE_STR:
+                //soFar must be always equals to total
+                callbackStringMsgSendConfirmed(peer, id, sofar, total);
+                break;
+            //just do nothing
+            default:
+                break;
+        }
+
+    }
+
+
+    private void callbackFileChunkSendConfirmed(Peer peer, String id, int soFar, int total) {
+        eventListener.onFileChunkMsgSendConfirmed(peer, id, soFar, total);
+    }
+
+
+    private void callbackStringMsgSendConfirmed(Peer peer, String id, int soFar, int total) {
+        eventListener.onStringMsgSendConfirmed(peer, id, soFar, total);
+    }
+
 
     private void handleIncomingMsgReadFailed(Peer peer, String id) {
         Logger.i(tag, "handle incoming msg read failed, id: " + id);

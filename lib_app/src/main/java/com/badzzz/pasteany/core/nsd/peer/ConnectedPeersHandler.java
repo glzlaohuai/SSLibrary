@@ -41,34 +41,10 @@ public class ConnectedPeersHandler {
 
     private String tag = S_TAG + " # " + hashCode();
 
-    private static ConnectedPeerEventListener eventListener;
+    private static ConnectedPeerEventListener eventListener = new ConnectedPeerEventListenerAdapter();
 
     public static void setEventListener(ConnectedPeerEventListener eventListener) {
         ConnectedPeersHandler.eventListener = eventListener;
-    }
-
-    public interface ConnectedPeerEventListener {
-        void onIncomingPeer(ConnectedPeersHandler handler, Peer peer);
-
-        void onPeerDropped(ConnectedPeersHandler handler, Peer peer);
-
-        void onPeerDetailedInfoGot(ConnectedPeersHandler handler, Peer peer);
-
-        void onFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file);
-
-        void onFileChunkSaveFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize);
-
-        void onFileMergeFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID);
-
-        void onFileMerged(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, File finalFile);
-
-        void onIncomingStringMsg(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, String msg);
-
-        void onIncomingMsgReadFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID);
-
-        void onFileChunkMsgSendConfirmed(Peer peer, String id, int soFar, int total);
-
-        void onStringMsgSendConfirmed(Peer peer, String id, int soFar, int total);
     }
 
 
@@ -197,19 +173,19 @@ public class ConnectedPeersHandler {
     }
 
 
+    private void handleIncomingMsgReadFailed(Peer peer, String id) {
+        Logger.i(tag, "handle incoming msg read failed, id: " + id);
+        callbackMsgReadFailed(peer, PeerUtils.getDeviceIDFromPeer(peer), id);
+    }
+
+
     private void callbackFileChunkSendConfirmed(Peer peer, String id, int soFar, int total) {
-        eventListener.onFileChunkMsgSendConfirmed(peer, id, soFar, total);
+        eventListener.onFileChunkMsgSendConfirmed(this, peer, id, soFar, total);
     }
 
 
     private void callbackStringMsgSendConfirmed(Peer peer, String id, int soFar, int total) {
-        eventListener.onStringMsgSendConfirmed(peer, id, soFar, total);
-    }
-
-
-    private void handleIncomingMsgReadFailed(Peer peer, String id) {
-        Logger.i(tag, "handle incoming msg read failed, id: " + id);
-        callbackMsgReadFailed(peer, PeerUtils.getDeviceIDFromPeer(peer), id);
+        eventListener.onStringMsgSendConfirmed(this, peer, id, soFar, total);
     }
 
     private void callbackMsgReadFailed(Peer peer, String deviceID, String id) {

@@ -6,7 +6,7 @@ import android.net.wifi.WifiManager;
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.imob.lib.net.nsd.INsdExtraActionPerformer;
 
-public class AndroidNsdServiceManager implements INSDServiceManager {
+public class AndroidNsdServiceManager extends INSDServiceManager {
 
     private Context context;
 

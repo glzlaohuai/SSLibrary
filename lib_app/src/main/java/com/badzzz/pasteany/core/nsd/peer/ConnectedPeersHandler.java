@@ -4,11 +4,13 @@ import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.api.request.APIRequester;
 import com.badzzz.pasteany.core.api.response.APIResponserManager;
 import com.badzzz.pasteany.core.interfaces.IFileManager;
+import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.lib_common.Logger;
+import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
 import com.imob.lib.sslib.client.ClientListenerWrapper;
 import com.imob.lib.sslib.client.ClientNode;
@@ -193,6 +195,20 @@ public class ConnectedPeersHandler {
 
     private void callbackPeerDropped(Peer peer) {
         eventListener.onPeerDropped(this, peer);
+
+
+        if (PeerUtils.getDeviceIDFromPeer(peer) != null) {
+            String deviceID = PeerUtils.getDeviceIDFromPeer(peer);
+
+            // TODO: 2021/11/25 triggerServiceInfo
+            if (ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == this) {
+                NsdNode nsdNode = ConnectedPeersManager.getInUsingServiceHandler().getNsdNode();
+                if (nsdNode != null) {
+                    Logger.i(tag, "try to retrieve losed peer's info");
+                    nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(deviceID, PreferenceManagerWrapper.getInstance().getServiceName()));
+                }
+            }
+        }
     }
 
     private void callbackIncomingNewPeer(Peer peer) {

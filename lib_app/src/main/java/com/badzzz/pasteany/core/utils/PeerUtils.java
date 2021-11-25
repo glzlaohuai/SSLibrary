@@ -18,4 +18,15 @@ public class PeerUtils {
     }
 
 
+    public static String getDeviceNameFromPeer(Peer peer) {
+        if (peer != null && peer.getTag() != null) {
+            String jsonString = peer.getTag();
+
+            JSONObject jsonObject = new JSONObject(jsonString);
+            return jsonObject.optString(Constants.Device.KEY_DEVICE_NAME);
+        }
+        return null;
+    }
+
+
 }

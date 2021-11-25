@@ -40,4 +40,9 @@ public class ConnectedPeersManager {
         }
         return null;
     }
+
+
+    public static NsdServiceHandler getInUsingServiceHandler() {
+        return inUsingServiceHandler;
+    }
 }

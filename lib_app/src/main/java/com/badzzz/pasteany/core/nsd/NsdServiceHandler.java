@@ -1,6 +1,6 @@
 package com.badzzz.pasteany.core.nsd;
 
-import com.badzzz.pasteany.core.interfaces.IAppManager;
+import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
@@ -14,8 +14,6 @@ import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerListenerWrapper;
 import com.imob.lib.sslib.server.ServerNode;
-
-import org.json.JSONObject;
 
 
 public class NsdServiceHandler {
@@ -73,25 +71,13 @@ public class NsdServiceHandler {
         serverNode.create(Constants.Others.TIMEOUT);
     }
 
-
-    private static String createRegisterServiceName() {
-        JSONObject json = new JSONObject();
-        IAppManager appManager = PlatformManagerHolder.get().getAppManager();
-
-        json.put(Constants.Device.KEY_DEVICEID, appManager.getDeviceInfoManager().getDeviceID());
-        json.put(Constants.NSD.Key.SERVICE_NAME, PreferenceManagerWrapper.getInstance().getServiceName());
-
-        return json.toString();
-    }
-
-
     private synchronized void createNsdNode() {
         if (serverNode != null && serverNode.isInUsing()) {
             nsdNode = new NsdNode(PlatformManagerHolder.get().getAppManager().getNsdServiceManager().getExtraActionPerformer(), PlatformManagerHolder.get().getAppManager().getNetworkManager().getLocalNotLoopbackAddress(), Constants.NSD.NSD_HOST_NAME, new NsdEventListenerWrapper(new NsdEventListenerAdapter() {
                 @Override
                 public void onCreated(NsdNode nsdNode) {
                     if (!nsdNode.isDestroyed()) {
-                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, createRegisterServiceName(), null, serverNode.getPort());
+                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), PreferenceManagerWrapper.getInstance().getServiceName()), null, serverNode.getPort());
                         nsdNode.watchService(Constants.NSD.NSD_SERVICE_TYPE, null);
                     }
                 }
@@ -148,5 +134,10 @@ public class NsdServiceHandler {
         } else {
             doStuffAfterHandlerBeDestroyed(listener);
         }
+    }
+
+
+    public NsdNode getNsdNode() {
+        return nsdNode;
     }
 }

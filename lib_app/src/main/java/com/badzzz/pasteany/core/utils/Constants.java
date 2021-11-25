@@ -52,6 +52,34 @@ public class Constants {
     }
 
 
+    public final static class DB {
+        public static final String DB_NAME = "paste_any_where";
+
+        public static final String TB_CONNECTED_DEVICES = "connected_devices";
+        public static final String TB_MSGS = "msgs";
+
+        public static final class KEY {
+            public static final class CONNECTED_DEVICES {
+                public static final String DEVICE_ID = Device.KEY_DEVICEID;
+                public static final String DEVICE_NAME = Device.KEY_DEVICE_NAME;
+                public static final String DEVICE_PLATFORM = Device.KEY_PLATFORM;
+            }
+
+            public static final class MSGS {
+                public static final String MSG_ID = "msg_id";
+                public static final String MSG_TYPE = "msg_type";
+                public static final String MSG_DATA = "msg_data";
+                public static final String MSG_FROM = "msg_from";
+                public static final String MSG_TO = "msg_to";
+                public static final String MSG_LEN = "msg_len";
+                public static final String MSG_STATE = "msg_state";
+                public static final String MSG_TIME_RECEIVE = "msg_time_receive";
+                public static final String MSG_TIME_SEND = "msg_time_send";
+            }
+        }
+    }
+
+
     public static final class Others {
         public static final long TIMEOUT = 10 * 1000;
         public static final String APP_ROOT_DIR_NAME = "paste_any_where";

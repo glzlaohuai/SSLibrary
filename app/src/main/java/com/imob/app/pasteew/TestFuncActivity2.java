@@ -99,7 +99,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
         });
 
 
-        ConnectedPeersHandler.setEventListener(new ConnectedPeerEventListenerAdapter() {
+        ConnectedPeersHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
 
             private void notifyAdapter() {
                 runOnUiThread(new Runnable() {

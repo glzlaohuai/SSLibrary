@@ -54,12 +54,13 @@ public class Constants {
 
     public final static class DB {
         public static final String DB_NAME = "paste_any_where";
+        public static final String AUTO_INCREAMENT_ID = "_id";
 
         public static final String TB_CONNECTED_DEVICES = "connected_devices";
         public static final String TB_MSGS = "msgs";
 
         public static final String SQL_CREATE_TABLE_DEVICES = String.format("CREATE TABLE %s (%s TEXT PRIMARY KEY, %s TEXT, %s TEXT)", TB_CONNECTED_DEVICES, KEY.CONNECTED_DEVICES.DEVICE_ID, KEY.CONNECTED_DEVICES.DEVICE_NAME, KEY.CONNECTED_DEVICES.DEVICE_PLATFORM);
-        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (_id INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME_RECEIVE, KEY.MSGS.MSG_TIME_SEND);
+        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME_RECEIVE, KEY.MSGS.MSG_TIME_SEND, KEY.MSGS.MSG_TIME_INSERT);
 
         public static final class KEY {
             public static final class CONNECTED_DEVICES {
@@ -78,6 +79,7 @@ public class Constants {
                 public static final String MSG_STATE = "msg_state";
                 public static final String MSG_TIME_RECEIVE = "msg_time_receive";
                 public static final String MSG_TIME_SEND = "msg_time_send";
+                public static final String MSG_TIME_INSERT = "msg_time_insert";
             }
         }
     }

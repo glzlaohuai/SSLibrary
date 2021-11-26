@@ -12,4 +12,7 @@ public interface IAppManager {
 
     IFileManager getFileManager();
 
+
+    IDBManager getDBManager();
+
 }

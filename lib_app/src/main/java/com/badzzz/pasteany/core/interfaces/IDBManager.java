@@ -1,12 +1,23 @@
 package com.badzzz.pasteany.core.interfaces;
 
+import com.badzzz.pasteany.core.utils.Constants;
+
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class IDBManager {
 
-    public synchronized List<Map<String, String>> query(String tableName, String[] whereKeys, String[] whereValues, String orderBy, int limit) {
-        return doQuery(tableName, whereKeys, whereValues, orderBy, limit);
+    private static final Set<String> sqlSet = new HashSet<>();
+
+    static {
+        sqlSet.add(Constants.DB.SQL_CREATE_TABLE_DEVICES);
+        sqlSet.add(Constants.DB.SQL_CREATE_TABLE_MSGS);
+    }
+
+    public synchronized List<Map<String, String>> query(String sql) {
+        return doQuery(sql);
     }
 
     public synchronized int update(String tableName, String[] keys, String[] values, String[] whereKeys, String[] whereValues) {
@@ -21,8 +32,7 @@ public abstract class IDBManager {
         doExecuteSql(sql);
     }
 
-
-    protected abstract List<Map<String, String>> doQuery(String tableName, String[] whereKeys, String[] whereValues, String orderBy, int limit);
+    protected abstract List<Map<String, String>> doQuery(String sql);
 
     protected abstract int doUpdate(String tableName, String[] keys, String[] values, String[] whereKeys, String[] whereValues);
 
@@ -31,5 +41,10 @@ public abstract class IDBManager {
     protected abstract boolean doExecuteSql(String sql);
 
     protected abstract String getDBRootDir();
+
+    protected Set<String> getTableCreateSqls() {
+        return IDBManager.sqlSet;
+    }
+
 
 }

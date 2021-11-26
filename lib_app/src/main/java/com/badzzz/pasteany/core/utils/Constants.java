@@ -58,6 +58,9 @@ public class Constants {
         public static final String TB_CONNECTED_DEVICES = "connected_devices";
         public static final String TB_MSGS = "msgs";
 
+        public static final String SQL_CREATE_TABLE_DEVICES = String.format("CREATE TABLE %s (%s TEXT PRIMARY KEY, %s TEXT, %s TEXT)", TB_CONNECTED_DEVICES, KEY.CONNECTED_DEVICES.DEVICE_ID, KEY.CONNECTED_DEVICES.DEVICE_NAME, KEY.CONNECTED_DEVICES.DEVICE_PLATFORM);
+        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (_id INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME_RECEIVE, KEY.MSGS.MSG_TIME_SEND);
+
         public static final class KEY {
             public static final class CONNECTED_DEVICES {
                 public static final String DEVICE_ID = Device.KEY_DEVICEID;

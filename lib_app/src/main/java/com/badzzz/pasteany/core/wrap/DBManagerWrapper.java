@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
  */
 public class DBManagerWrapper {
 
-
     private IDBManager dbManager;
     private final static DBManagerWrapper instance = new DBManagerWrapper();
 
@@ -66,16 +65,13 @@ public class DBManagerWrapper {
         });
     }
 
-
-
-    
-
-    public void queryAllMsgs(long fromID, int limit, IDBActionListener listener) {
-
+    public void queryAllMsgs(int fromID, int limit, IDBActionListener listener) {
+        String sql = String.format(Constants.DB.SQL_QUERY_MSGS, fromID, limit);
     }
 
-    public void queryAllRelatedMsgs(String deviceID, long fromID, int limit, IDBActionListener listener) {
-
+    public void queryAllRelatedMsgs(String deviceID, int fromID, int limit, IDBActionListener listener) {
+        String sql = String.format(Constants.DB.SQL_QUERY_DEVICE_RELATED_MSGS, fromID, deviceID, deviceID, limit);
+        doQuery(sql, listener);
     }
 
 

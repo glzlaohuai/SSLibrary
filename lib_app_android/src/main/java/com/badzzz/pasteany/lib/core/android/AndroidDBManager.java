@@ -29,7 +29,6 @@ public class AndroidDBManager extends IDBManager {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.qu
             for (String sql : getTableCreateSqls()) {
                 db.execSQL(sql);
             }

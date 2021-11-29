@@ -47,7 +47,7 @@ public class AndroidDBManager extends IDBManager {
     }
 
     @Override
-    protected List<Map<String, String>> doQuery(String tableName, String[] whereKeys, String[] whereValues, String orderBy, int limit) {
+    protected List<Map<String, String>> doQuery(String sql) {
         SQLiteDatabase writableDatabase = null;
         List<Map<String, String>> result = new ArrayList<>();
         try {
@@ -55,7 +55,7 @@ public class AndroidDBManager extends IDBManager {
             if (writableDatabase != null && writableDatabase.isOpen()) {
                 Cursor cursor = null;
                 try {
-                    cursor = writableDatabase.query(tableName, null, DBUtils.buildClause(whereKeys), whereValues, null, null, orderBy, String.valueOf(limit));
+                    cursor = writableDatabase.rawQuery(sql, null);
                     if (cursor != null) {
                         int count = cursor.getCount();
                         String[] keys = cursor.getColumnNames();

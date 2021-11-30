@@ -3,6 +3,7 @@ package com.badzzz.pasteany.lib.core.android;
 import android.content.Context;
 
 import com.badzzz.pasteany.core.interfaces.IAppManager;
+import com.badzzz.pasteany.core.interfaces.IDBManager;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
 import com.badzzz.pasteany.core.interfaces.IFileManager;
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
@@ -16,6 +17,7 @@ public class AndroidAppManager implements IAppManager {
     private IPreferenceManager preferenceManager;
     private INetworkManager networkManager;
     private IFileManager fileManager;
+    private IDBManager dbManager;
 
     public AndroidAppManager(Context context) {
         deviceInfoManager = new AndroidDeviceInfoManager(context);
@@ -23,6 +25,7 @@ public class AndroidAppManager implements IAppManager {
         preferenceManager = new AndroidPreferenceManager(context);
         fileManager = new AndroidFileManager(context);
         networkManager = new AndroidNetworkManager(context);
+        dbManager = new AndroidDBManager(context);
     }
 
     @Override
@@ -38,6 +41,11 @@ public class AndroidAppManager implements IAppManager {
     @Override
     public IFileManager getFileManager() {
         return fileManager;
+    }
+
+    @Override
+    public IDBManager getDBManager() {
+        return dbManager;
     }
 
     @Override

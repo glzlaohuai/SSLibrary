@@ -48,32 +48,27 @@ public class AndroidDBManager extends IDBManager {
 
     @Override
     protected List<Map<String, String>> doQuery(String sql) {
-        SQLiteDatabase writableDatabase = null;
         List<Map<String, String>> result = new ArrayList<>();
-        try {
-            writableDatabase = workerDBManager.getWritableDatabase();
-            if (writableDatabase != null && writableDatabase.isOpen()) {
-                Cursor cursor = null;
-                try {
-                    cursor = writableDatabase.rawQuery(sql, null);
-                    if (cursor != null) {
-                        int count = cursor.getCount();
-                        String[] keys = cursor.getColumnNames();
-                        for (int i = 0; i < count; i++) {
-                            cursor.moveToPosition(i);
-                            Map<String, String> map = new HashMap<>();
-                            for (int j = 0; j < keys.length; j++) {
-                                map.put(keys[j], cursor.getString(cursor.getColumnIndex(keys[j])));
-                            }
-                            result.add(map);
+        SQLiteDatabase writableDatabase = workerDBManager.getWritableDatabase();
+        if (writableDatabase != null && writableDatabase.isOpen()) {
+            Cursor cursor = null;
+            try {
+                cursor = writableDatabase.rawQuery(sql, null);
+                if (cursor != null) {
+                    int count = cursor.getCount();
+                    String[] keys = cursor.getColumnNames();
+                    for (int i = 0; i < count; i++) {
+                        cursor.moveToPosition(i);
+                        Map<String, String> map = new HashMap<>();
+                        for (int j = 0; j < keys.length; j++) {
+                            map.put(keys[j], cursor.getString(cursor.getColumnIndex(keys[j])));
                         }
+                        result.add(map);
                     }
-                } finally {
-                    Closer.close(cursor);
                 }
+            } finally {
+                Closer.close(cursor);
             }
-        } finally {
-            Closer.close(writableDatabase);
         }
         return result;
     }
@@ -81,12 +76,8 @@ public class AndroidDBManager extends IDBManager {
     @Override
     protected int doUpdate(String tableName, String[] keys, String[] values, String[] whereKeys, String[] whereValues) {
         SQLiteDatabase database = workerDBManager.getWritableDatabase();
-        try {
-            if (database != null && database.isOpen()) {
-                return database.update(tableName, DBUtils.buildContentValues(keys, values), DBUtils.buildClause(whereKeys), whereValues);
-            }
-        } finally {
-            Closer.close(database);
+        if (database != null && database.isOpen()) {
+            return database.update(tableName, DBUtils.buildContentValues(keys, values), DBUtils.buildClause(whereKeys), whereValues);
         }
         return -1;
     }
@@ -96,13 +87,19 @@ public class AndroidDBManager extends IDBManager {
 
         SQLiteDatabase writableDatabase = workerDBManager.getWritableDatabase();
 
-        try {
-            if (writableDatabase != null && writableDatabase.isOpen()) {
-                long insert = writableDatabase.insert(tableName, null, DBUtils.buildContentValues(keys, values));
-                return insert > 0;
-            }
-        } finally {
-            Closer.close(writableDatabase);
+        if (writableDatabase != null && writableDatabase.isOpen()) {
+            long insert = writableDatabase.insert(tableName, null, DBUtils.buildContentValues(keys, values));
+            return insert > 0;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean doDelete(String tableName, String[] keys, String[] values) {
+        SQLiteDatabase db = workerDBManager.getWritableDatabase();
+        if (db != null && db.isOpen()) {
+            int delete = db.delete(tableName, DBUtils.buildClause(keys), values);
+            return delete > 0;
         }
         return false;
     }
@@ -117,8 +114,6 @@ public class AndroidDBManager extends IDBManager {
                 return true;
             } catch (SQLException e) {
                 e.printStackTrace();
-            } finally {
-                Closer.close(writableDatabase);
             }
         }
 

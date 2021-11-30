@@ -14,6 +14,7 @@ public abstract class IDBManager {
     static {
         sqlSet.add(Constants.DB.SQL_CREATE_TABLE_DEVICES);
         sqlSet.add(Constants.DB.SQL_CREATE_TABLE_MSGS);
+        sqlSet.add(Constants.DB.SQL_CREATE_TABLE_MSGS_SENDING);
     }
 
     public synchronized List<Map<String, String>> query(String sql) {
@@ -28,15 +29,23 @@ public abstract class IDBManager {
         return doInsert(tableName, keys, values);
     }
 
+
+    public synchronized boolean delete(String tableName, String[] keys, String[] values) {
+        return doDelete(tableName, keys, values);
+    }
+
     public synchronized void executeSql(String sql) {
         doExecuteSql(sql);
     }
+
 
     protected abstract List<Map<String, String>> doQuery(String sql);
 
     protected abstract int doUpdate(String tableName, String[] keys, String[] values, String[] whereKeys, String[] whereValues);
 
     protected abstract boolean doInsert(String tableName, String[] keys, String[] values);
+
+    protected abstract boolean doDelete(String tableName, String[] keys, String[] values);
 
     protected abstract boolean doExecuteSql(String sql);
 

@@ -15,23 +15,27 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.sslib.peer.Peer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class TestFuncActivity2 extends AppCompatActivity {
 
     private ListView knowNameListView;
-    private ListView totalListView;
+
+    private List<Peer> peerList = new ArrayList<>();
 
     private BaseAdapter knowAdapter = new BaseAdapter() {
         @Override
         public int getCount() {
-            return ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() != null ? ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().size() : 0;
+            return peerList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().get(position);
+            return peerList.get(position);
         }
 
         @Override
@@ -42,37 +46,11 @@ public class TestFuncActivity2 extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             TextView infoView = new TextView(TestFuncActivity2.this);
-            infoView.setText(((Peer) getItem(position)).getTag());
+            infoView.setText(((Peer) getItem(position)).toString());
             return infoView;
         }
     };
 
-
-    private BaseAdapter totalAdapter = new BaseAdapter() {
-        @Override
-        public int getCount() {
-            return ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() != null ? ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getTotalConnectedPeers().size() : 0;
-
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getTotalConnectedPeers().get(position);
-
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            TextView infoView = new TextView(TestFuncActivity2.this);
-            infoView.setText(((Peer) getItem(position)).getTag());
-            return infoView;
-        }
-    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +58,6 @@ public class TestFuncActivity2 extends AppCompatActivity {
         setContentView(R.layout.test_func_2);
 
         knowNameListView = findViewById(R.id.knownNameListView);
-        totalListView = findViewById(R.id.totalListView);
 
         setup();
     }
@@ -88,7 +65,6 @@ public class TestFuncActivity2 extends AppCompatActivity {
 
     private void setup() {
         knowNameListView.setAdapter(knowAdapter);
-        totalListView.setAdapter(totalAdapter);
 
         knowNameListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -105,8 +81,9 @@ public class TestFuncActivity2 extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        peerList.clear();
+                        peerList.addAll(ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers());
                         knowAdapter.notifyDataSetChanged();
-                        totalAdapter.notifyDataSetChanged();
                     }
                 });
             }

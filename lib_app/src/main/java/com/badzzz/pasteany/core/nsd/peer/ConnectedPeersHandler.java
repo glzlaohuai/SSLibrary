@@ -56,6 +56,39 @@ public class ConnectedPeersHandler {
     private PeerListener peerNameRetrieveListeenr = new PeerListenerAdapter() {
         @Override
         public void onIOStreamOpened(Peer peer) {
+            afterPeerIncoming(peer);
+        }
+
+
+        @Override
+        public void onDestroy(Peer peer) {
+            afterPeerDropped(peer);
+        }
+
+        @Override
+        public void onIncomingMsg(Peer peer, String id, int available) {
+            afterIncomingPeerDetail(id, peer);
+        }
+
+
+        private synchronized void afterPeerDropped(Peer peer) {
+            totalConnectedPeers.remove(peer);
+            detailedInfoPeers.remove(peer);
+
+            callbackPeerDropped(peer);
+        }
+
+        private synchronized void afterIncomingPeerDetail(String msgID, Peer peer) {
+            if (!detailedInfoPeers.contains(peer)) {
+                peer.setTag(MsgID.buildWithJsonString(msgID).getDevice());
+                destroyStalePeerByTagBeforeAddNewIncomingDetailedPeer(peer);
+                detailedInfoPeers.add(peer);
+                callbackPeerDetailInfoGot(peer);
+            }
+        }
+
+
+        private synchronized void afterPeerIncoming(Peer peer) {
             Logger.i(tag, "incoming a new peer, send msg to retrieve its detail device info.");
             totalConnectedPeers.add(peer);
             callbackIncomingNewPeer(peer);
@@ -85,24 +118,21 @@ public class ConnectedPeersHandler {
         }
 
 
-        @Override
-        public void onDestroy(Peer peer) {
-            totalConnectedPeers.remove(peer);
-            detailedInfoPeers.remove(peer);
+    };
 
-            callbackPeerDropped(peer);
-        }
 
-        @Override
-        public void onIncomingMsg(Peer peer, String id, int available) {
-            if (!detailedInfoPeers.contains(peer)) {
-                peer.setTag(MsgID.buildWithJsonString(id).getDevice());
-                detailedInfoPeers.add(peer);
+    private void destroyStalePeerByTagBeforeAddNewIncomingDetailedPeer(Peer incomingPeer) {
+        if (incomingPeer == null || incomingPeer.getTag() == null) return;
 
-                callbackPeerDetailInfoGot(peer);
+        for (Peer peer : detailedInfoPeers) {
+            if (peer == incomingPeer) continue;
+            if (peer.getTag().equals(incomingPeer.getTag()) && peer.getLocalNode().isServerNode()) {
+                Logger.i(tag, "peer's connection must has already lost, but not be detected by system yet, destroy it immediatelly: " + peer.toString());
+                peer.destroy();
             }
         }
-    };
+    }
+
 
     private PeerListener mainGlobalPeerListener = new PeerListenerAdapter() {
 

@@ -61,7 +61,7 @@ public class Constants {
         public static final String TB_MSGS_SENDING = "msgs_sending";
 
         public static final String SQL_CREATE_TABLE_DEVICES = String.format("CREATE TABLE %s (%s TEXT PRIMARY KEY, %s TEXT, %s TEXT)", TB_CONNECTED_DEVICES, KEY.CONNECTED_DEVICES.DEVICE_ID, KEY.CONNECTED_DEVICES.DEVICE_NAME, KEY.CONNECTED_DEVICES.DEVICE_PLATFORM);
-        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME_RECEIVE, KEY.MSGS.MSG_TIME_SEND, KEY.MSGS.MSG_TIME_INSERT);
+        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT PRIMARY KEY, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME);
         public static final String SQL_CREATE_TABLE_MSGS_SENDING = String.format("CREATE TABLE %s (%s INTEGER AUTOINCREMENT PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS_SENDING, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO);
 
         public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
@@ -84,11 +84,15 @@ public class Constants {
                 public static final String MSG_TO = "msg_to";
                 public static final String MSG_LEN = "msg_len";
                 public static final String MSG_STATE = "msg_state";
-                public static final String MSG_TIME_RECEIVE = "msg_time_receive";
-                public static final String MSG_TIME_SEND = "msg_time_send";
-                public static final String MSG_TIME_INSERT = "msg_time_insert";
+                public static final String MSG_TIME = "msg_time";
             }
         }
+
+        public static final String MSG_TYPE_STATE_SENDING = "0";
+        public static final String MSG_TYPE_STATE_SENDED = "1";
+        public static final String MSG_TYPE_STATE_FAILED = "-1";
+
+        public static final String MSG_CHAR_SPLIT = ",";
     }
 
 

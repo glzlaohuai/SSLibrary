@@ -80,11 +80,11 @@ public class DBManagerWrapper {
         doQuery(sql, listener);
     }
 
-    public void updateMsgState(final int autoID, final String state, final IDBActionListener listener) {
+    public void updateMsgState(final String msgID, final String state, final IDBActionListener listener) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                int update = dbManager.update(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_STATE}, new String[]{state}, new String[]{Constants.DB.AUTO_INCREAMENT_ID}, new String[]{String.valueOf(autoID)});
+                int update = dbManager.update(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_STATE}, new String[]{state}, new String[]{Constants.DB.KEY.MSGS.MSG_ID}, new String[]{msgID});
                 if (update > 0) {
                     listener.succeeded(null);
                 } else {
@@ -123,11 +123,11 @@ public class DBManagerWrapper {
         });
     }
 
-    public void addMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final String type, final String data, final int len, final String state, final long receiveTime, final long sendTime, final IDBActionListener listener) {
+    public void addMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final String type, final String data, final int len, final String state, final long msgTime, final IDBActionListener listener) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME_RECEIVE, Constants.DB.KEY.MSGS.MSG_TIME_SEND, Constants.DB.KEY.MSGS.MSG_TIME_INSERT}, new String[]{msgID, fromDeviceID, toDeviceID, type, data, String.valueOf(len), state, String.valueOf(receiveTime), String.valueOf(sendTime), String.valueOf(System.currentTimeMillis())});
+                boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME}, new String[]{msgID, fromDeviceID, toDeviceID, type, data, String.valueOf(len), state, String.valueOf(msgTime)});
                 if (insert) {
                     listener.succeeded(null);
                 } else {
@@ -151,6 +151,4 @@ public class DBManagerWrapper {
             }
         });
     }
-
-
 }

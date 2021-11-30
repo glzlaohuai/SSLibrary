@@ -21,8 +21,11 @@ public class XApplication extends Application {
         context = getApplicationContext();
 
         AndroidPlatformManager androidPlatformManager = new AndroidPlatformManager(this);
+
+        // TODO: 2021/11/30 just for tests, should be removed later
         PreferenceManagerWrapper.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
         PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
+
         androidPlatformManager.initPlatform();
     }
 }

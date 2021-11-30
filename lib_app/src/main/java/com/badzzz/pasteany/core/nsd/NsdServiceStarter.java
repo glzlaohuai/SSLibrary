@@ -28,6 +28,18 @@ public class NsdServiceStarter {
         }
     }
 
+
+    /**
+     * will be called after service name setted(reset), see {@link PreferenceManagerWrapper#saveServiceName(String)}
+     */
+    public final static void stuffAfterServiceNameSetted() {
+        if (hasInited) {
+            redoIfSomethingWentWrong();
+        } else {
+            doInit();
+        }
+    }
+
     private synchronized final static void doInit() {
         if (!hasInited) {
             hasInited = true;

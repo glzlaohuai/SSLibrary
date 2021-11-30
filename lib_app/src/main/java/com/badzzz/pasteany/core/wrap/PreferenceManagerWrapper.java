@@ -1,6 +1,7 @@
 package com.badzzz.pasteany.core.wrap;
 
 import com.badzzz.pasteany.core.interfaces.IPreferenceManager;
+import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.utils.Constants;
 
 
@@ -50,6 +51,8 @@ public class PreferenceManagerWrapper {
 
     public void saveServiceName(String serviceName) {
         manager.saveString(Constants.Preference.KEY_SERVICE_NAME, serviceName);
+
+        NsdServiceStarter.stuffAfterServiceNameSetted();
     }
 
 

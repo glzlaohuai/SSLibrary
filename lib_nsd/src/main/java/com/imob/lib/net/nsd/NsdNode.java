@@ -256,9 +256,17 @@ public class NsdNode {
                 public void run() {
                     if (jmDNS != null) {
                         Logger.i(tag, "get service info, type: " + type + ", name: " + name);
-                        ServiceInfo serviceInfo = jmDNS.getServiceInfo(type, name);
+                        ServiceInfo serviceInfo = null;
+                        try {
+                            serviceInfo = jmDNS.getServiceInfo(type, name);
+                        } catch (Exception e) {
+                            Logger.e(e);
+                        }
                         Logger.i(tag, "got service info: " + serviceInfo);
-                        listener.onServiceDiscoveryed(NsdNode.this, serviceInfo);
+                        if (serviceInfo != null) {
+                            listener.onServiceDiscoveryed(NsdNode.this, serviceInfo);
+                        }
+
                     }
                 }
             });

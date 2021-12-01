@@ -5,6 +5,13 @@
     android:orientation="vertical">
 
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="testIt"
+        android:text="test" />
+
+
     <ListView
         android:id="@+id/knownNameListView"
         android:layout_width="match_parent"

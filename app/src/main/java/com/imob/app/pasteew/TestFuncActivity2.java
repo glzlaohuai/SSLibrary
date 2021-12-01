@@ -106,5 +106,9 @@ public class TestFuncActivity2 extends AppCompatActivity {
         });
     }
 
+    private static final String TAG = TestFuncActivity2.class.getName();
+
+    public void testIt(View view) {
+    }
 
 }

@@ -243,7 +243,7 @@ public class NsdNode {
             listener.onDestroyed(this);
 
             initExecutorService.shutdown();
-            retrieveServiceInfoService.shutdown();
+            //            retrieveServiceInfoService.shutdown();
         }
     }
 

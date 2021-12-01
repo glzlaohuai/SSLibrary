@@ -98,7 +98,7 @@ public class ClientListenerWrapper implements ClientListener {
 
         base.onMsgSendFailed(peer, id, msg, exception);
         if (printLog) {
-            Logger.i(TAG, "onMsgSendFailed, peer: " + peer.getTag() + ", id: " + id + ", msg: " + msg + ", exception: " + exception);
+            Logger.i(TAG, "onMsgSendFailed, peer: " + (peer == null ? "null" : peer.getTag()) + ", id: " + id + ", msg: " + msg + ", exception: " + exception);
 
         }
     }
@@ -185,8 +185,8 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
-        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar,available, chunkBytes);
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
+        base.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available, chunkBytes);
         if (printLog) {
             Logger.i(TAG, "onIncomingMsgChunkReadSucceeded, peer: " + peer.getTag() + ", id: " + id + ", chunkSize: " + chunkSize + ", soFar: " + soFar + ", chunkBytes: " + chunkBytes);
 

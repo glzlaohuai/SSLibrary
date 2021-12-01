@@ -1,8 +1,6 @@
 package com.imob.lib.sslib.peer;
 
 import com.imob.lib.lib_common.Logger;
-import com.imob.lib.sslib.peer.Peer;
-import com.imob.lib.sslib.peer.PeerListener;
 
 public class PeerListenerWrapper implements PeerListener {
     private static final String TAG = "PeerListenerWrapper";
@@ -83,7 +81,7 @@ public class PeerListenerWrapper implements PeerListener {
     public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
         base.onMsgSendFailed(peer, id, msg, exception);
         if (printLog) {
-            Logger.i(TAG, "onMsgSendFailed: peer: " + peer.getTag() + ", id: " + id + ", msg: " + msg + ", exception: " + exception);
+            Logger.i(TAG, "onMsgSendFailed: peer: " + (peer == null ? "null" : peer.getTag()) + ", id: " + id + ", msg: " + msg + ", exception: " + exception);
         }
     }
 

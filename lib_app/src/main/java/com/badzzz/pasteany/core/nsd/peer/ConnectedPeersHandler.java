@@ -259,7 +259,7 @@ public class ConnectedPeersHandler {
             if (ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == this) {
                 NsdNode nsdNode = ConnectedPeersManager.getInUsingServiceHandler().getNsdNode();
                 if (nsdNode != null) {
-                    Logger.i(tag, "try to retrieve losed peer's info");
+                    Logger.i(tag, "try to retrieve lost peer's info");
                     nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(deviceID, PreferenceManagerWrapper.getInstance().getServiceName()));
                 }
             }
@@ -360,7 +360,7 @@ public class ConnectedPeersHandler {
         //        Peer.setGlobalPeerListener(null);
     }
 
-    public synchronized void afterServiceDiscoveryed(ServiceInfo info) {
+    public synchronized void afterServiceDiscoveryed(final ServiceInfo info) {
         if (info != null) {
 
             String deviceID = null;
@@ -389,6 +389,15 @@ public class ConnectedPeersHandler {
                             public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
                                 super.onClientCreateFailed(clientNode, msg, exception);
                                 clientNodeList.remove(clientNode);
+
+                                //connect to server failed, so send another service info retrieve msg
+                                if (!destroyed && ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == ConnectedPeersHandler.this) {
+                                    Logger.i(tag, "create client failed, maybe the server info changed? do another retrieve service info loop and if retrieved, try to reconnect to it again.");
+                                    NsdNode nsdNode = ConnectedPeersManager.getInUsingServiceHandler().getNsdNode();
+                                    if (nsdNode != null) {
+                                        nsdNode.triggerServiceInfoResolve(info.getType(), info.getName());
+                                    }
+                                }
                             }
 
                             @Override

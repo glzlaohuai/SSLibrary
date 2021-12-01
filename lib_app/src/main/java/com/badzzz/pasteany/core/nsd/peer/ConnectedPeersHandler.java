@@ -1,5 +1,6 @@
 package com.badzzz.pasteany.core.nsd.peer;
 
+import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.api.request.APIRequester;
 import com.badzzz.pasteany.core.api.response.APIResponserManager;
@@ -37,7 +38,7 @@ public class ConnectedPeersHandler {
 
     private List<Peer> totalConnectedPeers = new LinkedList<>();
     private List<Peer> detailedInfoPeers = new LinkedList<>();
-    private List<ClientNode> clientNodeSet = new LinkedList<>();
+    private List<ClientNode> clientNodeList = new LinkedList<>();
 
     private String tag = S_TAG + " # " + hashCode();
 
@@ -314,6 +315,10 @@ public class ConnectedPeersHandler {
              */
             case Constants.PeerMsgType.TYPE_API_RESPONSE:
                 break;
+
+            case Constants.PeerMsgType.TYPE_PING:
+                Logger.i(tag, "incoming a ping msg, ignore it.");
+                break;
         }
     }
 
@@ -341,14 +346,14 @@ public class ConnectedPeersHandler {
     }
 
 
-    private boolean hasClientNodeReferToThisIP(String ip) {
-        if (ip == null || ip.isEmpty()) return false;
-        for (ClientNode clientNode : clientNodeSet) {
+    private ClientNode getClientNodeReferToThisIP(String ip) {
+        if (ip == null || ip.isEmpty()) return null;
+        for (ClientNode clientNode : clientNodeList) {
             if (clientNode.getIp() != null && clientNode.getIp().equals(ip)) {
-                return true;
+                return clientNode;
             }
         }
-        return false;
+        return null;
     }
 
     private synchronized void doDestroy() {
@@ -376,30 +381,33 @@ public class ConnectedPeersHandler {
 
                 if (inetAddresses != null) {
                     String ip4 = inetAddresses.getHostAddress();
-                    if (ip4 != null && !hasClientNodeReferToThisIP(ip4)) {
+                    ClientNode referedClientNode = getClientNodeReferToThisIP(ip4);
+
+                    if (ip4 != null && referedClientNode == null) {
                         ClientNode node = new ClientNode(ip4, port, new ClientListenerWrapper(new ClientListenerAdapter() {
                             @Override
                             public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
                                 super.onClientCreateFailed(clientNode, msg, exception);
-                                clientNodeSet.remove(clientNode);
+                                clientNodeList.remove(clientNode);
                             }
 
                             @Override
                             public void onClientDestroyed(ClientNode clientNode) {
                                 super.onClientDestroyed(clientNode);
-                                clientNodeSet.remove(clientNode);
+                                clientNodeList.remove(clientNode);
                             }
 
                             @Override
                             public void onDestroy(Peer peer) {
                                 super.onDestroy(peer);
-                                clientNodeSet.remove(peer.getLocalNode());
+                                clientNodeList.remove(peer.getLocalNode());
                             }
                         }, true));
                         node.create(Constants.Others.TIMEOUT);
-                        clientNodeSet.add(node);
+                        clientNodeList.add(node);
                     } else {
-                        Logger.i(tag, "there already has a peer connected to the nsd service, so no need to connect to it again.");
+                        Logger.i(tag, "there already has a peer connected to the nsd service, so no need to connect to it again, just send a ping msg to check if it's still available.");
+                        referedClientNode.sendMsg(MsgCreator.createPingMsg());
                     }
                 }
             } else {

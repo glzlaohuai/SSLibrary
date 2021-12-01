@@ -234,7 +234,6 @@ public class Peer {
         }
     }
 
-
     private long findFirstAddedChunkSendTime() {
         long minTime = Long.MAX_VALUE;
 

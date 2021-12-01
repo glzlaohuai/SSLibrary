@@ -64,6 +64,12 @@ public class MsgCreator {
         return StringMsg.create(msgID, content);
     }
 
+
+    public static StringMsg createPingMsg() {
+        String msgID = createMsgID(Constants.PeerMsgType.TYPE_PING, "ping");
+        return StringMsg.create(msgID, String.valueOf(System.currentTimeMillis()));
+    }
+
     public static FileMsg createFileMsg(File file) {
         String msgID = createMsgID(Constants.PeerMsgType.TYPE_FILE, file.getAbsolutePath());
         try {

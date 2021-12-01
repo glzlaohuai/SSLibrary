@@ -172,7 +172,9 @@ public class NsdNode {
                                             retrieveServiceInfoService.execute(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    jmDNS.getServiceInfo(event.getType(), event.getName());
+                                                    if (jmDNS != null) {
+                                                        jmDNS.getServiceInfo(event.getType(), event.getName());
+                                                    }
                                                 }
                                             });
                                         }
@@ -243,7 +245,7 @@ public class NsdNode {
             listener.onDestroyed(this);
 
             initExecutorService.shutdown();
-            //            retrieveServiceInfoService.shutdown();
+            retrieveServiceInfoService.shutdown();
         }
     }
 

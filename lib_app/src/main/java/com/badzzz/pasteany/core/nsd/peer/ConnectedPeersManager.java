@@ -6,7 +6,7 @@ import com.imob.lib.net.nsd.NsdNode;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class ConnectedPeersManager {
 
@@ -27,9 +27,9 @@ public class ConnectedPeersManager {
     }
 
 
-    public static void afterServiceDiscoveryed(NsdServiceHandler nsdServiceHandler, NsdNode nsdNode, ServiceEvent event) {
-        if (inUsingServiceHandler == nsdServiceHandler && relatedConnectedPeersHandlerMap.get(nsdServiceHandler) != null && nsdNode != null && event != null && nsdNode.isRunning()) {
-            relatedConnectedPeersHandlerMap.get(nsdServiceHandler).afterServiceDiscoveryed(event);
+    public static void afterServiceDiscoveryed(NsdServiceHandler nsdServiceHandler, NsdNode nsdNode, ServiceInfo info) {
+        if (inUsingServiceHandler == nsdServiceHandler && relatedConnectedPeersHandlerMap.get(nsdServiceHandler) != null && nsdNode != null && info != null && nsdNode.isRunning()) {
+            relatedConnectedPeersHandlerMap.get(nsdServiceHandler).afterServiceDiscoveryed(info);
         }
     }
 

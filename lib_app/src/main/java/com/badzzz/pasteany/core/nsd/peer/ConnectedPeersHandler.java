@@ -27,7 +27,7 @@ import java.net.Inet4Address;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class ConnectedPeersHandler {
 
@@ -122,7 +122,8 @@ public class ConnectedPeersHandler {
 
 
     private void destroyStalePeerByTagBeforeAddNewIncomingDetailedPeer(Peer incomingPeer) {
-        if (incomingPeer == null || incomingPeer.getTag() == null) return;
+        if (incomingPeer == null || incomingPeer.getTag() == null || !incomingPeer.getLocalNode().isServerNode())
+            return;
 
         for (Peer peer : detailedInfoPeers) {
             if (peer == incomingPeer) continue;
@@ -354,14 +355,14 @@ public class ConnectedPeersHandler {
         //        Peer.setGlobalPeerListener(null);
     }
 
-    public synchronized void afterServiceDiscoveryed(ServiceEvent event) {
-        if (event != null) {
+    public synchronized void afterServiceDiscoveryed(ServiceInfo info) {
+        if (info != null) {
 
             String deviceID = null;
             String serviceName = null;
 
             try {
-                JSONObject serviceJsonObject = new JSONObject(event.getName());
+                JSONObject serviceJsonObject = new JSONObject(info.getName());
                 deviceID = serviceJsonObject.getString(Constants.Device.KEY_DEVICEID);
                 serviceName = serviceJsonObject.getString(Constants.NSD.Key.SERVICE_NAME);
             } catch (JSONException e) {
@@ -370,8 +371,8 @@ public class ConnectedPeersHandler {
 
             if (deviceID != null && !deviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID()) && serviceName != null && serviceName.equals(PreferenceManagerWrapper.getInstance().getServiceName())) {
                 Logger.i(tag, "discoveryed nsd service's name match, and not the one created from localhost, so connect to it.");
-                Inet4Address inetAddresses = event.getInfo().getInet4Address();
-                int port = event.getInfo().getPort();
+                Inet4Address inetAddresses = info.getInet4Address();
+                int port = info.getPort();
 
                 if (inetAddresses != null) {
                     String ip4 = inetAddresses.getHostAddress();

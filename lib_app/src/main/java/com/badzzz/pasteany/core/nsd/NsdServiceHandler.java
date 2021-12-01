@@ -15,6 +15,8 @@ import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerListenerWrapper;
 import com.imob.lib.sslib.server.ServerNode;
 
+import javax.jmdns.ServiceInfo;
+
 
 public class NsdServiceHandler {
 
@@ -90,9 +92,9 @@ public class NsdServiceHandler {
 
 
                 @Override
-                public void onServiceDiscoveryed(NsdNode nsdNode, javax.jmdns.ServiceEvent event) {
+                public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
                     //find a nsdNode, try to connect to it
-                    ConnectedPeersManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, event);
+                    ConnectedPeersManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, info);
                 }
             }));
             nsdNode.create();

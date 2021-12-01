@@ -1,6 +1,6 @@
 package com.imob.lib.net.nsd;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class NsdEventListenerAdapter implements NsdEventListener {
     @Override
@@ -24,7 +24,7 @@ public class NsdEventListenerAdapter implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event) {
+    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo event) {
 
     }
 

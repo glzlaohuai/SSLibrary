@@ -13,7 +13,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class Main {
 
@@ -93,7 +93,7 @@ public class Main {
             }
 
             @Override
-            public void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event) {
+            public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
 
             }
 

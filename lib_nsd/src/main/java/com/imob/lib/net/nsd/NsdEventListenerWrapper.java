@@ -2,7 +2,7 @@ package com.imob.lib.net.nsd;
 
 import com.imob.lib.lib_common.Logger;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class NsdEventListenerWrapper implements NsdEventListener {
 
@@ -56,10 +56,10 @@ public class NsdEventListenerWrapper implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event) {
-        base.onServiceDiscoveryed(nsdNode, event);
+    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
+        base.onServiceDiscoveryed(nsdNode, info);
         if (printLog) {
-            Logger.i(TAG, "onServiceDiscoveryed, nsdNode: " + nsdNode + ", event: " + event.getInfo());
+            Logger.i(TAG, "onServiceDiscoveryed, nsdNode: " + nsdNode + ", info: " + info);
 
         }
     }

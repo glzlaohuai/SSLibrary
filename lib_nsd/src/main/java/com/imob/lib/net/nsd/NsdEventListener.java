@@ -1,6 +1,6 @@
 package com.imob.lib.net.nsd;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public interface NsdEventListener {
 
@@ -12,7 +12,7 @@ public interface NsdEventListener {
 
     void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e);
 
-    void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event);
+    void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo event);
 
     void onSuccessfullyWatchService(NsdNode nsdNode, String type, String name);
 

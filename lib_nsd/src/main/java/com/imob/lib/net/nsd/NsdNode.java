@@ -186,7 +186,7 @@ public class NsdNode {
 
                                 @Override
                                 public void serviceResolved(ServiceEvent event) {
-                                    listener.onServiceDiscoveryed(NsdNode.this, event);
+                                    listener.onServiceDiscoveryed(NsdNode.this, event.getInfo());
                                 }
                             });
                             listener.onSuccessfullyWatchService(NsdNode.this, type, name);

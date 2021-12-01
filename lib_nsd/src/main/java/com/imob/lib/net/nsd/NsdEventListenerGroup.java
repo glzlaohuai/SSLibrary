@@ -3,7 +3,7 @@ package com.imob.lib.net.nsd;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 
 public class NsdEventListenerGroup implements NsdEventListener {
 
@@ -57,9 +57,9 @@ public class NsdEventListenerGroup implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceEvent event) {
+    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
         for (NsdEventListener listener : queue) {
-            listener.onServiceDiscoveryed(nsdNode, event);
+            listener.onServiceDiscoveryed(nsdNode, info);
         }
     }
 

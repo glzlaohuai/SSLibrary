@@ -344,7 +344,7 @@ public class ConnectedPeersHandler {
     private boolean hasClientNodeReferToThisIP(String ip) {
         if (ip == null || ip.isEmpty()) return false;
         for (ClientNode clientNode : clientNodeSet) {
-            if (clientNode.getIp() != null && clientNode.equals(ip)) {
+            if (clientNode.getIp() != null && clientNode.getIp().equals(ip)) {
                 return true;
             }
         }
@@ -382,6 +382,18 @@ public class ConnectedPeersHandler {
                             public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
                                 super.onClientCreateFailed(clientNode, msg, exception);
                                 clientNodeSet.remove(clientNode);
+                            }
+
+                            @Override
+                            public void onClientDestroyed(ClientNode clientNode) {
+                                super.onClientDestroyed(clientNode);
+                                clientNodeSet.remove(clientNode);
+                            }
+
+                            @Override
+                            public void onDestroy(Peer peer) {
+                                super.onDestroy(peer);
+                                clientNodeSet.remove(peer.getLocalNode());
                             }
                         }, true));
                         node.create(Constants.Others.TIMEOUT);

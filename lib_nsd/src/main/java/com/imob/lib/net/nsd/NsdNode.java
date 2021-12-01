@@ -256,6 +256,7 @@ public class NsdNode {
                         Logger.i(tag, "get service info, type: " + type + ", name: " + name);
                         ServiceInfo serviceInfo = jmDNS.getServiceInfo(type, name);
                         Logger.i(tag, "got service info: " + serviceInfo);
+                        listener.onServiceDiscoveryed(NsdNode.this, serviceInfo);
                     }
                 }
             });

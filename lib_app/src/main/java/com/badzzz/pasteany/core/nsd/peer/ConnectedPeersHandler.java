@@ -25,8 +25,12 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.net.Inet4Address;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jmdns.ServiceInfo;
 
@@ -36,8 +40,7 @@ public class ConnectedPeersHandler {
 
     private boolean destroyed = false;
 
-    private List<Peer> totalConnectedPeers = new LinkedList<>();
-    private List<Peer> detailedInfoPeers = new LinkedList<>();
+    private Map<String, Set<Peer>> detailedInfoPeers = new ConcurrentHashMap<>();
     private List<ClientNode> clientNodeList = new LinkedList<>();
 
     private String tag = S_TAG + " # " + hashCode();
@@ -73,17 +76,54 @@ public class ConnectedPeersHandler {
 
 
         private synchronized void afterPeerDropped(Peer peer) {
-            totalConnectedPeers.remove(peer);
-            detailedInfoPeers.remove(peer);
-
+            removePeerFromMap(peer);
             callbackPeerDropped(peer);
         }
 
+
+        private boolean isPeerInMap(Peer peer) {
+            if (peer == null || peer.getTag() == null) return false;
+            Set<String> keys = detailedInfoPeers.keySet();
+            for (String key : keys) {
+                Set<Peer> peers = detailedInfoPeers.get(key);
+                if (peers != null && peers.contains(peer)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        private void addPeerToMap(Peer peer) {
+            if (peer == null || peer.getTag() == null) return;
+
+            String tag = peer.getTag();
+            Set<Peer> peers = detailedInfoPeers.get(tag);
+            if (peers == null) {
+                peers = new HashSet<>();
+                detailedInfoPeers.put(tag, peers);
+            }
+
+            peers.add(peer);
+        }
+
+
+        private void removePeerFromMap(Peer peer) {
+            if (peer != null && peer.getTag() != null) {
+                Set<Peer> peers = detailedInfoPeers.get(peer.getTag());
+                if (peers != null) {
+                    peers.remove(peer);
+                }
+            }
+
+        }
+
+
         private synchronized void afterIncomingPeerDetail(String msgID, Peer peer) {
-            if (!detailedInfoPeers.contains(peer)) {
+            if (!isPeerInMap(peer)) {
                 peer.setTag(MsgID.buildWithJsonString(msgID).getDevice());
                 destroyStalePeerByTagBeforeAddNewIncomingDetailedPeer(peer);
-                detailedInfoPeers.add(peer);
+                addPeerToMap(peer);
                 callbackPeerDetailInfoGot(peer);
             }
         }
@@ -91,7 +131,6 @@ public class ConnectedPeersHandler {
 
         private synchronized void afterPeerIncoming(Peer peer) {
             Logger.i(tag, "incoming a new peer, send msg to retrieve its detail device info.");
-            totalConnectedPeers.add(peer);
             callbackIncomingNewPeer(peer);
 
             //send a api msg to peer to got its detail info
@@ -117,16 +156,18 @@ public class ConnectedPeersHandler {
                 }
             });
         }
-
-
     };
-
 
     private void destroyStalePeerByTagBeforeAddNewIncomingDetailedPeer(Peer incomingPeer) {
         if (incomingPeer == null || incomingPeer.getTag() == null || !incomingPeer.getLocalNode().isServerNode())
             return;
 
-        for (Peer peer : detailedInfoPeers) {
+        Set<Peer> sameTagPeers = detailedInfoPeers.get(incomingPeer.getTag());
+        if (sameTagPeers == null) {
+            return;
+        }
+
+        for (Peer peer : sameTagPeers) {
             if (peer == incomingPeer) continue;
             if (peer.getTag().equals(incomingPeer.getTag()) && peer.getLocalNode().isServerNode()) {
                 Logger.i(tag, "peer's connection must has already lost, but not be detected by system yet, destroy it immediatelly: " + peer.toString());
@@ -150,7 +191,6 @@ public class ConnectedPeersHandler {
             handleIncomingMsgReadSucceeded(peer, id);
         }
 
-
         @Override
         public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
             super.onIncomingMsgReadFailed(peer, id, total, soFar);
@@ -160,7 +200,7 @@ public class ConnectedPeersHandler {
         @Override
         public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
             super.onIncomingConfirmMsg(peer, id, soFar, total);
-
+            handleIncomingConfirmMsg(peer, id, soFar, total);
 
         }
     };
@@ -230,22 +270,22 @@ public class ConnectedPeersHandler {
     }
 
     private void callbackFileMergeFailed(Peer peer, String deviceID, String msgID) {
-        listenerGroup.onFileMergeFailed(this, peer, deviceID, msgID);
+        listenerGroup.onIncomingFileChunkMergeFailed(this, peer, deviceID, msgID);
     }
 
 
     private void callbackFileMergeSucceeded(Peer peer, String deviceID, String msgID, File finalFile) {
-        listenerGroup.onFileMerged(this, peer, deviceID, msgID, finalFile);
+        listenerGroup.onIncomingFileChunkMerged(this, peer, deviceID, msgID, finalFile);
     }
 
 
     private void callbackFileChunkSaved(Peer peer, String deviceID, String msgID, File chunkFile, int soFar, int chunkSize) {
-        listenerGroup.onFileChunkSaved(this, peer, deviceID, msgID, soFar, chunkSize, chunkFile);
+        listenerGroup.onIncomingFileChunkSaved(this, peer, deviceID, msgID, soFar, chunkSize, chunkFile);
     }
 
 
     private void callbackFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
-        listenerGroup.onFileChunkSaveFailed(this, peer, deviceID, msgID, soFar, chunkSize);
+        listenerGroup.onIncomingFileChunkSaveFailed(this, peer, deviceID, msgID, soFar, chunkSize);
     }
 
     private void callbackPeerDropped(Peer peer) {
@@ -330,11 +370,8 @@ public class ConnectedPeersHandler {
         Peer.setGlobalPeerListener(globalListener);
     }
 
-    public List<Peer> getTotalConnectedPeers() {
-        return totalConnectedPeers;
-    }
 
-    public List<Peer> getDetailedInfoPeers() {
+    public Map<String, Set<Peer>> getDetailedInfoPeers() {
         return detailedInfoPeers;
     }
 

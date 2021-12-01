@@ -12,11 +12,17 @@ import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersHandler;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.imob.app.pasteew.utils.FileUtils;
+import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,8 +30,9 @@ import androidx.appcompat.app.AppCompatActivity;
 public class TestFuncActivity2 extends AppCompatActivity {
 
     private ListView knowNameListView;
+    private File testFile;
 
-    private List<Peer> peerList = new ArrayList<>();
+    private List<Set<Peer>> peerList = new ArrayList<>();
 
     private BaseAdapter knowAdapter = new BaseAdapter() {
         @Override
@@ -46,7 +53,9 @@ public class TestFuncActivity2 extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             TextView infoView = new TextView(TestFuncActivity2.this);
-            infoView.setText(((Peer) getItem(position)).toString());
+            Set<Peer> item = (Set<Peer>) getItem(position);
+
+            infoView.setText("connections: " + item.size() + "\n" + item.toString());
             return infoView;
         }
     };
@@ -60,6 +69,37 @@ public class TestFuncActivity2 extends AppCompatActivity {
         knowNameListView = findViewById(R.id.knownNameListView);
 
         setup();
+        copyTestFileToAppSandboxDirectory();
+    }
+
+
+    private void copyTestFileToAppSandboxDirectory() {
+        testFile = new File(getCacheDir(), "a_test_file_name");
+        if (!testFile.exists()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    InputStream inputStream = null;
+                    FileOutputStream fos = null;
+
+                    try {
+                        inputStream = getAssets().open("test.img");
+                        if (!testFile.exists()) {
+                            testFile.createNewFile();
+                        }
+
+                        fos = new FileOutputStream(testFile);
+                        FileUtils.inputToOutput(inputStream, fos);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        Closer.close(fos);
+                        Closer.close(inputStream);
+                    }
+                }
+            }).start();
+
+        }
     }
 
 
@@ -69,8 +109,9 @@ public class TestFuncActivity2 extends AppCompatActivity {
         knowNameListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Peer peer = ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().get(position);
-                peer.sendMessage(MsgCreator.createNormalStringMsg("hello, from " + PreferenceManagerWrapper.getInstance().getDeviceName()));
+                Set<Peer> set = peerList.get(position);
+                Peer peer = set.iterator().next();
+                peer.sendMessage(MsgCreator.createFileMsg(testFile));
             }
         });
 
@@ -82,7 +123,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
                     @Override
                     public void run() {
                         peerList.clear();
-                        peerList.addAll(ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers());
+                        peerList.addAll(ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
                         knowAdapter.notifyDataSetChanged();
                     }
                 });
@@ -96,12 +137,17 @@ public class TestFuncActivity2 extends AppCompatActivity {
             @Override
             public void onPeerDropped(ConnectedPeersHandler handler, Peer peer) {
                 notifyAdapter();
-
             }
 
             @Override
             public void onPeerDetailedInfoGot(ConnectedPeersHandler handler, Peer peer) {
                 notifyAdapter();
+            }
+
+
+            @Override
+            public void onIncomingFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
+                super.onIncomingFileChunkSaved(handler, peer, deviceID, msgID, soFar, chunkSize, file);
             }
         });
     }

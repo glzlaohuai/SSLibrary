@@ -311,6 +311,7 @@ public class Peer {
     }
 
     public synchronized void sendMessage(final Msg msg) {
+        if (msg == null) return;
         if (isDestroyed) {
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
             return;

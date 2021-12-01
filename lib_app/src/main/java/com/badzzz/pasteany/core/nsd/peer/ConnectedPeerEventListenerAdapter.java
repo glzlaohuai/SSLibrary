@@ -21,22 +21,22 @@ public class ConnectedPeerEventListenerAdapter implements ConnectedPeerEventList
     }
 
     @Override
-    public void onFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
+    public void onIncomingFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
 
     }
 
     @Override
-    public void onFileChunkSaveFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
+    public void onIncomingFileChunkSaveFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
 
     }
 
     @Override
-    public void onFileMergeFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID) {
+    public void onIncomingFileChunkMergeFailed(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID) {
 
     }
 
     @Override
-    public void onFileMerged(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, File finalFile) {
+    public void onIncomingFileChunkMerged(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, File finalFile) {
 
     }
 
@@ -51,12 +51,12 @@ public class ConnectedPeerEventListenerAdapter implements ConnectedPeerEventList
     }
 
     @Override
-    public void onFileChunkMsgSendConfirmed(ConnectedPeersHandler handler, Peer peer, String id, int soFar, int total) {
+    public void onFileChunkMsgSendConfirmed(ConnectedPeersHandler handler, Peer peer, String msgID, int soFar, int total) {
 
     }
 
     @Override
-    public void onStringMsgSendConfirmed(ConnectedPeersHandler handler, Peer peer, String id, int soFar, int total) {
+    public void onStringMsgSendConfirmed(ConnectedPeersHandler handler, Peer peer, String msgID, int soFar, int total) {
 
     }
 }

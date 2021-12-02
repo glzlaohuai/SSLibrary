@@ -74,7 +74,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
 
 
     private void copyTestFileToAppSandboxDirectory() {
-        testFile = new File(getCacheDir(), "a_test_file_name");
+        testFile = new File(getCacheDir(), "aaaaaaa");
         if (!testFile.exists()) {
             new Thread(new Runnable() {
                 @Override
@@ -83,7 +83,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
                     FileOutputStream fos = null;
 
                     try {
-                        inputStream = getAssets().open("test.img");
+                        inputStream = getAssets().open("testfile");
                         if (!testFile.exists()) {
                             testFile.createNewFile();
                         }
@@ -154,7 +154,11 @@ public class TestFuncActivity2 extends AppCompatActivity {
 
     private static final String TAG = TestFuncActivity2.class.getName();
 
-    public void testIt(View view) {
+    public void testIt(View view) throws InterruptedException {
+        //        throw new RuntimeException("this is a test exception.");
+
+
+        Thread.sleep(10 * 10000);
     }
 
 }

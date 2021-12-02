@@ -37,6 +37,7 @@ public class Peer {
     private static final String ERROR_MSG_CHUNK_READ_FAILED_IO = "read msg chunk failed due to peer send error occured, io error";
 
     private static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
+    private static PeerListenerGroup monitoredListener = new PeerListenerGroup();
 
     private Socket socket;
     private PeerListenerGroup listener = new PeerListenerGroup();
@@ -120,10 +121,19 @@ public class Peer {
         Peer.globalPeerListener.clear();
     }
 
+    public static void monitorPeerState(PeerListener listener) {
+        monitoredListener.add(listener);
+    }
+
+    public static void unmonitorPeerState(PeerListener listener) {
+        monitoredListener.remove(listener);
+    }
+
     public Peer(Socket socket, INode localNode, PeerListener listener) {
         this.socket = socket;
         this.listener.add(listener);
         this.listener.add(globalPeerListener);
+        this.listener.add(monitoredListener);
 
         this.localNode = localNode;
 

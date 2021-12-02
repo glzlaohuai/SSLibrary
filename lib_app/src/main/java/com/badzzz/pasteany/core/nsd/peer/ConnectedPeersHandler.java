@@ -19,18 +19,22 @@ import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerGroup;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.net.Inet4Address;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.jmdns.ServiceInfo;
 
@@ -38,10 +42,17 @@ public class ConnectedPeersHandler {
 
     private static final String S_TAG = "ConnectedPeersHandler";
 
+    private static final int MAX_RETRY_NUM = 5;
+
     private boolean destroyed = false;
+
+    private ScheduledExecutorService retryConnectService = Executors.newScheduledThreadPool(2, SSThreadFactory.build("cc-handler"));
 
     private Map<String, Set<Peer>> detailedInfoPeers = new ConcurrentHashMap<>();
     private List<ClientNode> clientNodeList = new LinkedList<>();
+
+    private Map<String, Integer> clientConnectRetryMap = new HashMap<>();
+
 
     private String tag = S_TAG + " # " + hashCode();
 
@@ -394,13 +405,29 @@ public class ConnectedPeersHandler {
     }
 
     private synchronized void doDestroy() {
-        //        Peer.setGlobalPeerListener(null);
-
         for (ClientNode clientNode : clientNodeList) {
             clientNode.destroy();
         }
         clientNodeList.clear();
+        retryConnectService.shutdown();
     }
+
+
+    private boolean isRetryConnectNumExceedsLimit(String serviceName) {
+        Integer integer = clientConnectRetryMap.get(serviceName);
+        return (integer == null || integer < MAX_RETRY_NUM);
+    }
+
+
+    private void increaseRetryNum(String serviceName) {
+        Integer integer = clientConnectRetryMap.get(serviceName);
+        if (integer == null) {
+            integer = 0;
+        }
+        integer++;
+        clientConnectRetryMap.put(serviceName, integer);
+    }
+
 
     public synchronized void afterServiceDiscoveryed(final ServiceInfo info) {
         if (info != null) {
@@ -423,14 +450,21 @@ public class ConnectedPeersHandler {
 
                 if (inetAddresses != null) {
                     String ip4 = inetAddresses.getHostAddress();
-                    ClientNode referedClientNode = getClientNodeReferToThisIP(ip4);
+                    final ClientNode referedClientNode = getClientNodeReferToThisIP(ip4);
 
                     if (ip4 != null && referedClientNode == null) {
+                        final String finalServiceName = serviceName;
+
+
                         ClientNode node = new ClientNode(ip4, port, new ClientListenerWrapper(new ClientListenerAdapter() {
                             @Override
                             public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
                                 super.onClientCreateFailed(clientNode, msg, exception);
                                 clientNodeList.remove(clientNode);
+
+                                if (!destroyed && !retryConnectService.isShutdown() && !isRetryConnectNumExceedsLimit(finalServiceName)) {
+
+                                }
 
                                 //connect to server failed, so send another service info retrieve msg
                                 if (!destroyed && ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == ConnectedPeersHandler.this) {
@@ -445,13 +479,19 @@ public class ConnectedPeersHandler {
                             @Override
                             public void onClientDestroyed(ClientNode clientNode) {
                                 super.onClientDestroyed(clientNode);
+                                afterClientDestroyed(clientNode);
+                            }
+
+                            private void afterClientDestroyed(ClientNode clientNode) {
                                 clientNodeList.remove(clientNode);
+                                //after be destroyed, reset its retry number
+                                clientConnectRetryMap.put(info.getName(), 0);
                             }
 
                             @Override
                             public void onDestroy(Peer peer) {
                                 super.onDestroy(peer);
-                                clientNodeList.remove(peer.getLocalNode());
+                                afterClientDestroyed((ClientNode) peer.getLocalNode());
                             }
                         }, true));
                         node.create(Constants.Others.TIMEOUT);

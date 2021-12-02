@@ -23,9 +23,9 @@ import java.util.concurrent.Executors;
 
 public class ServerNode implements INode {
 
-    private ExecutorService createExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("snode-c"));
+    private ExecutorService createExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("server-create"));
 
-    private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("snode-m"));
+    private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("server-moni"));
 
     private Byte createLock = 0x0;
 

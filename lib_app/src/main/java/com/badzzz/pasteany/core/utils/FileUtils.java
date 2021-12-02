@@ -43,6 +43,13 @@ public class FileUtils {
         if (fileList == null || fileList.isEmpty()) {
             return false;
         }
+        if (!finalFile.exists()) {
+            try {
+                finalFile.createNewFile();
+            } catch (IOException e) {
+                Logger.e(e);
+            }
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(finalFile, false);

@@ -214,7 +214,7 @@ public class ConnectedPeersHandler {
         switch (type) {
             //only handle file type msg here
             case Constants.PeerMsgType.TYPE_FILE:
-                PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, msgID.getData(), new IFileManager.FileMergeListener() {
+                PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, new File(msgID.getData()).getName(), new IFileManager.FileMergeListener() {
                     @Override
                     public void onSuccess(File finalFile) {
                         callbackFileMergeSucceeded(peer, PeerUtils.getDeviceIDFromPeer(peer), id, finalFile);
@@ -395,6 +395,11 @@ public class ConnectedPeersHandler {
 
     private synchronized void doDestroy() {
         //        Peer.setGlobalPeerListener(null);
+
+        for (ClientNode clientNode : clientNodeList) {
+            clientNode.destroy();
+        }
+        clientNodeList.clear();
     }
 
     public synchronized void afterServiceDiscoveryed(final ServiceInfo info) {

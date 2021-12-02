@@ -9,6 +9,7 @@ import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerGroup;
 import com.imob.lib.sslib.peer.PeerListenerWrapper;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,9 +23,9 @@ import java.util.concurrent.Executors;
 
 public class ServerNode implements INode {
 
-    private ExecutorService createExecutorService = Executors.newSingleThreadExecutor();
+    private ExecutorService createExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("snode-c"));
 
-    private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor();
+    private ExecutorService monitorExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("snode-m"));
 
     private Byte createLock = 0x0;
 

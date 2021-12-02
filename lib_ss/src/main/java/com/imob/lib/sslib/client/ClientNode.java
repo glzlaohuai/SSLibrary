@@ -4,6 +4,7 @@ import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.INode;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.peer.Peer;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -34,7 +35,7 @@ public class ClientNode implements INode {
 
     private Peer peer;
 
-    private ExecutorService socketStuffService = Executors.newSingleThreadExecutor();
+    private ExecutorService socketStuffService = Executors.newSingleThreadExecutor(SSThreadFactory.build("client-stuff"));
 
     public ClientNode(String ip, int port, ClientListener clientListener) {
         this.ip = ip;

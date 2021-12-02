@@ -2,6 +2,7 @@ package com.badzzz.pasteany.core.wrap;
 
 import com.badzzz.pasteany.core.interfaces.IDBManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class DBManagerWrapper {
     private IDBManager dbManager;
     private final static DBManagerWrapper instance = new DBManagerWrapper();
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService executorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("dbwrapper"));
 
 
     public interface IDBActionListener {

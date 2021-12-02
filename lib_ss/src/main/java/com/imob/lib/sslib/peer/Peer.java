@@ -7,6 +7,7 @@ import com.imob.lib.sslib.msg.Chunk;
 import com.imob.lib.sslib.msg.ConfirmMsg;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.MsgQueue;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -50,10 +51,10 @@ public class Peer {
 
     private boolean isDestroyed = false;
 
-    private ExecutorService msgSendService = Executors.newSingleThreadExecutor();
-    private ExecutorService monitorIncomingMsgService = Executors.newSingleThreadExecutor();
-    private ExecutorService msgInQueueService = Executors.newSingleThreadExecutor();
-    private ExecutorService timeoutCheckService = Executors.newSingleThreadExecutor();
+    private ExecutorService msgSendService = Executors.newSingleThreadExecutor(SSThreadFactory.build("peer-send"));
+    private ExecutorService monitorIncomingMsgService = Executors.newSingleThreadExecutor(SSThreadFactory.build("peer-moni"));
+    private ExecutorService msgInQueueService = Executors.newSingleThreadExecutor(SSThreadFactory.build("peer-queue"));
+    private ExecutorService timeoutCheckService = Executors.newSingleThreadExecutor(SSThreadFactory.build("peer-time"));
 
     private Byte timeoutLock = 0x0;
 

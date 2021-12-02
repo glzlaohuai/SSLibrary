@@ -1,6 +1,7 @@
 package com.imob.lib.net.nsd;
 
 import com.imob.lib.lib_common.Logger;
+import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -24,8 +25,8 @@ public class NsdNode {
 
     private static final String S_TAG = "NsdNode";
 
-    private final ExecutorService initExecutorService = Executors.newSingleThreadExecutor();
-    private final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool();
+    private final ExecutorService initExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("nsd-init"));
+    private final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool(SSThreadFactory.build("nsd-retri"));
 
     private final Byte lock = 0x0;
 

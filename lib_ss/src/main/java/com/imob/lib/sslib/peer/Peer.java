@@ -57,6 +57,7 @@ public class Peer {
     private ExecutorService timeoutCheckService = Executors.newSingleThreadExecutor(SSThreadFactory.build("peer-time"));
 
     private Byte timeoutLock = 0x0;
+    private Byte destroyLock = 0x0;
 
     private boolean destroyCallbacked = false;
     private boolean corruptedCallbacked = false;
@@ -65,6 +66,7 @@ public class Peer {
     private Map<String, Long> chunkSendingTime = new HashMap<>();
     private INode localNode;
     private String tag;
+    private String logTag;
     private long timeout;
 
     class IncomingMsgInfo {
@@ -141,6 +143,7 @@ public class Peer {
         init();
 
         tag = S_TAG + " - " + (localNode.isServerNode() ? "server" : "client") + ", remote: " + socket.getRemoteSocketAddress() + ", local: " + socket.getLocalSocketAddress();
+        logTag = S_TAG + " # " + hashCode();
     }
 
 
@@ -180,12 +183,18 @@ public class Peer {
         });
     }
 
-    public synchronized void destroy() {
-        if (!isDestroyed) {
-            isDestroyed = true;
+    public void destroy() {
+        Logger.i(logTag, "destroy called");
 
-            doDestroyStuff();
-            callbackDestroy();
+        if (!isDestroyed) {
+            synchronized (destroyLock) {
+                if (!isDestroyed) {
+                    isDestroyed = true;
+
+                    doDestroyStuff();
+                    callbackDestroy();
+                }
+            }
         }
     }
 
@@ -269,10 +278,11 @@ public class Peer {
     private void kickOffTimeoutCheck() {
         while (!isDestroyed()) {
             synchronized (timeoutLock) {
+                Logger.i(logTag, "timeout checking");
                 if (chunkSendingTime.isEmpty()) {
                     try {
+                        Logger.i(logTag, "msg chunk sending msg map is empty now, just wait until it's not empty to resume the timeout check process.");
                         timeoutLock.wait();
-                        Logger.i(tag, "msg chunk sending msg map is empty now, just wait until it's not empty to resume the timeout check process.");
                         continue;
                     } catch (InterruptedException e) {
                         Logger.e(e);
@@ -298,7 +308,7 @@ public class Peer {
         }
     }
 
-    private synchronized void doDestroyStuff() {
+    private void doDestroyStuff() {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
         clearAllProcessingIncomingMsgSetAndCallbackFailed();
@@ -321,13 +331,15 @@ public class Peer {
         Closer.close(socket);
     }
 
-    public synchronized void sendMessage(final Msg msg) {
+    public void sendMessage(final Msg msg) {
         if (msg == null) return;
         if (isDestroyed) {
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
             return;
         }
 
+        Logger.i(logTag, "send message: " + msg);
+        Logger.i(logTag, "peer's tag: " + tag);
         msg.addPeerHolder(this);
         msgQueue.add(msg);
         callbackMsgSendPending(msg);
@@ -359,7 +371,7 @@ public class Peer {
             return;
         }
 
-        Logger.i(tag, "awake msg queue loop thread after adding msg into msg queue.");
+        Logger.i(logTag, "awake msg queue loop thread after adding msg into msg queue.");
         callbackMsgIntoQueue(msg);
         notify();
     }
@@ -413,11 +425,13 @@ public class Peer {
     }
 
     private void addItemToChunkSendingTime(String id, int soFar) {
+        Logger.i(logTag, "add chunk send time to map: " + id + ", " + soFar);
         chunkSendingTime.put(id + " # " + soFar, System.currentTimeMillis());
 
     }
 
     private void removeItemFromChunkSendingTime(String id, int soFar) {
+        Logger.i(logTag, "remove chunk send time from map: " + id + ", " + soFar);
         chunkSendingTime.remove(id + " # " + soFar);
     }
 
@@ -425,9 +439,9 @@ public class Peer {
         final byte[] bytes = new byte[CHUNK_BYTE_LEN];
         while (!isDestroyed()) {
             Msg msg = msgQueue.poll();
-            Logger.i(tag, "poll msg: " + msg);
+            Logger.i(logTag, "poll msg: " + msg);
             if (msg == null) {
-                Logger.i(tag, "has no msg in msg queue currently, halt loop thread.");
+                Logger.i(logTag, "has no msg in msg queue currently, halt loop thread.");
                 try {
                     wait();
                 } catch (InterruptedException e) {
@@ -463,21 +477,24 @@ public class Peer {
                             Chunk chunk = msg.readChunk(bytes);
                             int state = chunk.getState();
                             dos.writeInt(state);
-                            Logger.i(tag, "write normal msg to dos, round: " + round + ", state: " + state + " , chunkSize: " + chunk.getSize() + ", total: " + available + ", e: " + chunk.getException());
+                            Logger.i(logTag, "write normal msg to dos, round: " + round + ", state: " + state + " , chunkSize: " + chunk.getSize() + ", total: " + available + ", e: " + chunk.getException());
 
                             switch (state) {
                                 case Chunk.STATE_OK:
                                     readed += chunk.getSize();
+
+                                    //保存chunk发出的时间
+                                    synchronized (timeoutLock) {
+                                        addItemToChunkSendingTime(msg.getId(), readed);
+                                        timeoutLock.notifyAll();
+                                    }
+
                                     dos.writeInt(chunk.getSize());
                                     dos.write(chunk.getBytes(), 0, chunk.getSize());
 
                                     listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
 
-                                    //保存chunk发出的时间
-                                    synchronized (timeoutLock) {
-                                        addItemToChunkSendingTime(msg.getId(), readed);
-                                        timeoutLock.notify();
-                                    }
+
                                     break;
                                 //should never happen
                                 case Chunk.STATE_EOF:
@@ -516,7 +533,7 @@ public class Peer {
             }
         }
 
-        Logger.i(tag, "msg queue loop end");
+        Logger.i(logTag, "msg queue loop end");
 
     }
 

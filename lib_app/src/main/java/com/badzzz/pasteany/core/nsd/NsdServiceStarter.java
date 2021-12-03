@@ -61,9 +61,13 @@ public class NsdServiceStarter {
 
 
     private static void createNsdServiceHandlerIfEnvironmentAvailable() {
+        Logger.i(TAG, "try to create&init nsd service handler");
         if (isEnvironmentAvailable()) {
+            Logger.i(TAG, "wifi connected, create and init nsd service handler");
             nsdServiceHandler = new NsdServiceHandler();
             nsdServiceHandler.init();
+        } else {
+            Logger.i(TAG, "wifi not be connected, do not create and init nsd service handler");
         }
     }
 

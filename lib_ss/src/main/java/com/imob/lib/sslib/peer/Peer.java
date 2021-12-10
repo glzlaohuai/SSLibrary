@@ -288,6 +288,7 @@ public class Peer {
                         Logger.e(e);
                     }
                 } else {
+                    Logger.i(logTag, "msg chunk sending msg map is not empty, check if it's timeout or not.");
                     long currentTime = System.currentTimeMillis();
                     //find the minimum time in chunkSendingTimeMap
                     long minimumTime = findFirstAddedChunkSendTime();

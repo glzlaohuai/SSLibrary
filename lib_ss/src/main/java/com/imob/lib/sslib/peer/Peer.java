@@ -299,7 +299,7 @@ public class Peer {
                     } else {
                         try {
                             //wait at least this time long, or be notified due to a new msg chunk send time was put into chunkSendingTimeMap
-                            timeoutLock.wait(currentTime - minimumTime);
+                            timeoutLock.wait(timeout - (currentTime - minimumTime));
                         } catch (InterruptedException e) {
                             Logger.e(e);
                         }

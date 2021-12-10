@@ -1,6 +1,7 @@
 package com.badzzz.pasteany.core.interfaces;
 
 import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 
@@ -20,6 +21,7 @@ public abstract class IPlatformManager {
         if (!hasInited) {
             initDefaultPreferenceValuesIfNotSet();
             kickOffNsdServiceIfServiceNameSet();
+            ConnectedPeersManager.init();
             hasInited = true;
         }
     }

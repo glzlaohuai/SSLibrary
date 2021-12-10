@@ -1,6 +1,5 @@
 package com.badzzz.pasteany.core.nsd.peer;
 
-import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsHandler;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.io.File;
@@ -31,79 +30,63 @@ public class ConnectedPeerEventListenerGroup implements ConnectedPeerEventListen
 
 
     @Override
-    public void onIncomingPeer(ConnectedClientsHandler handler, Peer peer) {
+    public void onIncomingPeer(Peer peer) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingPeer(handler, peer);
+            listener.onIncomingPeer(peer);
         }
     }
 
     @Override
-    public void onPeerDropped(ConnectedClientsHandler handler, Peer peer) {
+    public void onPeerLost(Peer peer) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onPeerDropped(handler, peer);
+            listener.onPeerLost(peer);
+        }
+    }
+
+
+    @Override
+    public void onIncomingFileChunkSaved(Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
+        for (ConnectedPeerEventListener listener : queue) {
+            listener.onIncomingFileChunkSaved(peer, deviceID, msgID, soFar, chunkSize, file);
         }
     }
 
     @Override
-    public void onPeerDetailedInfoGot(ConnectedClientsHandler handler, Peer peer) {
+    public void onIncomingFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onPeerDetailedInfoGot(handler, peer);
+            listener.onIncomingFileChunkSaveFailed(peer, deviceID, msgID, soFar, chunkSize);
         }
     }
 
     @Override
-    public void onIncomingFileChunkSaved(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
+    public void onIncomingFileChunkMergeFailed(Peer peer, String deviceID, String msgID) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingFileChunkSaved(handler, peer, deviceID, msgID, soFar, chunkSize, file);
+            listener.onIncomingFileChunkMergeFailed(peer, deviceID, msgID);
         }
     }
 
     @Override
-    public void onIncomingFileChunkSaveFailed(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
+    public void onIncomingFileChunkMerged(Peer peer, String deviceID, String msgID, File finalFile) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingFileChunkSaveFailed(handler, peer, deviceID, msgID, soFar, chunkSize);
+            listener.onIncomingFileChunkMerged(peer, deviceID, msgID, finalFile);
         }
     }
 
     @Override
-    public void onIncomingFileChunkMergeFailed(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID) {
+    public void onIncomingStringMsg(Peer peer, String deviceID, String msgID, String msg) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingFileChunkMergeFailed(handler, peer, deviceID, msgID);
+            listener.onIncomingStringMsg(peer, deviceID, msgID, msg);
         }
     }
 
     @Override
-    public void onIncomingFileChunkMerged(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, File finalFile) {
+    public void onIncomingMsgReadFailed(Peer peer, String deviceID, String msgID) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingFileChunkMerged(handler, peer, deviceID, msgID, finalFile);
+            listener.onIncomingMsgReadFailed(peer, deviceID, msgID);
         }
     }
 
-    @Override
-    public void onIncomingStringMsg(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, String msg) {
-        for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingStringMsg(handler, peer, deviceID, msgID, msg);
-        }
-    }
 
-    @Override
-    public void onIncomingMsgReadFailed(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID) {
-        for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingMsgReadFailed(handler, peer, deviceID, msgID);
-        }
-    }
 
-    @Override
-    public void onFileChunkMsgSendConfirmed(ConnectedClientsHandler handler, Peer peer, String msgID, int soFar, int total) {
-        for (ConnectedPeerEventListener listener : queue) {
-            listener.onFileChunkMsgSendConfirmed(handler, peer, msgID, soFar, total);
-        }
-    }
 
-    @Override
-    public void onStringMsgSendConfirmed(ConnectedClientsHandler handler, Peer peer, String msgID, int soFar, int total) {
-        for (ConnectedPeerEventListener listener : queue) {
-            listener.onStringMsgSendConfirmed(handler, peer, msgID, soFar, total);
-        }
-    }
 }

@@ -65,8 +65,8 @@ public class MsgCreator {
     }
 
 
-    public static StringMsg createPingMsg() {
-        String msgID = createMsgID(Constants.PeerMsgType.TYPE_PING, "ping");
+    public static StringMsg createPingMsg(String data) {
+        String msgID = createMsgID(Constants.PeerMsgType.TYPE_PING, data);
         return StringMsg.create(msgID, String.valueOf(System.currentTimeMillis()));
     }
 

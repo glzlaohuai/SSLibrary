@@ -232,4 +232,12 @@ public class ClientListenerWrapper implements ClientListener {
             Logger.i(TAG, "onMsgSendPending, peer: " + peer.getTag() + ", id: " + id);
         }
     }
+
+    @Override
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
+        base.onMsgSendPending(peer, id);
+        if (printLog) {
+            Logger.i(TAG, "onSomeMsgChunkSendSucceededButNotConfirmedByPeer, peer: " + peer.getTag() + ", id: " + msgID);
+        }
+    }
 }

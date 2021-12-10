@@ -33,7 +33,7 @@ public interface PeerListener {
 
     void onIncomingMsgChunkReadFailed(Peer peer, String id, String errorMsg);
 
-    void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes);
+    void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes);
 
     void onIncomingMsgReadSucceeded(Peer peer, String id);
 
@@ -44,4 +44,6 @@ public interface PeerListener {
     void onConfirmMsgSendPending(Peer peer, String id, int soFar, int total);
 
     void onMsgSendPending(Peer peer, String id);
+
+    void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID);
 }

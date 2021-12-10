@@ -295,7 +295,7 @@ public class ConnectedClientsHandler {
     }
 
     private void callbackPeerDropped(Peer peer) {
-        listenerGroup.onPeerDropped(this, peer);
+        listenerGroup.onPeerLost(this, peer);
 
 
         if (PeerUtils.getDeviceIDFromPeer(peer) != null) {
@@ -471,7 +471,7 @@ public class ConnectedClientsHandler {
                         clientNodeList.add(node);
                     } else {
                         Logger.i(tag, "there already has a peer connected to the nsd service, so no need to connect to it again, just send a ping msg to check if it's still available.");
-                        referedClientNode.sendMsg(MsgCreator.createPingMsg());
+                        referedClientNode.sendMsg(MsgCreator.createPingMsg("ping_alive_check"));
                     }
                 }
             } else {

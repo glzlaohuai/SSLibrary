@@ -202,4 +202,11 @@ public class ClientListenerGroup implements ClientListener {
             listener.onMsgSendPending(peer, id);
         }
     }
+
+    @Override
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
+        for (ClientListener listener : queue) {
+            listener.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(peer, msgID);
+        }
+    }
 }

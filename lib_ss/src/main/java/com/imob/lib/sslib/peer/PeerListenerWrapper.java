@@ -222,4 +222,13 @@ public class PeerListenerWrapper implements PeerListener {
 
         }
     }
+
+    @Override
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
+        base.onMsgSendPending(peer, msgID);
+        if (printLog) {
+            Logger.i(TAG, "onSomeMsgChunkSendSucceededButNotConfirmedByPeer, peer: " + peer.getTag() + ", id: " + msgID);
+
+        }
+    }
 }

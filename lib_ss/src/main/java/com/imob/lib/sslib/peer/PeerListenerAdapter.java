@@ -82,7 +82,7 @@ public class PeerListenerAdapter implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
 
     }
 
@@ -108,6 +108,11 @@ public class PeerListenerAdapter implements PeerListener {
 
     @Override
     public void onMsgSendPending(Peer peer, String id) {
+
+    }
+
+    @Override
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
 
     }
 }

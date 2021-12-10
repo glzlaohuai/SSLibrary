@@ -99,7 +99,7 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar,int available, byte[] chunkBytes) {
+    public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
 
     }
 
@@ -125,6 +125,11 @@ public class ClientListenerAdapter implements ClientListener {
 
     @Override
     public void onMsgSendPending(Peer peer, String id) {
+
+    }
+
+    @Override
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
 
     }
 }

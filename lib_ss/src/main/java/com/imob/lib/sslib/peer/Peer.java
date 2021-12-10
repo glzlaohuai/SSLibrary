@@ -69,6 +69,8 @@ public class Peer {
     private String logTag;
     private long timeout;
 
+    private UnconfirmedSendedChunkManager unconfirmedSendedChunkManager = new UnconfirmedSendedChunkManager();
+
     class IncomingMsgInfo {
         private String msgID;
         private int soFar;
@@ -95,6 +97,35 @@ public class Peer {
 
         public int getTotal() {
             return total;
+        }
+    }
+
+
+    class UnconfirmedSendedChunkManager {
+
+        private Map<String, Set<Integer>> chunkMap = new HashMap<>();
+
+        public void afterChunkMsgSended(String msgID, int soFar) {
+            Set<Integer> chunks;
+            if (chunkMap.containsKey(msgID)) {
+                chunks = chunkMap.get(msgID);
+            } else {
+                chunks = new HashSet<>();
+                chunkMap.put(msgID, chunks);
+            }
+
+            chunks.add(soFar);
+        }
+
+
+        public void afterConfirmMsgIncome(String msgID, int soFar) {
+            if (chunkMap.containsKey(msgID)) {
+                chunkMap.get(msgID).remove(soFar);
+            }
+        }
+
+        public Set<String> getAllUnconfirmedMsgID() {
+            return chunkMap.keySet();
         }
     }
 
@@ -313,7 +344,15 @@ public class Peer {
         closeIODropConnection();
         clearAllNonePendingMsgAndCallbackFailed();
         clearAllProcessingIncomingMsgSetAndCallbackFailed();
+        clearAllUnconfirmedSendedChunkAndCallbackFailed();
         stopAllExecutorService();
+    }
+
+    private void clearAllUnconfirmedSendedChunkAndCallbackFailed() {
+        Set<String> unconfirmedMsgIDSet = unconfirmedSendedChunkManager.getAllUnconfirmedMsgID();
+        for (String msgID : unconfirmedMsgIDSet) {
+            listener.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(this, msgID);
+        }
     }
 
 
@@ -411,6 +450,7 @@ public class Peer {
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendFailed(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal(), errorMsg, e);
         } else {
+            unconfirmedSendedChunkManager.
             listener.onMsgSendFailed(Peer.this, msg == null ? "" : msg.getId(), errorMsg, e);
         }
     }
@@ -495,7 +535,7 @@ public class Peer {
 
                                     listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
 
-
+                                    unconfirmedSendedChunkManager.afterChunkMsgSended(msg.getId(), readed);
                                     break;
                                 //should never happen
                                 case Chunk.STATE_EOF:
@@ -616,6 +656,7 @@ public class Peer {
                                 }
 
                                 listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
+                                unconfirmedSendedChunkManager.afterConfirmMsgIncome(id, soFar);
                                 synchronized (timeoutLock) {
                                     removeItemFromChunkSendingTime(id, soFar);
                                     timeoutLock.notify();

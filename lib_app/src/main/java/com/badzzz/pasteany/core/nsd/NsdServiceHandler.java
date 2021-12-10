@@ -1,7 +1,7 @@
 package com.badzzz.pasteany.core.nsd;
 
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
-import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
+import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
@@ -39,7 +39,7 @@ public class NsdServiceHandler {
     public synchronized void init() {
         if (!isDestroyCalled && !isInited) {
             isInited = true;
-            ConnectedPeersManager.setCurrentlyUsedHandler(this);
+            ConnectedClientsManager.setCurrentlyUsedHandler(this);
             createServerNodeAndCreateNsdNodeAfterServerNodeCreated();
         }
     }
@@ -94,7 +94,7 @@ public class NsdServiceHandler {
                 @Override
                 public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
                     //find a nsdNode, try to connect to it
-                    ConnectedPeersManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, info);
+                    ConnectedClientsManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, info);
                 }
             }));
             nsdNode.create();
@@ -117,7 +117,7 @@ public class NsdServiceHandler {
     private void doStuffAfterHandlerBeDestroyed(INsdServiceHandlerDestroyListener listener) {
         isDestroyed = true;
         listener.onDestroyed(this);
-        ConnectedPeersManager.destroyRelatedConnectedPeerHolder(this);
+        ConnectedClientsManager.destroyRelatedConnectedPeerHolder(this);
     }
 
     private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener) {

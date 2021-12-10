@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
-import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersHandler;
-import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
+import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsHandler;
+import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
@@ -116,37 +116,37 @@ public class TestFuncActivity2 extends AppCompatActivity {
         });
 
 
-        ConnectedPeersHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
+        ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
 
             private void notifyAdapter() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         peerList.clear();
-                        peerList.addAll(ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
+                        peerList.addAll(ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
                         knowAdapter.notifyDataSetChanged();
                     }
                 });
             }
 
             @Override
-            public void onIncomingPeer(ConnectedPeersHandler handler, Peer peer) {
+            public void onIncomingPeer(ConnectedClientsHandler handler, Peer peer) {
                 notifyAdapter();
             }
 
             @Override
-            public void onPeerDropped(ConnectedPeersHandler handler, Peer peer) {
+            public void onPeerDropped(ConnectedClientsHandler handler, Peer peer) {
                 notifyAdapter();
             }
 
             @Override
-            public void onPeerDetailedInfoGot(ConnectedPeersHandler handler, Peer peer) {
+            public void onPeerDetailedInfoGot(ConnectedClientsHandler handler, Peer peer) {
                 notifyAdapter();
             }
 
 
             @Override
-            public void onIncomingFileChunkSaved(ConnectedPeersHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
+            public void onIncomingFileChunkSaved(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
                 super.onIncomingFileChunkSaved(handler, peer, deviceID, msgID, soFar, chunkSize, file);
             }
         });

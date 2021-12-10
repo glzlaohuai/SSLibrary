@@ -1,4 +1,4 @@
-package com.badzzz.pasteany.core.nsd.peer;
+package com.badzzz.pasteany.core.nsd.peer.client;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.api.msg.MsgID;
@@ -6,6 +6,8 @@ import com.badzzz.pasteany.core.api.request.APIRequester;
 import com.badzzz.pasteany.core.api.response.APIResponserManager;
 import com.badzzz.pasteany.core.interfaces.IFileManager;
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerGroup;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
@@ -35,9 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jmdns.ServiceInfo;
 
-public class ConnectedPeersHandler {
+public class ConnectedClientsHandler {
 
-    private static final String S_TAG = "ConnectedPeersHandler";
+    private static final String S_TAG = "ConnectedClientsHandler";
 
     private boolean destroyed = false;
 
@@ -52,12 +54,12 @@ public class ConnectedPeersHandler {
     private static ConnectedPeerEventListenerGroup listenerGroup = new ConnectedPeerEventListenerGroup();
 
     public static void monitorConnectedPeersEvents(ConnectedPeerEventListener eventListener) {
-        ConnectedPeersHandler.listenerGroup.add(eventListener);
+        ConnectedClientsHandler.listenerGroup.add(eventListener);
     }
 
 
     public static void unmonitorConnectedPeersEvents(ConnectedPeerEventListener eventListener) {
-        ConnectedPeersHandler.listenerGroup.remove(eventListener);
+        ConnectedClientsHandler.listenerGroup.remove(eventListener);
     }
 
 
@@ -300,8 +302,8 @@ public class ConnectedPeersHandler {
             String deviceID = PeerUtils.getDeviceIDFromPeer(peer);
 
             // TODO: 2021/11/25 triggerServiceInfo
-            if (ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == this) {
-                NsdNode nsdNode = ConnectedPeersManager.getInUsingServiceHandler().getNsdNode();
+            if (ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler() == this) {
+                NsdNode nsdNode = ConnectedClientsManager.getInUsingServiceHandler().getNsdNode();
                 if (nsdNode != null) {
                     Logger.i(tag, "try to retrieve lost peer's info");
                     nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(deviceID, PreferenceManagerWrapper.getInstance().getServiceName()));
@@ -367,7 +369,7 @@ public class ConnectedPeersHandler {
     }
 
 
-    public ConnectedPeersHandler() {
+    public ConnectedClientsHandler() {
         globalListener.add(peerNameRetrieveListeenr);
         globalListener.add(mainGlobalPeerListener);
 
@@ -438,9 +440,9 @@ public class ConnectedPeersHandler {
                                 super.onClientCreateFailed(clientNode, msg, exception);
                                 clientNodeList.remove(clientNode);
                                 //connect to server failed, so send another service info retrieve msg
-                                if (!destroyed && ConnectedPeersManager.getCurrentlyUsedConnectedPeerHandler() == ConnectedPeersHandler.this) {
+                                if (!destroyed && ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler() == ConnectedClientsHandler.this) {
                                     Logger.i(tag, "create client failed, maybe the server info changed? do another retrieve service info loop and if retrieved, try to reconnect to it again.");
-                                    NsdNode nsdNode = ConnectedPeersManager.getInUsingServiceHandler().getNsdNode();
+                                    NsdNode nsdNode = ConnectedClientsManager.getInUsingServiceHandler().getNsdNode();
                                     if (nsdNode != null) {
                                         nsdNode.triggerServiceInfoResolve(info.getType(), info.getName());
                                     }

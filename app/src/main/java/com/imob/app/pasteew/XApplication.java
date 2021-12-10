@@ -4,9 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
+import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsHandler;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerWrapper;
-import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersHandler;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.badzzz.pasteany.lib.core.android.AndroidPlatformManager;
@@ -38,6 +38,7 @@ public class XApplication extends Application {
         PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
 
         androidPlatformManager.initPlatform();
-        ConnectedPeersHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerWrapper(new ConnectedPeerEventListenerAdapter(), true));
+        ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerWrapper(new ConnectedPeerEventListenerAdapter(), true));
     }
+
 }

@@ -355,7 +355,7 @@ public class Peer {
     }
 
     private void clearAllUnconfirmedSendedChunkAndCallbackFailed() {
-        Set<String> unconfirmedMsgIDSet = unconfirmedSendedChunkManager.getAllUnconfirmedMsgID();
+        Set<String> unconfirmedMsgIDSet = new HashSet<>(unconfirmedSendedChunkManager.getAllUnconfirmedMsgID());
         for (String msgID : unconfirmedMsgIDSet) {
             listener.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(this, msgID);
         }
@@ -565,7 +565,7 @@ public class Peer {
                         dos.writeInt(((ConfirmMsg) msg).getTotal());
                         break;
                 }
-
+                unconfirmedSendedChunkManager.removeMsgSendChunkByMsgID(msg.getId());
                 callbackMsgSendSucceeded(msg);
             } catch (IOException e) {
                 Logger.e(e);
@@ -702,6 +702,6 @@ public class Peer {
 
     @Override
     public String toString() {
-        return String.format("Peer{%s, node: %s}", getTag(), getLocalNode() == null ? "null" : getLocalNode().toString());
+        return String.format("Peer{%s, node: %s}", logTag, getLocalNode() == null ? "null" : getLocalNode().toString());
     }
 }

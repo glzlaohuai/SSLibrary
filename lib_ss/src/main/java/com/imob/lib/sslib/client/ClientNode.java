@@ -43,7 +43,7 @@ public class ClientNode implements INode {
 
         this.listener.add(new ClientListenerWrapper(clientListener, false));
 
-        tag = S_TAG + " - " + "ip: " + ip + ", port: " + port + ", hash: " + hashCode();
+        tag = S_TAG + " # " + hashCode();
     }
 
 
@@ -143,6 +143,11 @@ public class ClientNode implements INode {
         }
     }
 
+
+    @Override
+    public String toString() {
+        return tag;
+    }
 
     public String getIp() {
         return ip;

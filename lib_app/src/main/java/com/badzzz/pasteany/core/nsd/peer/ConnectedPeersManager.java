@@ -127,30 +127,31 @@ public class ConnectedPeersManager {
         }
 
         @Override
-        public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
-            super.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(peer, msgID);
-
-            connectedPeerEventListenerGroup.onNotAllMsgChunkSendedConfirmed(peer, msgID);
+        public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String id) {
+            super.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(peer, id);
+            if (isThisMsgTypeNeedCallback(id)) {
+                connectedPeerEventListenerGroup.onNotAllMsgChunkSendedConfirmed(peer, id);
+            }
         }
 
     };
 
 
-    private static void callbackFileChunkSaved(Peer peer, String msgID, File chunkFile, int soFar, int chunkSize) {
-        connectedPeerEventListenerGroup.onIncomingFileChunkSaved(peer, msgID, soFar, chunkSize, chunkFile);
+    private static void callbackFileChunkSaved(Peer peer, String id, File chunkFile, int soFar, int chunkSize) {
+        connectedPeerEventListenerGroup.onIncomingFileChunkSaved(peer, id, soFar, chunkSize, chunkFile);
     }
 
-    private static void callbackFileChunkSaveFailed(Peer peer, String msgID, int soFar, int chunkSize) {
-        connectedPeerEventListenerGroup.onIncomingFileChunkSaveFailed(peer, msgID, soFar, chunkSize);
+    private static void callbackFileChunkSaveFailed(Peer peer, String id, int soFar, int chunkSize) {
+        connectedPeerEventListenerGroup.onIncomingFileChunkSaveFailed(peer, id, soFar, chunkSize);
     }
 
-    private static void callbackIncomingFileChunk(Peer peer, String msgID, int chunkSize, int soFar, int available, byte[] chunkBytes) {
-        connectedPeerEventListenerGroup.onIncomingFileChunk(peer, msgID, soFar, chunkSize, available, chunkBytes);
+    private static void callbackIncomingFileChunk(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
+        connectedPeerEventListenerGroup.onIncomingFileChunk(peer, id, soFar, chunkSize, available, chunkBytes);
     }
 
 
-    private static void callbackIncomingStringMsg(Peer peer, String msgID, String msg) {
-        connectedPeerEventListenerGroup.onIncomingStringMsg(peer, msgID, msg);
+    private static void callbackIncomingStringMsg(Peer peer, String id, String msg) {
+        connectedPeerEventListenerGroup.onIncomingStringMsg(peer, id, msg);
     }
 
 

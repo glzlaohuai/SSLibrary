@@ -295,6 +295,25 @@ public class ConnectedPeersManager {
         removePeerFromMap(peer);
         callbackPeerLost(peer);
         triggerReconnectActionAfterPeerDropped(peer);
+        findSameRemoteLocationPeerAndCheckAliveAfterPeerLost(peer);
+    }
+
+
+    private static void findSameRemoteLocationPeerAndCheckAliveAfterPeerLost(Peer lostPeer) {
+        if (lostPeer != null && PeerUtils.getDeviceIDFromPeer(lostPeer) != null) {
+            String tag = lostPeer.getTag();
+            Set<Peer> peers = new HashSet<>(connectedPeersMap.get(tag));
+
+            if (peers != null) {
+                for (Peer peer : peers) {
+                    if (peer != lostPeer) {
+                        peer.sendMessage(MsgCreator.createPingMsg("alive_check_for_same_remote_location"));
+                    }
+                }
+            }
+
+
+        }
     }
 
     private static void callbackPeerLost(Peer peer) {

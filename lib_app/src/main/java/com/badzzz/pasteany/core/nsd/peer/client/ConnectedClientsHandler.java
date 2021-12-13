@@ -80,9 +80,6 @@ public class ConnectedClientsHandler {
                     final ClientNode referedClientNode = getClientNodeReferToThisIP(ip4);
 
                     if (ip4 != null && referedClientNode == null) {
-                        final String finalServiceName = serviceName;
-
-
                         ClientNode node = new ClientNode(ip4, port, new ClientListenerWrapper(new ClientListenerAdapter() {
                             @Override
                             public void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception) {
@@ -118,7 +115,7 @@ public class ConnectedClientsHandler {
                         clientNodeList.add(node);
                     } else {
                         Logger.i(tag, "there already has a peer connected to the nsd service, so no need to connect to it again, just send a ping msg to check if it's still available.");
-                        referedClientNode.sendMsg(MsgCreator.createPingMsg("ping_alive_check"));
+                        referedClientNode.sendMsg(MsgCreator.createPingMsg("ping_alive_check_for_connected_client"));
                     }
                 }
             } else {

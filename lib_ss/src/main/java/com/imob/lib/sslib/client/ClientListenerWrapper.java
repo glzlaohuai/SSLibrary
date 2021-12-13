@@ -234,10 +234,10 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
-    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
+    public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String id) {
         base.onMsgSendPending(peer, id);
         if (printLog) {
-            Logger.i(TAG, "onSomeMsgChunkSendSucceededButNotConfirmedByPeer, peer: " + peer.getTag() + ", id: " + msgID);
+            Logger.i(TAG, "onSomeMsgChunkSendSucceededButNotConfirmedByPeer, peer: " + peer.getTag() + ", id: " + id);
         }
     }
 }

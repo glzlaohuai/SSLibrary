@@ -10,24 +10,26 @@ public interface ConnectedPeerEventListener {
 
     void onIncomingPeer(Peer peer);
 
-    void onIncomingFileChunkSaved(Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file);
+    void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file);
 
-    void onIncomingFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize);
+    void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes);
 
-    void onIncomingFileChunkMergeFailed(Peer peer, String deviceID, String msgID);
+    void onIncomingFileChunkSaveFailed(Peer peer, String id, int soFar, int chunkSize);
 
-    void onIncomingFileChunkMerged(Peer peer, String deviceID, String msgID, File finalFile);
+    void onIncomingFileChunkMergeFailed(Peer peer, String id);
 
-    void onIncomingStringMsg(Peer peer, String deviceID, String msgID, String msg);
+    void onIncomingFileChunkMerged(Peer peer, String id, File finalFile);
 
-    void onIncomingMsgReadSucceeded(Peer peer, String msgID);
+    void onIncomingStringMsg(Peer peer, String id, String msg);
 
-    void onIncomingMsgReadFailed(Peer peer, String msgID, int soFar, int total);
+    void onIncomingMsgReadSucceeded(Peer peer, String id);
 
-    void onMsgSendFailed(Peer peer, String msgID);
+    void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total);
 
-    void onNotAllMsgChunkSendedConfirmed(Peer peer, String msgID);
+    void onMsgSendFailed(Peer peer, String id);
 
-    void onSendedMsgChunkConfirmed(Peer peer, String msgID, int soFar, int total);
+    void onNotAllMsgChunkSendedConfirmed(Peer peer, String id);
+
+    void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total);
 
 }

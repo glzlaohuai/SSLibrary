@@ -124,6 +124,12 @@ public class Peer {
             }
         }
 
+
+        public void removeMsgSendChunkByMsgID(String msgID) {
+            chunkMap.remove(msgID);
+        }
+
+
         public Set<String> getAllUnconfirmedMsgID() {
             return chunkMap.keySet();
         }
@@ -450,7 +456,6 @@ public class Peer {
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendFailed(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal(), errorMsg, e);
         } else {
-            unconfirmedSendedChunkManager.
             listener.onMsgSendFailed(Peer.this, msg == null ? "" : msg.getId(), errorMsg, e);
         }
     }
@@ -565,10 +570,11 @@ public class Peer {
             } catch (IOException e) {
                 Logger.e(e);
                 //send msg failed, connection lost
-                destroy();
+                unconfirmedSendedChunkManager.removeMsgSendChunkByMsgID(msg.getId());
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_CONNECTION_LOST, e);
                 callbackCorrupted("corrupted due to exception occured while sending msg to peer", e);
 
+                destroy();
             } finally {
                 msg.destroy(this);
             }
@@ -635,6 +641,11 @@ public class Peer {
                                             break;
                                         default:
                                             throw new IOException("got a unexpected chunk state from peer, connection coruppted");
+                                    }
+
+                                    //read state is not ok, so break the while loop
+                                    if (state != Chunk.STATE_OK) {
+                                        break;
                                     }
                                 }
 

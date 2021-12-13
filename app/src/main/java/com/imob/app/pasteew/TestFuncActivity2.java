@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsHandler;
 import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.imob.app.pasteew.utils.FileUtils;
@@ -114,6 +115,8 @@ public class TestFuncActivity2 extends AppCompatActivity {
                 peer.sendMessage(MsgCreator.createFileMsg(testFile));
             }
         });
+
+
 
 
         ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {

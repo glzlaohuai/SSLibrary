@@ -20,93 +20,125 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         this.printLog = printLog;
     }
 
+
+    @Override
+    public void onPeerLost(Peer peer) {
+        base.onPeerLost(peer);
+
+        if (printLog) {
+            Logger.i(TAG, "onPeerLost, peer: " + peer);
+        }
+
+    }
+
     @Override
     public void onIncomingPeer(Peer peer) {
+
         base.onIncomingPeer(peer);
+
         if (printLog) {
             Logger.i(TAG, "onIncomingPeer, peer: " + peer);
         }
     }
 
     @Override
-    public void onPeerLost(Peer peer) {
+    public void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file) {
+        base.onIncomingFileChunkSaved(peer, id, soFar, chunkSize, file);
 
-        base.onPeerLost(peer);
         if (printLog) {
-            Logger.i(TAG, "onPeerDropped, peer: " + peer);
+            Logger.i(TAG, "onIncomingFileChunkSaved, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize + ", file: " + file);
         }
     }
 
     @Override
-    public void onPeerDetailedInfoGot(Peer peer) {
-        base.onPeerDetailedInfoGot(peer);
+    public void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes) {
+        base.onIncomingFileChunk(peer, id, soFar, chunkSize, available, bytes);
         if (printLog) {
-            Logger.i(TAG, "onPeerDetailedInfoGot, peer: " + peer);
+            Logger.i(TAG, "onIncomingFileChunk, peer: " + peer + ", id: " + id + ", soFar: " + soFar + ", chunkSize: " + chunkSize + ", available: " + available + ", bytes: " + bytes);
+        }
+    }
+
+
+    @Override
+    public void onIncomingFileChunkSaveFailed(Peer peer, String id, int soFar, int chunkSize) {
+        base.onIncomingFileChunkSaveFailed(peer, id, soFar, chunkSize);
+
+        if (printLog) {
+            Logger.i(TAG, "onIncomingFileChunkSaveFailed, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize);
         }
     }
 
     @Override
-    public void onIncomingFileChunkSaved(Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
-        base.onIncomingFileChunkSaved(peer, deviceID, msgID, soFar, chunkSize, file);
+    public void onIncomingFileChunkMergeFailed(Peer peer, String id) {
+        base.onIncomingFileChunkMergeFailed(peer, id);
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkSaved, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID + ", soFar: " + soFar + ", chunkSize: " + chunkSize + ", file: " + file);
-        }
-
-    }
-
-    @Override
-    public void onIncomingFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
-        base.onIncomingFileChunkSaveFailed(peer, deviceID, msgID, soFar, chunkSize);
-        if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkSaveFailed, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID + ", soFar: " + soFar + ", chunkSize: " + chunkSize);
+            Logger.i(TAG, "onIncomingFileChunkMergeFailed, peer: " + peer + ", id: " + id);
         }
     }
 
     @Override
-    public void onIncomingFileChunkMergeFailed(Peer peer, String deviceID, String msgID) {
-        base.onIncomingFileChunkMergeFailed(peer, deviceID, msgID);
+    public void onIncomingFileChunkMerged(Peer peer, String id, File finalFile) {
+        base.onIncomingFileChunkMerged(peer, id, finalFile);
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkMergeFailed, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID);
+            Logger.i(TAG, "onIncomingFileChunkMerged, peer: " + peer + ", id: " + id + ", file: " + finalFile);
         }
     }
 
     @Override
-    public void onIncomingFileChunkMerged(Peer peer, String deviceID, String msgID, File finalFile) {
-        base.onIncomingFileChunkMerged(peer, deviceID, msgID, finalFile);
+    public void onIncomingStringMsg(Peer peer, String id, String msg) {
+
+        base.onIncomingStringMsg(peer, id, msg);
+
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkMerged, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID + ", finalFile: " + finalFile);
+            Logger.i(TAG, "onIncomingStringMsg, peer: " + peer + ", id: " + id + ",msg: " + msg);
         }
     }
 
     @Override
-    public void onIncomingStringMsg(Peer peer, String deviceID, String msgID, String msg) {
-        base.onIncomingStringMsg(peer, deviceID, msgID, msg);
+    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+
+        base.onIncomingMsgReadSucceeded(peer, id);
+
         if (printLog) {
-            Logger.i(TAG, "onIncomingStringMsg, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID + ", msg: " + msg);
+            Logger.i(TAG, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
         }
     }
 
     @Override
-    public void onIncomingMsgReadFailed(Peer peer, String deviceID, String msgID) {
-        base.onIncomingMsgReadFailed(peer, deviceID, msgID);
+    public void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total) {
+        base.onIncomingMsgReadFailed(peer, id, soFar, total);
+
         if (printLog) {
-            Logger.i(TAG, "onIncomingMsgReadFailed, peer: " + peer + ", deviceID: " + deviceID + ", msgID: " + msgID);
+            Logger.i(TAG, "onIncomingMsgReadFailed, peer: " + peer + ", id: " + id + ", total: " + total);
         }
     }
 
     @Override
-    public void onFileChunkMsgSendConfirmed(Peer peer, String msgID, int soFar, int total) {
-        base.onFileChunkMsgSendConfirmed(peer, msgID, soFar, total);
+    public void onMsgSendFailed(Peer peer, String id) {
+        base.onMsgSendFailed(peer, id);
+
         if (printLog) {
-            Logger.i(TAG, "onFileChunkMsgSendConfirmed, peer: " + peer + ", msgID: " + msgID + ", soFar: " + soFar + ", total: " + total);
+            Logger.i(TAG, "onMsgSendFailed, peer: " + peer + ", id: " + id);
         }
     }
 
     @Override
-    public void onStringMsgSendConfirmed(Peer peer, String msgID, int soFar, int total) {
-        base.onStringMsgSendConfirmed(peer, msgID, soFar, total);
+    public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
+
+        base.onNotAllMsgChunkSendedConfirmed(peer, id);
+
         if (printLog) {
-            Logger.i(TAG, "onStringMsgSendConfirmed, peer: " + peer + ", msgID: " + msgID + ", soFar: " + soFar + ", total: " + total);
+            Logger.i(TAG, "onNotAllMsgChunkSendedConfirmed, peer: " + peer + ", id: " + id);
         }
     }
+
+    @Override
+    public void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total) {
+        base.onSendedMsgChunkConfirmed(peer, id, soFar, total);
+
+        if (printLog) {
+            Logger.i(TAG, "onSendedMsgChunkConfirmed, peer: " + peer + ", id: " + id + ", SoFar: " + soFar + ", total: " + total);
+        }
+    }
+
 }

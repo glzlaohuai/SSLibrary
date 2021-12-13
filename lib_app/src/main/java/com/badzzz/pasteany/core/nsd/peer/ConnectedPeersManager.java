@@ -32,7 +32,7 @@ public class ConnectedPeersManager {
     private final static Byte peerMapLock = 0x0;
     private final static Map<String, Set<Peer>> connectedPeersMap = new ConcurrentHashMap<>();
 
-    private static ConnectedPeerEventListenerGroup connectedPeerEventListenerManager = new ConnectedPeerEventListenerGroup();
+    private static ConnectedPeerEventListenerGroup connectedPeerEventListenerGroup = new ConnectedPeerEventListenerGroup();
 
     private final static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
     private final static PeerListener peerMapManagerListener = new PeerListenerAdapter() {
@@ -69,6 +69,7 @@ public class ConnectedPeersManager {
 
     private final static PeerListener peerMsgManagerListener = new PeerListenerAdapter() {
 
+
         @Override
         public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {
             super.onIncomingMsgChunkReadSucceeded(peer, id, chunkSize, soFar, available, chunkBytes);
@@ -80,58 +81,70 @@ public class ConnectedPeersManager {
         @Override
         public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
             super.onIncomingConfirmMsg(peer, id, soFar, total);
-            handleIncomingConfirmMsg(peer, id, soFar, total);
+
+            if (isThisMsgTypeNeedCallback(id)) {
+                connectedPeerEventListenerGroup.onSendedMsgChunkConfirmed(peer, id, soFar, total);
+            }
         }
 
         @Override
         public void onMsgSendFailed(Peer peer, String id, String msg, Exception exception) {
             super.onMsgSendFailed(peer, id, msg, exception);
-            connectedPeerEventListenerManager.onMsgSendFailed(peer, id);
+            connectedPeerEventListenerGroup.onMsgSendFailed(peer, id);
         }
 
         @Override
-        public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+        public void onIncomingMsgReadSucceeded(final Peer peer, final String id) {
             super.onIncomingMsgReadSucceeded(peer, id);
-            connectedPeerEventListenerManager.onIncomingMsgReadSucceeded(peer, id);
+            connectedPeerEventListenerGroup.onIncomingMsgReadSucceeded(peer, id);
+            //if it's fileMsg, the merge all received file chunk into the completed final file, and callback the merge result
+            MsgID msgID = MsgID.buildWithJsonString(id);
+            if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
+                PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, new File(msgID.getData()).getName(), new IFileManager.FileMergeListener() {
+                    @Override
+                    public void onSuccess(File finalFile) {
+                        connectedPeerEventListenerGroup.onIncomingFileChunkMerged(peer, id, finalFile);
+                    }
+
+                    @Override
+                    public void onFailed() {
+                        connectedPeerEventListenerGroup.onIncomingFileChunkMergeFailed(peer, id);
+                    }
+                });
+            }
         }
 
         @Override
         public void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar) {
             super.onIncomingMsgReadFailed(peer, id, total, soFar);
-            connectedPeerEventListenerManager.onIncomingMsgReadFailed(peer, id, soFar, total);
+            connectedPeerEventListenerGroup.onIncomingMsgReadFailed(peer, id, soFar, total);
         }
 
         @Override
         public void onSomeMsgChunkSendSucceededButNotConfirmedByPeer(Peer peer, String msgID) {
             super.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(peer, msgID);
 
-            connectedPeerEventListenerManager.onNotAllMsgChunkSendedConfirmed(peer, msgID);
+            connectedPeerEventListenerGroup.onNotAllMsgChunkSendedConfirmed(peer, msgID);
         }
 
     };
 
-    private static void callbackFileChunkSaved(Peer peer, String deviceID, String msgID, File chunkFile, int soFar, int chunkSize) {
-        connectedPeerEventListenerManager.onIncomingFileChunkSaved(peer, deviceID, msgID, soFar, chunkSize, chunkFile);
+
+    private static void callbackFileChunkSaved(Peer peer, String msgID, File chunkFile, int soFar, int chunkSize) {
+        connectedPeerEventListenerGroup.onIncomingFileChunkSaved(peer, msgID, soFar, chunkSize, chunkFile);
     }
 
-    private static void callbackFileChunkSaveFailed(Peer peer, String deviceID, String msgID, int soFar, int chunkSize) {
-        connectedPeerEventListenerManager.onIncomingFileChunkSaveFailed(peer, deviceID, msgID, soFar, chunkSize);
+    private static void callbackFileChunkSaveFailed(Peer peer, String msgID, int soFar, int chunkSize) {
+        connectedPeerEventListenerGroup.onIncomingFileChunkSaveFailed(peer, msgID, soFar, chunkSize);
     }
 
-    private static void callbackIncomingFileChunk(Peer peer, String deviceID, String msgID, int chunkSize, int soFar, int available, byte[] chunkBytes) {
-
+    private static void callbackIncomingFileChunk(Peer peer, String msgID, int chunkSize, int soFar, int available, byte[] chunkBytes) {
+        connectedPeerEventListenerGroup.onIncomingFileChunk(peer, msgID, soFar, chunkSize, available, chunkBytes);
     }
 
 
-    private static void callbackIncomingStringMsg(Peer peer, String deviceID, String msgID, String msg) {
-
-    }
-
-    private static void handleIncomingConfirmMsg(Peer peer, String id, int sofar, int total) {
-        Logger.i(TAG, "handle incoming confirm msg, id: " + id + ", soFar: " + sofar + ", total: " + total);
-        if (isThisMsgTypeNeedCallback(id)) {
-            connectedPeerEventListenerManager.onSendedMsgChunkConfirmed(peer, id, sofar, total);
-        }
+    private static void callbackIncomingStringMsg(Peer peer, String msgID, String msg) {
+        connectedPeerEventListenerGroup.onIncomingStringMsg(peer, msgID, msg);
     }
 
 
@@ -152,22 +165,22 @@ public class ConnectedPeersManager {
             case Constants.PeerMsgType.TYPE_FILE:
                 final String deviceID = PeerUtils.getDeviceIDFromPeer(peer);
 
-                callbackIncomingFileChunk(peer, deviceID, id, chunkSize, soFar, available, chunkBytes);
+                callbackIncomingFileChunk(peer, id, chunkSize, soFar, available, chunkBytes);
                 PlatformManagerHolder.get().getAppManager().getFileManager().saveFileChunk(deviceID, id, chunkSize, soFar, available, chunkBytes, new IFileManager.FileChunkSaveListener() {
                     @Override
                     public void onSuccess(File chunkFile) {
-                        callbackFileChunkSaved(peer, deviceID, id, chunkFile, soFar, chunkSize);
+                        callbackFileChunkSaved(peer, id, chunkFile, soFar, chunkSize);
                     }
 
                     @Override
                     public void onFailed() {
-                        callbackFileChunkSaveFailed(peer, deviceID, id, soFar, chunkSize);
+                        callbackFileChunkSaveFailed(peer, id, soFar, chunkSize);
                     }
                 });
                 break;
             //string type msg always only have one msg chunk, so one msg chunk means msg read completed
             case Constants.PeerMsgType.TYPE_STR:
-                callbackIncomingStringMsg(peer, PeerUtils.getDeviceIDFromPeer(peer), id, new String(chunkBytes, 0, chunkSize));
+                callbackIncomingStringMsg(peer, id, new String(chunkBytes, 0, chunkSize));
                 break;
 
             case Constants.PeerMsgType.TYPE_PING:
@@ -240,7 +253,7 @@ public class ConnectedPeersManager {
                 peer.setTag(msgID.getDevice());
                 destroyStalePeersIfExistsAfterIncomingNewPeer(peer);
                 addPeerToMap(peer);
-                connectedPeerEventListenerManager.onIncomingPeer(peer);
+                connectedPeerEventListenerGroup.onIncomingPeer(peer);
             }
         }
     }
@@ -265,7 +278,7 @@ public class ConnectedPeersManager {
     }
 
     private static void callbackPeerLost(Peer peer) {
-        connectedPeerEventListenerManager.onPeerLost(peer);
+        connectedPeerEventListenerGroup.onPeerLost(peer);
     }
 
 

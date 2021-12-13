@@ -80,12 +80,6 @@
         android:onClick="createAndRegisterService"
         android:text="create and register service" />
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="setGlobalPeerListener"
-        android:text="set a global peer listener" />
-
 
     <Button
         android:layout_width="match_parent"

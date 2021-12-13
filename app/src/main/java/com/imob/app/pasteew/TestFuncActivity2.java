@@ -117,10 +117,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
         });
 
 
-
-
-        ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
-
+        ConnectedPeersManager.monitorConnectedPeersEvent(new ConnectedPeerEventListenerAdapter() {
             private void notifyAdapter() {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -132,25 +129,36 @@ public class TestFuncActivity2 extends AppCompatActivity {
                 });
             }
 
+
+        });
+
+
+        ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
+
             @Override
-            public void onIncomingPeer(ConnectedClientsHandler handler, Peer peer) {
+            public void onIncomingPeer(Peer peer) {
+                super.onIncomingPeer(peer);
                 notifyAdapter();
             }
 
+
             @Override
-            public void onPeerDropped(ConnectedClientsHandler handler, Peer peer) {
+            public void onPeerLost(Peer peer) {
+                super.onPeerLost(peer);
+
                 notifyAdapter();
             }
 
-            @Override
-            public void onPeerDetailedInfoGot(ConnectedClientsHandler handler, Peer peer) {
-                notifyAdapter();
-            }
 
-
-            @Override
-            public void onIncomingFileChunkSaved(ConnectedClientsHandler handler, Peer peer, String deviceID, String msgID, int soFar, int chunkSize, File file) {
-                super.onIncomingFileChunkSaved(handler, peer, deviceID, msgID, soFar, chunkSize, file);
+            private void notifyAdapter() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        peerList.clear();
+                        peerList.addAll(ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
+                        knowAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
@@ -159,7 +167,6 @@ public class TestFuncActivity2 extends AppCompatActivity {
 
     public void testIt(View view) throws InterruptedException {
         //        throw new RuntimeException("this is a test exception.");
-
 
         Thread.sleep(10 * 10000);
     }

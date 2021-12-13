@@ -33,6 +33,9 @@ public class ConnectedPeersManager {
     private final static Map<String, Set<Peer>> connectedPeersMap = new ConcurrentHashMap<>();
 
     private static ConnectedPeerEventListenerGroup connectedPeerEventListenerGroup = new ConnectedPeerEventListenerGroup();
+    private static ConnectedPeerEventListenerGroup globalConnectedPeerEventListener = new ConnectedPeerEventListenerGroup();
+    private static ConnectedPeerEventListenerGroup monitoredListeners = new ConnectedPeerEventListenerGroup();
+
 
     private final static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
     private final static PeerListener peerMapManagerListener = new PeerListenerAdapter() {
@@ -317,6 +320,26 @@ public class ConnectedPeersManager {
         globalPeerListener.add(peerMsgManagerListener);
 
         Peer.setGlobalPeerListener(globalPeerListener);
+
+        connectedPeerEventListenerGroup.add(globalConnectedPeerEventListener);
+        connectedPeerEventListenerGroup.add(monitoredListeners);
     }
+
+
+    public static void monitorConnectedPeersEvent(ConnectedPeerEventListener listener) {
+        monitoredListeners.add(listener);
+    }
+
+
+    public static void unmonitorConnectedPeersEvent(ConnectedPeerEventListener listener) {
+        monitoredListeners.remove(listener);
+    }
+
+
+    public static void setGlobalConnectedPeerEventListener(ConnectedPeerEventListener listener) {
+        globalConnectedPeerEventListener.clear();
+        globalConnectedPeerEventListener.add(listener);
+    }
+
 
 }

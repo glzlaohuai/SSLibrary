@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerWrapper;
+import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.badzzz.pasteany.lib.core.android.AndroidPlatformManager;
@@ -31,6 +34,9 @@ public class XApplication extends Application {
         PreferenceManagerWrapper.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
         PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
         androidPlatformManager.initPlatform();
+
+        //just for test, logPrint
+        ConnectedPeersManager.monitorConnectedPeersEvent(new ConnectedPeerEventListenerWrapper(new ConnectedPeerEventListenerAdapter(), true));
     }
 
 

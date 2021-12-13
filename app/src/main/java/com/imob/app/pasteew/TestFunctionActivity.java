@@ -14,7 +14,6 @@ import com.imob.lib.sslib.client.ClientManager;
 import com.imob.lib.sslib.client.ClientNode;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
-import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
 import com.imob.lib.sslib.server.ServerManager;
 import com.imob.lib.sslib.server.ServerNode;
@@ -84,10 +83,6 @@ public class TestFunctionActivity extends AppCompatActivity {
     }
 
     public void createAndRegisterService(View view) {
-    }
-
-    public void setGlobalPeerListener(View view) {
-        Peer.setGlobalPeerListener(new PeerListenerWrapper(new PeerListenerAdapter(), true));
     }
 
     @Override

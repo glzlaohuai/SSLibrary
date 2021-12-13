@@ -123,6 +123,14 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     }
 
     @Override
+    public void onMsgSendStarted(Peer peer, String id) {
+        base.onMsgSendStarted(peer, id);
+        if (printLog) {
+            Logger.i(TAG, "onMsgSendStarted, peer: " + peer + ", id: " + id);
+        }
+    }
+
+    @Override
     public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
 
         base.onNotAllMsgChunkSendedConfirmed(peer, id);

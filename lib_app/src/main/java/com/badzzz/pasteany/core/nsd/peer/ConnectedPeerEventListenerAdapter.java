@@ -61,6 +61,11 @@ public class ConnectedPeerEventListenerAdapter implements ConnectedPeerEventList
     }
 
     @Override
+    public void onMsgSendStarted(Peer peer, String id) {
+
+    }
+
+    @Override
     public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
 
     }

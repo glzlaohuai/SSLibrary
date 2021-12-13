@@ -72,6 +72,14 @@ public class ConnectedPeersManager {
 
     private final static PeerListener peerMsgManagerListener = new PeerListenerAdapter() {
 
+        @Override
+        public void onMsgSendPending(Peer peer, String id) {
+            super.onMsgSendPending(peer, id);
+
+            if (isThisMsgTypeNeedCallback(id)) {
+                connectedPeerEventListenerGroup.onMsgSendStarted(peer, id);
+            }
+        }
 
         @Override
         public void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes) {

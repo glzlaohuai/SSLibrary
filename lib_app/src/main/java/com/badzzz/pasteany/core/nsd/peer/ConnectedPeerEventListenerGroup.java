@@ -107,6 +107,13 @@ public class ConnectedPeerEventListenerGroup implements ConnectedPeerEventListen
     }
 
     @Override
+    public void onMsgSendStarted(Peer peer, String id) {
+        for (ConnectedPeerEventListener listener : queue) {
+            listener.onMsgSendStarted(peer, id);
+        }
+    }
+
+    @Override
     public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
         for (ConnectedPeerEventListener listener : queue) {
             listener.onNotAllMsgChunkSendedConfirmed(peer, id);

@@ -28,6 +28,8 @@ public interface ConnectedPeerEventListener {
 
     void onMsgSendFailed(Peer peer, String id);
 
+    void onMsgSendStarted(Peer peer, String id);
+
     void onNotAllMsgChunkSendedConfirmed(Peer peer, String id);
 
     void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total);

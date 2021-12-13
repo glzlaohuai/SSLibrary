@@ -266,7 +266,7 @@ public class Peer {
             callbackMsgSendStart(msg);
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
 
-            msg.destroy(this);
+            msg.destroy();
         }
     }
 
@@ -380,13 +380,15 @@ public class Peer {
     public void sendMessage(final Msg msg) {
         if (msg == null) return;
         if (isDestroyed) {
+            callbackMsgSendPending(msg);
+            callbackMsgSendStart(msg);
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
+            msg.destroy();
             return;
         }
 
         Logger.i(logTag, "send message: " + msg);
         Logger.i(logTag, "peer's tag: " + tag);
-        msg.addPeerHolder(this);
         msgQueue.add(msg);
         callbackMsgSendPending(msg);
         msgInQueueService.execute(new Runnable() {
@@ -413,7 +415,7 @@ public class Peer {
 
         if (isDestroyed()) {
             callbackMsgSendFailed(msg, MSG_SEND_ERROR_PEER_IS_DESTROIED, null);
-            msg.destroy(this);
+            msg.destroy();
             return;
         }
 
@@ -503,7 +505,7 @@ public class Peer {
 
             if (available <= 0 && msgType == Msg.TYPE_NORMAL) {
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
-                msg.destroy(this);
+                msg.destroy();
                 continue;
             }
 
@@ -576,7 +578,7 @@ public class Peer {
 
                 destroy();
             } finally {
-                msg.destroy(this);
+                msg.destroy();
             }
         }
 

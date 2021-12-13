@@ -11,6 +11,9 @@ import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.badzzz.pasteany.lib.core.android.AndroidPlatformManager;
 import com.github.anrwatchdog.ANRWatchDog;
+import com.imob.lib.sslib.peer.Peer;
+import com.imob.lib.sslib.peer.PeerListenerAdapter;
+import com.imob.lib.sslib.peer.PeerListenerWrapper;
 import com.tencent.bugly.crashreport.CrashReport;
 
 public class XApplication extends Application {
@@ -36,7 +39,12 @@ public class XApplication extends Application {
         androidPlatformManager.initPlatform();
 
         //just for test, logPrint
+        forTest();
+    }
+
+    private void forTest() {
         ConnectedPeersManager.monitorConnectedPeersEvent(new ConnectedPeerEventListenerWrapper(new ConnectedPeerEventListenerAdapter(), true));
+        Peer.monitorPeerState(new PeerListenerWrapper(new PeerListenerAdapter(), true));
     }
 
 

@@ -106,6 +106,8 @@ public class Peer {
         private Map<String, Set<Integer>> chunkMap = new HashMap<>();
 
         public void afterChunkMsgSended(String msgID, int soFar) {
+
+            Logger.i(logTag, "add unconfirmed msg chunk, " + msgID + ", " + soFar);
             Set<Integer> chunks;
             if (chunkMap.containsKey(msgID)) {
                 chunks = chunkMap.get(msgID);
@@ -119,8 +121,12 @@ public class Peer {
 
 
         public void afterConfirmMsgIncome(String msgID, int soFar) {
+            Logger.i(logTag, "remove unconfirmed msg chunk, " + msgID + ", " + soFar);
             if (chunkMap.containsKey(msgID)) {
                 chunkMap.get(msgID).remove(soFar);
+                if (chunkMap.get(msgID).isEmpty()) {
+                    chunkMap.remove(msgID);
+                }
             }
         }
 
@@ -355,6 +361,7 @@ public class Peer {
     }
 
     private void clearAllUnconfirmedSendedChunkAndCallbackFailed() {
+        Logger.i(logTag, "unconfirmed msg chunk: " + unconfirmedSendedChunkManager.getAllUnconfirmedMsgID());
         Set<String> unconfirmedMsgIDSet = new HashSet<>(unconfirmedSendedChunkManager.getAllUnconfirmedMsgID());
         for (String msgID : unconfirmedMsgIDSet) {
             listener.onSomeMsgChunkSendSucceededButNotConfirmedByPeer(this, msgID);
@@ -567,7 +574,6 @@ public class Peer {
                         dos.writeInt(((ConfirmMsg) msg).getTotal());
                         break;
                 }
-                unconfirmedSendedChunkManager.removeMsgSendChunkByMsgID(msg.getId());
                 callbackMsgSendSucceeded(msg);
             } catch (IOException e) {
                 Logger.e(e);

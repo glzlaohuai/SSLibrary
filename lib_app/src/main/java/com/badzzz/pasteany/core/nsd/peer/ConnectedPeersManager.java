@@ -99,21 +99,24 @@ public class ConnectedPeersManager {
         @Override
         public void onIncomingMsgReadSucceeded(final Peer peer, final String id) {
             super.onIncomingMsgReadSucceeded(peer, id);
-            connectedPeerEventListenerGroup.onIncomingMsgReadSucceeded(peer, id);
-            //if it's fileMsg, the merge all received file chunk into the completed final file, and callback the merge result
-            MsgID msgID = MsgID.buildWithJsonString(id);
-            if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
-                PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, new File(msgID.getData()).getName(), new IFileManager.FileMergeListener() {
-                    @Override
-                    public void onSuccess(File finalFile) {
-                        connectedPeerEventListenerGroup.onIncomingFileChunkMerged(peer, id, finalFile);
-                    }
 
-                    @Override
-                    public void onFailed() {
-                        connectedPeerEventListenerGroup.onIncomingFileChunkMergeFailed(peer, id);
-                    }
-                });
+            if (isThisMsgTypeNeedCallback(id)) {
+                connectedPeerEventListenerGroup.onIncomingMsgReadSucceeded(peer, id);
+                //if it's fileMsg, the merge all received file chunk into the completed final file, and callback the merge result
+                MsgID msgID = MsgID.buildWithJsonString(id);
+                if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
+                    PlatformManagerHolder.get().getAppManager().getFileManager().mergeAllFileChunks(PeerUtils.getDeviceIDFromPeer(peer), id, new File(msgID.getData()).getName(), new IFileManager.FileMergeListener() {
+                        @Override
+                        public void onSuccess(File finalFile) {
+                            connectedPeerEventListenerGroup.onIncomingFileChunkMerged(peer, id, finalFile);
+                        }
+
+                        @Override
+                        public void onFailed() {
+                            connectedPeerEventListenerGroup.onIncomingFileChunkMergeFailed(peer, id);
+                        }
+                    });
+                }
             }
         }
 
@@ -273,6 +276,11 @@ public class ConnectedPeersManager {
         }
     }
 
+    public static Map<String, Set<Peer>> getConnectedPeers() {
+        synchronized (peerMapLock) {
+            return connectedPeersMap;
+        }
+    }
 
     private final static void afterPeerDestroyed(Peer peer) {
         removePeerFromMap(peer);

@@ -11,8 +11,6 @@ import android.widget.TextView;
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
-import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsHandler;
-import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
@@ -116,24 +114,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
             }
         });
 
-
         ConnectedPeersManager.monitorConnectedPeersEvent(new ConnectedPeerEventListenerAdapter() {
-            private void notifyAdapter() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        peerList.clear();
-                        peerList.addAll(ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
-                        knowAdapter.notifyDataSetChanged();
-                    }
-                });
-            }
-
-
-        });
-
-
-        ConnectedClientsHandler.monitorConnectedPeersEvents(new ConnectedPeerEventListenerAdapter() {
 
             @Override
             public void onIncomingPeer(Peer peer) {
@@ -141,21 +122,18 @@ public class TestFuncActivity2 extends AppCompatActivity {
                 notifyAdapter();
             }
 
-
             @Override
             public void onPeerLost(Peer peer) {
                 super.onPeerLost(peer);
-
                 notifyAdapter();
             }
-
 
             private void notifyAdapter() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         peerList.clear();
-                        peerList.addAll(ConnectedClientsManager.getCurrentlyUsedConnectedPeerHandler().getDetailedInfoPeers().values());
+                        peerList.addAll(ConnectedPeersManager.getConnectedPeers().values());
                         knowAdapter.notifyDataSetChanged();
                     }
                 });

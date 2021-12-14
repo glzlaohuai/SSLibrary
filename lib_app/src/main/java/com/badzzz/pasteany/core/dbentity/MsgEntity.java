@@ -137,4 +137,39 @@ public class MsgEntity {
     }
 
 
+    public int getAutoID() {
+        return autoID;
+    }
+
+    public String getMsgID() {
+        return msgID;
+    }
+
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public String getMsgData() {
+        return msgData;
+    }
+
+    public String getFromDeviceID() {
+        return fromDeviceID;
+    }
+
+    public List<String> getToDeviceIDList() {
+        return toDeviceIDList;
+    }
+
+    public int getMsgLen() {
+        return msgLen;
+    }
+
+    public List<String> getStateList() {
+        return stateList;
+    }
+
+    public long getMsgTime() {
+        return msgTime;
+    }
 }

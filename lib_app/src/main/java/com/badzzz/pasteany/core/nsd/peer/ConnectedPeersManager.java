@@ -284,6 +284,9 @@ public class ConnectedPeersManager {
                 Set<Peer> peers = connectedPeersMap.get(peer.getTag());
                 if (peers != null) {
                     peers.remove(peer);
+                    if (peers.isEmpty()) {
+                        connectedPeersMap.remove(peer.getTag());
+                    }
                 }
             }
         }

@@ -1,9 +1,13 @@
 package com.badzzz.pasteany.core.wrap;
 
+import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDBManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.utils.SSThreadFactory;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +20,8 @@ import java.util.concurrent.Executors;
  */
 public class DBManagerWrapper {
 
+    private static final String TAG = "DBManagerWrapper";
+
     private IDBManager dbManager;
     private final static DBManagerWrapper instance = new DBManagerWrapper();
 
@@ -26,6 +32,28 @@ public class DBManagerWrapper {
         void succeeded(List<Map<String, String>> resultList);
 
         void failed();
+    }
+
+
+    public abstract class IDBActionFinishListener implements IDBActionListener {
+        private List<Map<String, String>> resultList;
+
+        abstract void onFinished();
+
+        @Override
+        public void succeeded(List<Map<String, String>> resultList) {
+            this.resultList = resultList;
+            onFinished();
+        }
+
+        @Override
+        public void failed() {
+            onFinished();
+        }
+
+        public List<Map<String, String>> getResultList() {
+            return resultList;
+        }
     }
 
 
@@ -72,13 +100,87 @@ public class DBManagerWrapper {
         doQuery(sql, listener);
     }
 
+    public void queryAllSendingMsgs(IDBActionListener listener) {
+        String sql = Constants.DB.SQL_QUERY_ALL_SENDING_MSGS;
+        doQuery(sql, listener);
+    }
+
+
+    public void queryAllSendingMsgsAndMarkThemAsFailed(final IDBActionFinishListener listener) {
+
+        Logger.i(TAG, "query all sending msgs and mark them as send failed");
+
+        queryAllSendingMsgs(new IDBActionFinishListener() {
+            @Override
+            void onFinished() {
+                List<Map<String, String>> resultList = getResultList();
+                if (resultList != null && !resultList.isEmpty()) {
+
+                    Map<String, Set<String>> msgIDToDeviceSetMap = new HashMap<>();
+                    //mark all item in list as failed
+                    for (Map<String, String> item : resultList) {
+
+                        String msgID = item.get(Constants.DB.KEY.MSGS.MSG_ID);
+                        String deviceID = item.get(Constants.DB.KEY.MSGS.MSG_TO);
+
+                        if (msgID != null && !msgID.isEmpty() && deviceID != null && !deviceID.isEmpty()) {
+                            Set<String> toDeviceIDSet;
+                            if (msgIDToDeviceSetMap.containsKey(msgID)) {
+                                toDeviceIDSet = msgIDToDeviceSetMap.get(msgID);
+                            } else {
+                                toDeviceIDSet = new HashSet<>();
+                                msgIDToDeviceSetMap.put(msgID, toDeviceIDSet);
+                            }
+                            toDeviceIDSet.add(deviceID);
+                        }
+                    }
+
+                    Logger.i(TAG, "got sending msgs < msgID -> toDeviceIDSet >: " + msgIDToDeviceSetMap);
+                    loopUpdateMsgSendState(msgIDToDeviceSetMap, listener);
+                } else {
+                    listener.onFinished();
+                }
+            }
+        });
+    }
+
+
+    private void loopUpdateMsgSendState(final Map<String, Set<String>> map, final IDBActionFinishListener finishListener) {
+        if (map == null || map.isEmpty()) {
+            finishListener.onFinished();
+            return;
+        }
+
+        final String msgID = map.keySet().iterator().next();
+        queryMsgDetail(msgID, new IDBActionFinishListener() {
+            @Override
+            void onFinished() {
+                List<Map<String, String>> resultList = getResultList();
+                if (resultList == null || resultList.isEmpty()) {
+                    Logger.i(TAG, "got no msg detail before try to update msg state, something went wrong. msgID is: " + msgID);
+                    map.remove(msgID);
+                    loopUpdateMsgSendState(map, finishListener);
+                } else {
+                    Logger.i(TAG, "got msg detail for msgID: " + msgID + ", update its send state.");
+                    MsgEntity msgEntity = MsgEntity.dbQueryItemToEntity(resultList.get(0));
+                    msgEntity.getToDeviceIDList();
+
+
+                }
+            }
+        });
+
+
+    }
+
+
     public void queryAllRelatedMsgs(String deviceID, int fromID, int limit, IDBActionListener listener) {
         String sql = String.format(Constants.DB.SQL_QUERY_DEVICE_RELATED_MSGS, fromID, deviceID, deviceID, limit);
         doQuery(sql, listener);
     }
 
-    public void queryMsgDetail(int autoID, IDBActionListener listener) {
-        final String sql = String.format(Constants.DB.SQL_QUERY_MSG_DETAIL, autoID);
+    public void queryMsgDetail(String msgID, IDBActionListener listener) {
+        final String sql = String.format(Constants.DB.SQL_QUERY_MSG_DETAIL, msgID);
         doQuery(sql, listener);
     }
 
@@ -125,12 +227,11 @@ public class DBManagerWrapper {
     }
 
 
-    public void addSendingMsg(final String msgID, final String fromDeviceID, final Set<String> toDeviceIDSet, final IDBActionListener listener) {
-        if (msgID == null || msgID.isEmpty() || fromDeviceID == null || fromDeviceID.isEmpty() || toDeviceIDSet == null || toDeviceIDSet.isEmpty()) {
+    public void addSendingMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final IDBActionListener listener) {
+        if (msgID == null || msgID.isEmpty() || fromDeviceID == null || fromDeviceID.isEmpty() || toDeviceID == null || toDeviceID.isEmpty()) {
             listener.failed();
             return;
         }
-        final String toDeviceID = toDeviceIDSetToString(toDeviceIDSet);
         executorService.execute(new Runnable() {
             @Override
             public void run() {

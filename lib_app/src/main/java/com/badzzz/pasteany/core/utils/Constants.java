@@ -69,7 +69,7 @@ public class Constants {
 
         public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
         public static final String SQL_QUERY_DEVICE_RELATED_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d AND ( " + KEY.MSGS.MSG_FROM + " == %s OR " + KEY.MSGS.MSG_TO + " LIKE %s ) ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
-        public static final String SQL_QUERY_MSG_DETAIL = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " == %d";
+        public static final String SQL_QUERY_MSG_DETAIL = "SELECT * FROM " + TB_MSGS + " WHERE " + KEY.MSGS.MSG_ID + " == %d";
         public static final String SQL_QUERY_ALL_SENDING_MSGS = "SELECT * FROM " + TB_MSGS_SENDING;
 
         public static final class KEY {

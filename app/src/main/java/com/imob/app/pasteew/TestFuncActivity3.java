@@ -126,7 +126,28 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         updateConnectedPeersInfoView();
-        queryAllMsgs();
+
+
+    }
+
+
+    private void queryAllInSendingMsgsAndMarkThemAsFailed() {
+        DBManagerWrapper.getInstance().queryAllSendingMsgs(new DBManagerWrapper.IDBActionListener() {
+            @Override
+            public void succeeded(List<Map<String, String>> resultList) {
+
+            }
+
+            @Override
+            public void failed() {
+
+            }
+
+
+            private void after() {
+
+            }
+        });
     }
 
 
@@ -137,7 +158,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         String msgID = UUID.randomUUID().toString();
         String msgContent = "hello world";
 
-        DBManagerWrapper.getInstance().addMsg(msgID, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(),);
+        DBManagerWrapper.getInstance().addMsg(msgID, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), );
     }
 
 

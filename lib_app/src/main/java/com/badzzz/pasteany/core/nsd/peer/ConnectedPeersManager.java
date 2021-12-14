@@ -298,7 +298,7 @@ public class ConnectedPeersManager {
         }
     }
 
-    public static Set<String> getAllConnectedPeersTagSet() {
+    public static Set<String> getConnectedPeersTagSet() {
         return getConnectedPeers().keySet();
     }
 

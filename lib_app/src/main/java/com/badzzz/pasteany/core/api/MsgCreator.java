@@ -60,7 +60,11 @@ public class MsgCreator {
 
 
     public static StringMsg createNormalStringMsg(String content) {
-        String msgID = createMsgID(Constants.PeerMsgType.TYPE_STR, Md5.md5(content));
+        return createNormalStringMsg(UUID.randomUUID().toString(), content);
+    }
+
+    public static StringMsg createNormalStringMsg(String id, String content) {
+        String msgID = createMsgID(id, Constants.PeerMsgType.TYPE_STR, Md5.md5(content));
         return StringMsg.create(msgID, content);
     }
 

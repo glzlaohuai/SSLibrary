@@ -11,9 +11,9 @@
         android:layout_height="wrap_content" />
 
     <Button
+        android:id="@+id/sendBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="testIt"
         android:text="test" />
 
     <ListView

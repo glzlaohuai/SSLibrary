@@ -14,11 +14,15 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,20 +36,18 @@ public class TestFuncActivity3 extends AppCompatActivity {
         public void onIncomingPeer(Peer peer) {
             super.onIncomingPeer(peer);
 
-            updateConnectedPeers();
+            updateConnectedPeersInfoView();
         }
 
         @Override
         public void onPeerLost(Peer peer) {
             super.onPeerLost(peer);
 
-            updateConnectedPeers();
+            updateConnectedPeersInfoView();
         }
-
     };
+
     private List<MsgEntity> msgEntities = new ArrayList<>();
-
-
     private BaseAdapter msgAdapter = new BaseAdapter() {
         @Override
         public int getCount() {
@@ -96,11 +98,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     };
 
-    public void updateConnectedPeers() {
+    private void updateConnectedPeersInfoView() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                connectedPeersView.setText(ConnectedPeersManager.getAllConnectedPeersTagSet().toString());
+                connectedPeersView.setText(ConnectedPeersManager.getConnectedPeersTagSet().toString());
             }
         });
     }
@@ -112,8 +114,34 @@ public class TestFuncActivity3 extends AppCompatActivity {
         setContentView(R.layout.test_func_3);
 
         connectedPeersView = findViewById(R.id.connectedPersView);
-        ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
+        msgListView = findViewById(R.id.listView);
+        msgListView.setAdapter(msgAdapter);
+        findViewById(R.id.sendBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendTestMsgsToAllConnectedPeers();
+            }
+        });
 
+
+        ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
+        updateConnectedPeersInfoView();
+        queryAllMsgs();
+    }
+
+
+    private void sendTestMsgsToAllConnectedPeers() {
+        //in canse if concurrent exception occure
+        Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
+
+        String msgID = UUID.randomUUID().toString();
+        String msgContent = "hello world";
+
+        DBManagerWrapper.getInstance().addMsg(msgID, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(),);
+    }
+
+
+    private void queryAllMsgs() {
         DBManagerWrapper.getInstance().queryAllMsgs(Integer.MAX_VALUE, Constants.DB.DEFAULT_QUERY_LIMIT, new DBManagerWrapper.IDBActionListener() {
             @Override
             public void succeeded(List<Map<String, String>> resultList) {
@@ -132,10 +160,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 msgAdapter.notifyDataSetChanged();
             }
         });
-
-
-        msgListView = findViewById(R.id.listView);
-        msgListView.setAdapter(msgAdapter);
     }
 
     @Override

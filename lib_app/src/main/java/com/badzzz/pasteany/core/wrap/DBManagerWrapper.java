@@ -6,6 +6,7 @@ import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -110,7 +111,26 @@ public class DBManagerWrapper {
         });
     }
 
-    public void addSendingMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final IDBActionListener listener) {
+
+    private static String toDeviceIDSetToString(Set<String> idSet) {
+        StringBuilder sb = new StringBuilder();
+        for (String id : idSet) {
+            sb.append(id);
+            sb.append(Constants.DB.MSG_CHAR_SPLIT);
+        }
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+
+    public void addSendingMsg(final String msgID, final String fromDeviceID, final Set<String> toDeviceIDSet, final IDBActionListener listener) {
+        if (msgID == null || msgID.isEmpty() || fromDeviceID == null || fromDeviceID.isEmpty() || toDeviceIDSet == null || toDeviceIDSet.isEmpty()) {
+            listener.failed();
+            return;
+        }
+        final String toDeviceID = toDeviceIDSetToString(toDeviceIDSet);
         executorService.execute(new Runnable() {
             @Override
             public void run() {

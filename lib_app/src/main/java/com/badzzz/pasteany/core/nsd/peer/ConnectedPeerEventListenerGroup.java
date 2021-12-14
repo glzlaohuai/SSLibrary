@@ -43,6 +43,13 @@ public class ConnectedPeerEventListenerGroup implements ConnectedPeerEventListen
     }
 
     @Override
+    public void onIncomingMsgChunk(Peer peer, String id, int soFar, int chunkSize, int available) {
+        for (ConnectedPeerEventListener listener : queue) {
+            listener.onIncomingMsgChunk(peer, id, soFar, chunkSize, available);
+        }
+    }
+
+    @Override
     public void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file) {
         for (ConnectedPeerEventListener listener : queue) {
             listener.onIncomingFileChunkSaved(peer, id, soFar, chunkSize, file);

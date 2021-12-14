@@ -170,6 +170,10 @@ public class ConnectedPeersManager {
 
         String type = msgID.getType();
 
+        if (isThisMsgTypeNeedCallback(id)) {
+            connectedPeerEventListenerGroup.onIncomingMsgChunk(peer, id, soFar, chunkSize, available);
+        }
+
         switch (type) {
             case Constants.PeerMsgType.TYPE_API_REQUEST:
                 String api = msgID.getData();

@@ -10,6 +10,8 @@ public interface ConnectedPeerEventListener {
 
     void onIncomingPeer(Peer peer);
 
+    void onIncomingMsgChunk(Peer peer, String id, int soFar, int chunkSize, int available);
+
     void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file);
 
     void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes);

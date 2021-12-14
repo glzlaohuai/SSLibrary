@@ -43,6 +43,14 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     }
 
     @Override
+    public void onIncomingMsgChunk(Peer peer, String id, int soFar, int chunkSize, int available) {
+        base.onIncomingMsgChunk(peer, id, soFar, chunkSize, available);
+        if (printLog) {
+            Logger.i(tag, "onIncomingMsgChunk, peer: " + peer + ", id: " + id + ", soFar: " + soFar + ", chunkSize: " + chunkSize + ", available: " + available);
+        }
+    }
+
+    @Override
     public void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file) {
         base.onIncomingFileChunkSaved(peer, id, soFar, chunkSize, file);
 

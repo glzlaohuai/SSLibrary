@@ -16,6 +16,11 @@ public class ConnectedPeerEventListenerAdapter implements ConnectedPeerEventList
     }
 
     @Override
+    public void onIncomingMsgChunk(Peer peer, String id, int soFar, int chunkSize, int available) {
+
+    }
+
+    @Override
     public void onIncomingFileChunkSaved(Peer peer, String id, int soFar, int chunkSize, File file) {
 
     }

@@ -91,7 +91,7 @@ public class Constants {
             }
         }
 
-        public static final String MSG_TYPE_STATE_SENDING = "0";
+        public static final String MSG_TYPE_STATE_MANAGING = "0";
         public static final String MSG_TYPE_STATE_SENDED = "1";
         public static final String MSG_TYPE_STATE_FAILED = "-1";
 

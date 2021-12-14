@@ -8,13 +8,17 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.badzzz.pasteany.core.api.MsgCreator;
+import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.util.ArrayList;
@@ -88,11 +92,13 @@ public class TestFuncActivity3 extends AppCompatActivity {
             msgView.setText(sb.toString());
             msgFromView.setText(msgEntity.getFromDeviceID());
 
-            List<String> toDeviceIDList = msgEntity.getToDeviceIDList();
+            Map<String, String> msgSendStates = msgEntity.getMsgSendStates();
             sendingStateLayout.removeAllViews();
-            for (int i = 0; i < toDeviceIDList.size(); i++) {
+            for (String key : msgSendStates.keySet()) {
                 TextView textView = new TextView(TestFuncActivity3.this);
-                textView.setText(toDeviceIDList.get(i) + " # " + msgEntity.getStateList().get(i));
+                textView.setText(key + ", " + msgSendStates.get(key));
+                textView.setPadding(15, 15, 15, 15);
+                sendingStateLayout.addView(textView);
             }
             return view;
         }
@@ -151,6 +157,20 @@ public class TestFuncActivity3 extends AppCompatActivity {
     }
 
 
+    private static String[] peerTagSetToDeviceIdArray(Set<String> tagSet) {
+        try {
+            String[] tags = tagSet.toArray(new String[0]);
+            for (int i = 0; i < tags.length; i++) {
+                tags[i] = MsgID.buildWithJsonString(tags[i]).getId();
+            }
+            return tags;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     private void sendTestMsgsToAllConnectedPeers() {
         //in canse if concurrent exception occure
         Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
@@ -158,7 +178,15 @@ public class TestFuncActivity3 extends AppCompatActivity {
         String msgID = UUID.randomUUID().toString();
         String msgContent = "hello world";
 
-        DBManagerWrapper.getInstance().addMsg(msgID, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), );
+        StringMsg stringMsg = MsgCreator.createNormalStringMsg(msgID, msgContent);
+
+        String fromDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
+
+        MsgEntity msgEntity = MsgEntity.createMsgEntity(msgID, stringMsg.getMsgType(), msgContent, fromDeviceID, peerTagSetToDeviceIdArray(tagSet), stringMsg.getAvailable());
+        msgEntities.add(msgEntity);
+
+
+
     }
 
 

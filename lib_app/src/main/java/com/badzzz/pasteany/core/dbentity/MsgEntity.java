@@ -3,6 +3,7 @@ package com.badzzz.pasteany.core.dbentity;
 import com.badzzz.pasteany.core.utils.ArrayUtils;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.MapUtils;
+import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.imob.lib.lib_common.Logger;
 
 import java.util.ArrayList;
@@ -77,7 +78,11 @@ public class MsgEntity {
         return result;
     }
 
-    private boolean updateState(String toDeviceID, String state) {
+    private boolean updateState(String toDeviceId, String state) {
+        if (toDeviceId == null || toDeviceId.isEmpty() || !msgSendStates.containsKey(toDeviceId) || state == null || state.isEmpty()) {
+            return false;
+        }
+        msgSendStates.put(toDeviceId, state);
         return true;
     }
 
@@ -91,18 +96,9 @@ public class MsgEntity {
     }
 
 
-    public final static MsgEntity createMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, List<String> toDeviceIDList, int msgLen) {
-        Map<String, String> msgSendStates = buildInProgressMsgSendStatesWithToDeviceIds(Arrays.)
-
-        if (toDeviceIDList != null && toDeviceIDList.size() > 0) {
-            for (int i = 0; i < toDeviceIDList.size(); i++) {
-                stateList.add(new MsgSendState(toDeviceIDList.get(i), Constants.DB.MSG_TYPE_STATE_MANAGING));
-            }
-        } else {
-            return null;
-        }
-
-        return new MsgEntity(-1, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, stateList);
+    public final static MsgEntity createMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, String... toDeviceIds, int msgLen) {
+        Map<String, String> msgSendStates = MsgEntity.buildInProgressMsgSendStatesWithToDeviceIds(toDeviceIds);
+        return new MsgEntity(-1, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
     }
 
 
@@ -126,16 +122,24 @@ public class MsgEntity {
         return fromDeviceID;
     }
 
-
     public int getMsgLen() {
         return msgLen;
     }
 
-    public List<String> getStateList() {
+    public Map<String, String> getMsgSendStates() {
         return msgSendStates;
     }
 
     public long getMsgTime() {
         return msgTime;
+    }
+
+
+    public boolean isValid() {
+        return msgID != null && !msgID.isEmpty() && msgType != null && !msgType.isEmpty() && msgData != null && !msgData.isEmpty() && fromDeviceID != null && !fromDeviceID.isEmpty() && msgLen > 0 && msgTime > 0 && msgSendStates != null && !msgSendStates.isEmpty();
+    }
+
+
+    public void insertIntoMsgSendingTable(DBManagerWrapper.IDBActionFinishListener listener) {
     }
 }

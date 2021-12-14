@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SSLibrary">
         <activity
-            android:name=".TestFuncActivity2"
+            android:name=".TestFuncActivity3"
             android:exported="true">
 
             <intent-filter>

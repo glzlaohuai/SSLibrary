@@ -295,6 +295,21 @@ public class ConnectedPeersManager {
         }
     }
 
+    public static Set<String> getAllConnectedPeersTagSet() {
+        return getConnectedPeers().keySet();
+    }
+
+    public static Peer getConnectedPeerByTag(String tag) {
+        if (tag == null) {
+            return null;
+        }
+        //just in case if concurrent exception occure
+        Set<Peer> peers = new HashSet<>(getConnectedPeers().get(tag));
+        if (peers == null || peers.isEmpty()) return null;
+
+        return peers.iterator().next();
+    }
+
     private final static void afterPeerDestroyed(Peer peer) {
         removePeerFromMap(peer);
         callbackPeerLost(peer);

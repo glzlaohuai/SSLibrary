@@ -9,7 +9,8 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     private ConnectedPeerEventListener base;
     private boolean printLog;
 
-    private static final String TAG = "ConnectedPeerEventListenerWrapper";
+    private static final String S_TAG = "ConnectedPeerEventListenerWrapper";
+    private String tag = S_TAG + " # " + hashCode();
 
     public ConnectedPeerEventListenerWrapper(ConnectedPeerEventListener base) {
         this(base, false);
@@ -26,7 +27,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onPeerLost(peer);
 
         if (printLog) {
-            Logger.i(TAG, "onPeerLost, peer: " + peer);
+            Logger.i(tag, "onPeerLost, peer: " + peer);
         }
 
     }
@@ -37,7 +38,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingPeer(peer);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingPeer, peer: " + peer);
+            Logger.i(tag, "onIncomingPeer, peer: " + peer);
         }
     }
 
@@ -46,7 +47,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingFileChunkSaved(peer, id, soFar, chunkSize, file);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkSaved, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize + ", file: " + file);
+            Logger.i(tag, "onIncomingFileChunkSaved, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize + ", file: " + file);
         }
     }
 
@@ -54,7 +55,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     public void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes) {
         base.onIncomingFileChunk(peer, id, soFar, chunkSize, available, bytes);
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunk, peer: " + peer + ", id: " + id + ", soFar: " + soFar + ", chunkSize: " + chunkSize + ", available: " + available + ", bytes: " + bytes);
+            Logger.i(tag, "onIncomingFileChunk, peer: " + peer + ", id: " + id + ", soFar: " + soFar + ", chunkSize: " + chunkSize + ", available: " + available + ", bytes: " + bytes);
         }
     }
 
@@ -64,7 +65,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingFileChunkSaveFailed(peer, id, soFar, chunkSize);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkSaveFailed, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize);
+            Logger.i(tag, "onIncomingFileChunkSaveFailed, peer: " + peer + ", id: " + id + ", sofar: " + soFar + ", chunkSize: " + chunkSize);
         }
     }
 
@@ -72,7 +73,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     public void onIncomingFileChunkMergeFailed(Peer peer, String id) {
         base.onIncomingFileChunkMergeFailed(peer, id);
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkMergeFailed, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onIncomingFileChunkMergeFailed, peer: " + peer + ", id: " + id);
         }
     }
 
@@ -80,7 +81,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     public void onIncomingFileChunkMerged(Peer peer, String id, File finalFile) {
         base.onIncomingFileChunkMerged(peer, id, finalFile);
         if (printLog) {
-            Logger.i(TAG, "onIncomingFileChunkMerged, peer: " + peer + ", id: " + id + ", file: " + finalFile);
+            Logger.i(tag, "onIncomingFileChunkMerged, peer: " + peer + ", id: " + id + ", file: " + finalFile);
         }
     }
 
@@ -90,7 +91,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingStringMsg(peer, id, msg);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingStringMsg, peer: " + peer + ", id: " + id + ",msg: " + msg);
+            Logger.i(tag, "onIncomingStringMsg, peer: " + peer + ", id: " + id + ",msg: " + msg);
         }
     }
 
@@ -100,7 +101,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingMsgReadSucceeded(peer, id);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
         }
     }
 
@@ -109,7 +110,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onIncomingMsgReadFailed(peer, id, soFar, total);
 
         if (printLog) {
-            Logger.i(TAG, "onIncomingMsgReadFailed, peer: " + peer + ", id: " + id + ", total: " + total);
+            Logger.i(tag, "onIncomingMsgReadFailed, peer: " + peer + ", id: " + id + ", total: " + total);
         }
     }
 
@@ -118,7 +119,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onMsgSendFailed(peer, id);
 
         if (printLog) {
-            Logger.i(TAG, "onMsgSendFailed, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onMsgSendFailed, peer: " + peer + ", id: " + id);
         }
     }
 
@@ -126,7 +127,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     public void onMsgSendStarted(Peer peer, String id) {
         base.onMsgSendStarted(peer, id);
         if (printLog) {
-            Logger.i(TAG, "onMsgSendStarted, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onMsgSendStarted, peer: " + peer + ", id: " + id);
         }
     }
 
@@ -136,7 +137,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onNotAllMsgChunkSendedConfirmed(peer, id);
 
         if (printLog) {
-            Logger.i(TAG, "onNotAllMsgChunkSendedConfirmed, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onNotAllMsgChunkSendedConfirmed, peer: " + peer + ", id: " + id);
         }
     }
 
@@ -145,7 +146,7 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
         base.onSendedMsgChunkConfirmed(peer, id, soFar, total);
 
         if (printLog) {
-            Logger.i(TAG, "onSendedMsgChunkConfirmed, peer: " + peer + ", id: " + id + ", SoFar: " + soFar + ", total: " + total);
+            Logger.i(tag, "onSendedMsgChunkConfirmed, peer: " + peer + ", id: " + id + ", SoFar: " + soFar + ", total: " + total);
         }
     }
 

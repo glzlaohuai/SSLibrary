@@ -312,7 +312,6 @@ public class ConnectedPeersManager {
                 }
             }
 
-
         }
     }
 

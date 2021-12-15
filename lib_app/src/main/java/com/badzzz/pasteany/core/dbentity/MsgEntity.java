@@ -7,11 +7,14 @@ import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.imob.lib.lib_common.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class MsgEntity {
+
+    private static final String TAG = "MsgEntity";
 
     private int autoID;
     private String msgID;
@@ -35,7 +38,27 @@ public class MsgEntity {
         this.msgSendStates = msgSendStates;
     }
 
-    public final static MsgEntity dbQueryItemToEntity(Map<String, String> item) {
+
+    public void markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(DBManagerWrapper.IDBActionListener idbActionListener, String... deviceIDs) {
+        if (deviceIDs != null && deviceIDs.length > 0) {
+            Logger.i(TAG, "mark in sending state to failed for deviceIDS: " + Arrays.toString(deviceIDs));
+            for (String toDeviceID : deviceIDs) {
+                msgSendStates.put(toDeviceID, Constants.DB.MSG_TYPE_STATE_FAILED);
+            }
+            DBManagerWrapper.getInstance().updateMsgState(this, idbActionListener);
+        } else {
+            idbActionListener.failed();
+        }
+    }
+
+    public void markMsgSendStateAndUpdateDB(String toDeviceID, String sendState, DBManagerWrapper.IDBActionFinishListener listener) {
+        Logger.i(TAG, "msg send state update, toDeviceID: " + toDeviceID + ", state: " + sendState);
+        msgSendStates.put(toDeviceID, sendState);
+        DBManagerWrapper.getInstance().updateMsgState(this, listener);
+    }
+
+
+    public final static MsgEntity buildWithDBItem(Map<String, String> item) {
         if (item == null) return null;
         try {
 
@@ -61,7 +84,7 @@ public class MsgEntity {
     }
 
 
-    public final static List<MsgEntity> dbQueryListToEntityList(List<Map<String, String>> list) {
+    public final static List<MsgEntity> buildWithDBQueryList(List<Map<String, String>> list) {
         if (list == null || list.isEmpty()) {
             return null;
         }
@@ -69,7 +92,7 @@ public class MsgEntity {
         List<MsgEntity> result = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
-            MsgEntity msgEntity = dbQueryItemToEntity(list.get(i));
+            MsgEntity msgEntity = buildWithDBItem(list.get(i));
             if (msgEntity != null) {
                 result.add(msgEntity);
             }
@@ -78,7 +101,7 @@ public class MsgEntity {
     }
 
 
-    public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, String... toDeviceIds, int msgLen) {
+    public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, int msgLen, String... toDeviceIds) {
         Map<String, String> msgSendStates = null;
         if (toDeviceIds != null) {
             msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_TYPE_STATE_MANAGING));

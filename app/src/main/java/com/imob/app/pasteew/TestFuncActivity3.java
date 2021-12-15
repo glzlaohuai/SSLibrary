@@ -9,12 +9,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
-import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.sslib.msg.StringMsg;
@@ -160,7 +160,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         try {
             String[] tags = tagSet.toArray(new String[0]);
             for (int i = 0; i < tags.length; i++) {
-                tags[i] = MsgID.buildWithJsonString(tags[i]).getId();
+                tags[i] = PeerUtils.getDeviceIDFromPeerTag(tags[i]);
             }
             return tags;
         } catch (Exception e) {
@@ -181,10 +181,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         String fromDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
 
-        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msgContent, fromDeviceID, peerTagSetToDeviceIdArray(tagSet), stringMsg.getAvailable());
+        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msgContent, fromDeviceID, stringMsg.getAvailable(), peerTagSetToDeviceIdArray(tagSet));
         msgEntities.add(msgEntity);
-
-
 
         msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionFinishListener() {
             @Override
@@ -200,6 +198,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
+        msgAdapter.notifyDataSetChanged();
     }
 
 
@@ -207,7 +206,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         DBManagerWrapper.getInstance().queryAllMsgs(Integer.MAX_VALUE, Constants.DB.DEFAULT_QUERY_LIMIT, new DBManagerWrapper.IDBActionListener() {
             @Override
             public void succeeded(List<Map<String, String>> resultList) {
-                List<MsgEntity> msgEntities = MsgEntity.dbQueryListToEntityList(resultList);
+                List<MsgEntity> msgEntities = MsgEntity.buildWithDBQueryList(resultList);
                 TestFuncActivity3.this.msgEntities.addAll(msgEntities);
                 after();
             }

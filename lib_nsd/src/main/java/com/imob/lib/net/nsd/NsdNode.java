@@ -280,21 +280,28 @@ public class NsdNode {
     public boolean destroy() {
         if (!isDestroyed) {
             Logger.i(tag, "destroy");
-            isDestroyed = true;
-            synchronized (lock) {
-                if (jmDNS != null) {
-                    initExecutorService.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            doDestroy();
-                        }
-                    });
-                    return true;
-                }
-            }
+            handleDestroy();
             return false;
         }
         return false;
+    }
+
+
+    private void handleDestroy() {
+        initExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (lock) {
+                    if (!isDestroyed) {
+                        isDestroyed = true;
+                        if (jmDNS != null) {
+                            doDestroy();
+                        }
+                    }
+                }
+
+            }
+        });
     }
 
     public boolean isDestroyed() {

@@ -324,9 +324,10 @@ public class ConnectedPeersManager {
     private static void findSameRemoteLocationPeerAndCheckAliveAfterPeerLost(Peer lostPeer) {
         if (lostPeer != null && PeerUtils.getDeviceIDFromPeer(lostPeer) != null) {
             String tag = lostPeer.getTag();
-            Set<Peer> peers = new HashSet<>(connectedPeersMap.get(tag));
+            Set<Peer> peers = connectedPeersMap.get(tag);
 
             if (peers != null) {
+                peers = new HashSet<>(peers);
                 for (Peer peer : peers) {
                     if (peer != lostPeer) {
                         peer.sendMessage(MsgCreator.createPingMsg("alive_check_for_same_remote_location"));

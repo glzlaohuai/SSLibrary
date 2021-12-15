@@ -1,13 +1,12 @@
 package com.badzzz.pasteany.core.wrap;
 
+import com.badzzz.pasteany.core.dbentity.InSendingMsgEntity;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDBManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.utils.SSThreadFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,32 +112,42 @@ public class DBManagerWrapper {
         queryAllSendingMsgs(new IDBActionFinishListener() {
             @Override
             public void onFinished() {
-                List<Map<String, String>> resultList = getResultList();
-                if (resultList != null && !resultList.isEmpty()) {
+                List<InSendingMsgEntity> inSendingMsgEntities = InSendingMsgEntity.buildWithDBQueryList(getResultList());
 
-                    Map<String, Set<String>> msgIDToDeviceSetMap = new HashMap<>();
-                    //mark all item in list as failed
-                    for (Map<String, String> item : resultList) {
+                if (inSendingMsgEntities != null && !inSendingMsgEntities.isEmpty()) {
+                    final Map<String, Set<String>> msgIDToDeviceIDsMap = InSendingMsgEntity.inSendingListToMsgIDToDeviceIDSetMap(inSendingMsgEntities);
+                    Logger.i(TAG, "got sending msgs < msgID -> toDeviceIDSet >: " + msgIDToDeviceIDsMap);
 
-                        String msgID = item.get(Constants.DB.KEY.MSGS.MSG_ID);
-                        String deviceID = item.get(Constants.DB.KEY.MSGS.MSG_TO);
 
-                        if (msgID != null && !msgID.isEmpty() && deviceID != null && !deviceID.isEmpty()) {
-                            Set<String> toDeviceIDSet;
-                            if (msgIDToDeviceSetMap.containsKey(msgID)) {
-                                toDeviceIDSet = msgIDToDeviceSetMap.get(msgID);
-                            } else {
-                                toDeviceIDSet = new HashSet<>();
-                                msgIDToDeviceSetMap.put(msgID, toDeviceIDSet);
+                    if (msgIDToDeviceIDsMap != null && !msgIDToDeviceIDsMap.isEmpty()) {
+                        IDBActionFinishListener wrapListener = new IDBActionFinishListener() {
+                            boolean everFailed = false;
+                            int count = msgIDToDeviceIDsMap.keySet().size();
+
+                            @Override
+                            public void failed() {
+                                super.failed();
+                                everFailed = true;
                             }
-                            toDeviceIDSet.add(deviceID);
-                        }
-                    }
 
-                    Logger.i(TAG, "got sending msgs < msgID -> toDeviceIDSet >: " + msgIDToDeviceSetMap);
-                    loopUpdateMsgSendState(msgIDToDeviceSetMap, listener);
+                            @Override
+                            public void onFinished() {
+                                count--;
+                                if (count == 0) {
+                                    if (everFailed) {
+                                        listener.failed();
+                                    } else {
+                                        listener.succeeded(null);
+                                    }
+                                }
+                            }
+                        };
+                        loopUpdateMsgSendState(msgIDToDeviceIDsMap, wrapListener);
+                    } else {
+                        listener.failed();
+                    }
                 } else {
-                    listener.onFinished();
+                    listener.succeeded(null);
                 }
             }
         });
@@ -162,10 +171,9 @@ public class DBManagerWrapper {
                     loopUpdateMsgSendState(map, finishListener);
                 } else {
                     Logger.i(TAG, "got msg detail for msgID: " + msgID + ", update its send state.");
-                    MsgEntity msgEntity = MsgEntity.dbQueryItemToEntity(resultList.get(0));
-                    msgEntity.getToDeviceIDList();
+                    MsgEntity msgEntity = MsgEntity.buildWithDBItem(resultList.get(0));
 
-
+                    msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(finishListener, map.get(msgID).toArray(new String[0]));
                 }
             }
         });
@@ -184,18 +192,25 @@ public class DBManagerWrapper {
         doQuery(sql, listener);
     }
 
-    public void updateMsgState(final String msgID, final String state, final IDBActionListener listener) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                int update = dbManager.update(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_STATE}, new String[]{state}, new String[]{Constants.DB.KEY.MSGS.MSG_ID}, new String[]{msgID});
-                if (update > 0) {
-                    listener.succeeded(null);
-                } else {
-                    listener.failed();
+    public void updateMsgState(final MsgEntity msgEntity, final IDBActionListener listener) {
+
+        if (msgEntity == null || !msgEntity.isValid()) {
+            listener.failed();
+        } else {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    MsgEntity.MsgSendStateInDBFormate sendStateInDBFormate = MsgEntity.MsgSendStateInDBFormate.buildWithMsgSendStateMap(msgEntity.getMsgSendStates());
+                    int update = dbManager.update(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TO}, new String[]{sendStateInDBFormate.getSendStates(), sendStateInDBFormate.getDeviceIDs()}, new String[]{Constants.DB.KEY.MSGS.MSG_ID}, new String[]{msgEntity.getMsgID()});
+                    if (update > 0) {
+                        listener.succeeded(null);
+                    } else {
+                        listener.failed();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
 

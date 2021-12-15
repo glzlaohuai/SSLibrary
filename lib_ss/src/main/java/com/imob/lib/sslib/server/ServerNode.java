@@ -142,15 +142,27 @@ public class ServerNode implements INode {
         }
     }
 
+
+    private void handleDestroy() {
+        createExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (createLock) {
+                    if (!isDestroyed) {
+                        isDestroyed = true;
+                        Logger.i(tag, "do destroy stuff");
+                        doDestroyStuff();
+                        callbackDestroyed();
+                    }
+                }
+            }
+        });
+    }
+
     public void destroy() {
         if (!isDestroyed) {
             Logger.i(tag, "destroy called");
-            synchronized (createLock) {
-                Logger.i(tag, "do destroy stuff");
-                isDestroyed = true;
-                doDestroyStuff();
-                callbackDestroyed();
-            }
+            handleDestroy();
         }
     }
 

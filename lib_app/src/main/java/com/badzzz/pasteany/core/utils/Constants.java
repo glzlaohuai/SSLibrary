@@ -95,7 +95,7 @@ public class Constants {
         public static final String MSG_TYPE_STATE_SENDED = "1";
         public static final String MSG_TYPE_STATE_FAILED = "-1";
 
-        public static final String MSG_CHAR_SPLIT = ",";
+        public static final String SPLIT_CHAR = ",";
     }
 
 

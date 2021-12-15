@@ -7,10 +7,9 @@ import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.imob.lib.lib_common.Logger;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MsgEntity {
 
@@ -51,8 +50,8 @@ public class MsgEntity {
             String state = item.get(Constants.DB.KEY.MSGS.MSG_STATE);
             long msgTime = Long.parseLong(item.get(Constants.DB.KEY.MSGS.MSG_TIME));
 
-            String[] toIds = toDeviceID.split(Constants.DB.MSG_CHAR_SPLIT);
-            String[] states = state.split(Constants.DB.MSG_CHAR_SPLIT);
+            String[] toIds = toDeviceID.split(Constants.DB.SPLIT_CHAR);
+            String[] states = state.split(Constants.DB.SPLIT_CHAR);
 
             return new MsgEntity(autoID, msgID, msgType, msgData, fromDeviceID, msgTime, msgLen, MapUtils.buildMap(toIds, states));
         } catch (Throwable throwable) {
@@ -78,27 +77,64 @@ public class MsgEntity {
         return result;
     }
 
-    private boolean updateState(String toDeviceId, String state) {
-        if (toDeviceId == null || toDeviceId.isEmpty() || !msgSendStates.containsKey(toDeviceId) || state == null || state.isEmpty()) {
-            return false;
+
+    public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, String... toDeviceIds, int msgLen) {
+        Map<String, String> msgSendStates = null;
+        if (toDeviceIds != null) {
+            msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_TYPE_STATE_MANAGING));
         }
-        msgSendStates.put(toDeviceId, state);
-        return true;
-    }
-
-
-    private final static Map<String, String> buildInProgressMsgSendStatesWithToDeviceIds(String... toIds) {
-        if (toIds == null || toIds.length == 0) {
-            return null;
-        } else {
-            return MapUtils.buildMap(toIds, ArrayUtils.createAndFill(toIds.length, Constants.DB.MSG_TYPE_STATE_MANAGING));
-        }
-    }
-
-
-    public final static MsgEntity createMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, String... toDeviceIds, int msgLen) {
-        Map<String, String> msgSendStates = MsgEntity.buildInProgressMsgSendStatesWithToDeviceIds(toDeviceIds);
         return new MsgEntity(-1, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
+    }
+
+
+    public static class MsgSendStateInDBFormate {
+        private String deviceIDs;
+        private String sendStates;
+
+        private MsgSendStateInDBFormate(String deviceIDs, String sendStates) {
+            this.deviceIDs = deviceIDs;
+            this.sendStates = sendStates;
+        }
+
+
+        public String getDeviceIDs() {
+            return deviceIDs;
+        }
+
+        public String getSendStates() {
+            return sendStates;
+        }
+
+        public static MsgSendStateInDBFormate buildWithMsgSendStateMap(Map<String, String> sendStateMap) {
+            if (sendStateMap == null || sendStateMap.isEmpty()) {
+                return null;
+            } else {
+                Set<String> keySet = sendStateMap.keySet();
+                StringBuilder idStringBuilder = new StringBuilder();
+                StringBuilder stateStringBuilder = new StringBuilder();
+
+                for (String id : keySet) {
+                    String state = sendStateMap.get(id);
+
+                    idStringBuilder.append(id);
+                    idStringBuilder.append(Constants.DB.SPLIT_CHAR);
+
+                    stateStringBuilder.append(state);
+                    stateStringBuilder.append(Constants.DB.SPLIT_CHAR);
+                }
+
+
+                if (idStringBuilder.length() > 0) {
+                    idStringBuilder.deleteCharAt(idStringBuilder.length() - 1);
+                }
+                if (stateStringBuilder.length() > 0) {
+                    stateStringBuilder.deleteCharAt(stateStringBuilder.length() - 1);
+                }
+
+                return new MsgSendStateInDBFormate(idStringBuilder.toString(), stateStringBuilder.toString());
+
+            }
+        }
     }
 
 
@@ -140,6 +176,14 @@ public class MsgEntity {
     }
 
 
-    public void insertIntoMsgSendingTable(DBManagerWrapper.IDBActionFinishListener listener) {
+    public void insertIntoMsgSendingTable(final DBManagerWrapper.IDBActionFinishListener listener) {
+        DBManagerWrapper.getInstance().addSendingMsg(this, listener);
     }
+
+
+    public void insertIntoMsgTable(DBManagerWrapper.IDBActionFinishListener listener) {
+        DBManagerWrapper.getInstance().addMsg(this, listener);
+    }
+
+
 }

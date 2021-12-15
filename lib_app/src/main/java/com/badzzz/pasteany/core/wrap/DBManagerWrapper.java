@@ -35,10 +35,10 @@ public class DBManagerWrapper {
     }
 
 
-    public abstract class IDBActionFinishListener implements IDBActionListener {
+    public abstract static class IDBActionFinishListener implements IDBActionListener {
         private List<Map<String, String>> resultList;
 
-        abstract void onFinished();
+        public abstract void onFinished();
 
         @Override
         public void succeeded(List<Map<String, String>> resultList) {
@@ -112,7 +112,7 @@ public class DBManagerWrapper {
 
         queryAllSendingMsgs(new IDBActionFinishListener() {
             @Override
-            void onFinished() {
+            public void onFinished() {
                 List<Map<String, String>> resultList = getResultList();
                 if (resultList != null && !resultList.isEmpty()) {
 
@@ -154,7 +154,7 @@ public class DBManagerWrapper {
         final String msgID = map.keySet().iterator().next();
         queryMsgDetail(msgID, new IDBActionFinishListener() {
             @Override
-            void onFinished() {
+            public void onFinished() {
                 List<Map<String, String>> resultList = getResultList();
                 if (resultList == null || resultList.isEmpty()) {
                     Logger.i(TAG, "got no msg detail before try to update msg state, something went wrong. msgID is: " + msgID);
@@ -218,7 +218,7 @@ public class DBManagerWrapper {
         StringBuilder sb = new StringBuilder();
         for (String id : idSet) {
             sb.append(id);
-            sb.append(Constants.DB.MSG_CHAR_SPLIT);
+            sb.append(Constants.DB.SPLIT_CHAR);
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
@@ -227,36 +227,70 @@ public class DBManagerWrapper {
     }
 
 
-    public void addSendingMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final IDBActionListener listener) {
-        if (msgID == null || msgID.isEmpty() || fromDeviceID == null || fromDeviceID.isEmpty() || toDeviceID == null || toDeviceID.isEmpty()) {
-            listener.failed();
-            return;
-        }
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                boolean insert = dbManager.insert(Constants.DB.TB_MSGS_SENDING, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO}, new String[]{msgID, fromDeviceID, toDeviceID});
-                if (insert) {
-                    listener.succeeded(null);
-                } else {
-                    listener.failed();
+    public void addSendingMsg(final MsgEntity msgEntity, final IDBActionListener listener) {
+        if (msgEntity.isValid()) {
+            Logger.i(TAG, "add into sending msg table: " + msgEntity);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    IDBActionFinishListener wrapListener = new IDBActionFinishListener() {
+                        int count = msgEntity.getMsgSendStates().keySet().size();
+                        boolean everFailed = false;
+
+                        @Override
+                        public void failed() {
+                            everFailed = true;
+                        }
+
+                        @Override
+                        public void onFinished() {
+                            count--;
+                            if (count == 0) {
+                                if (everFailed) {
+                                    listener.failed();
+                                } else {
+                                    listener.succeeded(null);
+                                }
+                            }
+                        }
+                    };
+
+                    for (String toID : msgEntity.getMsgSendStates().keySet()) {
+                        boolean insert = dbManager.insert(Constants.DB.TB_MSGS_SENDING, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO}, new String[]{msgEntity.getMsgID(), msgEntity.getFromDeviceID(), toID});
+
+                        if (insert) {
+                            wrapListener.succeeded(null);
+                        } else {
+                            wrapListener.failed();
+                        }
+                    }
                 }
-            }
-        });
+            });
+
+        } else {
+            listener.failed();
+        }
     }
 
-    public void addMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final String type, final String data, final int len, final String state, final long msgTime, final IDBActionListener listener) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME}, new String[]{msgID, fromDeviceID, toDeviceID, type, data, String.valueOf(len), state, String.valueOf(msgTime)});
-                if (insert) {
-                    listener.succeeded(null);
-                } else {
-                    listener.failed();
+    public void addMsg(final MsgEntity msgEntity, final IDBActionListener listener) {
+        if (msgEntity.isValid()) {
+            Logger.i(TAG, "add into msg table: " + msgEntity);
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    MsgEntity.MsgSendStateInDBFormate msgSendStateInDBFormate = MsgEntity.MsgSendStateInDBFormate.buildWithMsgSendStateMap(msgEntity.getMsgSendStates());
+                    boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME}, new String[]{msgEntity.getMsgID(), msgEntity.getFromDeviceID(), msgSendStateInDBFormate.getDeviceIDs(), msgEntity.getMsgType(), msgEntity.getMsgData(), String.valueOf(msgEntity.getMsgLen()), msgSendStateInDBFormate.getSendStates(), String.valueOf(msgEntity.getMsgTime())});
+                    if (insert) {
+                        listener.succeeded(null);
+                    } else {
+                        listener.failed();
+                    }
                 }
-            }
-        });
+            });
+
+        } else {
+            listener.failed();
+        }
     }
 
 

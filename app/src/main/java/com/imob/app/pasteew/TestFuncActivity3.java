@@ -15,7 +15,6 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
-import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.sslib.msg.StringMsg;
@@ -182,10 +181,24 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         String fromDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
 
-        MsgEntity msgEntity = MsgEntity.createMsgEntity(msgID, stringMsg.getMsgType(), msgContent, fromDeviceID, peerTagSetToDeviceIdArray(tagSet), stringMsg.getAvailable());
+        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msgContent, fromDeviceID, peerTagSetToDeviceIdArray(tagSet), stringMsg.getAvailable());
         msgEntities.add(msgEntity);
 
 
+
+        msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionFinishListener() {
+            @Override
+            public void onFinished() {
+
+            }
+        });
+
+        msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionFinishListener() {
+            @Override
+            public void onFinished() {
+
+            }
+        });
 
     }
 

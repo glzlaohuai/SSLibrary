@@ -1,5 +1,6 @@
 package com.badzzz.pasteany.core.wrap;
 
+import com.badzzz.pasteany.core.dbentity.DeviceEntity;
 import com.badzzz.pasteany.core.dbentity.InSendingMsgEntity;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDBManager;
@@ -79,25 +80,30 @@ public class DBManagerWrapper {
         dbManager = PlatformManagerHolder.get().getAppManager().getDBManager();
     }
 
-    public void addDeviceInfo(final String deviceID, final String deviceName, final String platform, final IDBActionListener listener) {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                boolean result = dbManager.executeSql(String.format(Constants.DB.SQL_INSERT_OR_UPDATE_DEVICE, deviceID, deviceName, platform));
-                if (result) {
-                    listener.succeeded(null);
-                } else {
-                    listener.failed();
+    public void addDeviceInfo(final DeviceEntity deviceEntity, final IDBActionListener listener) {
+        if (deviceEntity.isValid()) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    boolean result = dbManager.executeSql(String.format(Constants.DB.SQL_INSERT_OR_UPDATE_DEVICE, deviceEntity.getId(), deviceEntity.getName(), deviceEntity.getPlatform()));
+                    if (result) {
+                        listener.succeeded(null);
+                    } else {
+                        listener.failed();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            listener.failed();
+        }
+
     }
 
     public void updateDeviceName(final String deviceID, final String deviceName, final IDBActionListener listener) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                int update = dbManager.update(Constants.DB.TB_CONNECTED_DEVICES, new String[]{Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_NAME}, new String[]{deviceName}, new String[]{Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_ID}, new String[]{deviceID});
+                int update = dbManager.update(Constants.DB.TB_DEVICES, new String[]{Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_NAME}, new String[]{deviceName}, new String[]{Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_ID}, new String[]{deviceID});
                 if (update > 0) {
                     listener.succeeded(null);
                 } else {
@@ -117,6 +123,10 @@ public class DBManagerWrapper {
         doQuery(sql, listener);
     }
 
+
+    public void queryAllDevices(IDBActionListener listener) {
+        String sql = Constants.DB.SQL_QUERY_ALL_DEVICES;
+    }
 
     public void queryAllSendingMsgsAndMarkThemAsFailed(final IDBActionFinishListener listener) {
 

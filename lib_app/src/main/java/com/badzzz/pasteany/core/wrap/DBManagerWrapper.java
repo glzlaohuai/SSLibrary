@@ -27,6 +27,20 @@ public class DBManagerWrapper {
     private ExecutorService executorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("dbwrapper"));
 
 
+    public static class IDBActionListenerWrapper implements IDBActionListener {
+
+        @Override
+        public void succeeded(List<Map<String, String>> resultList) {
+
+        }
+
+        @Override
+        public void failed() {
+
+        }
+    }
+
+
     public interface IDBActionListener {
         void succeeded(List<Map<String, String>> resultList);
 
@@ -65,13 +79,12 @@ public class DBManagerWrapper {
         dbManager = PlatformManagerHolder.get().getAppManager().getDBManager();
     }
 
-
     public void addDeviceInfo(final String deviceID, final String deviceName, final String platform, final IDBActionListener listener) {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                boolean insert = dbManager.insert(Constants.DB.TB_CONNECTED_DEVICES, new String[]{Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_ID, Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_NAME, Constants.DB.KEY.CONNECTED_DEVICES.DEVICE_PLATFORM}, new String[]{deviceID, deviceName, platform});
-                if (insert) {
+                boolean result = dbManager.executeSql(String.format(Constants.DB.SQL_INSERT_OR_UPDATE_DEVICE, deviceID, deviceName, platform));
+                if (result) {
                     listener.succeeded(null);
                 } else {
                     listener.failed();

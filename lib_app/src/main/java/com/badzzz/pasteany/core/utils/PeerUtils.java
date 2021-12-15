@@ -14,6 +14,25 @@ public class PeerUtils {
         return null;
     }
 
+
+    public static String getPlatformFromPeer(Peer peer) {
+        if (peer != null && peer.getTag() != null) {
+            return getPlatformFromPeerTag(peer.getTag());
+        } else {
+            return null;
+        }
+    }
+
+    public static String getPlatformFromPeerTag(String peerTag) {
+        try {
+            JSONObject jsonObject = new JSONObject(peerTag);
+            return jsonObject.optString(Constants.Device.KEY_PLATFORM);
+        } catch (Throwable e) {
+            Logger.e(e);
+            return null;
+        }
+    }
+
     public static String getDeviceNameFromPeer(Peer peer) {
         if (peer != null && peer.getTag() != null) {
             return getDeviceNameFromPeerTag(peer.getTag());

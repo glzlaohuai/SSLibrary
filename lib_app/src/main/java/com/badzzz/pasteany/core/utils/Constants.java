@@ -61,16 +61,16 @@ public class Constants {
         public static final String TB_MSGS = "msgs";
         public static final String TB_MSGS_SENDING = "msgs_sending";
 
-        public static final int DEFAULT_QUERY_LIMIT = 50;
-
         public static final String SQL_CREATE_TABLE_DEVICES = String.format("CREATE TABLE %s (%s TEXT PRIMARY KEY, %s TEXT, %s TEXT)", TB_CONNECTED_DEVICES, KEY.CONNECTED_DEVICES.DEVICE_ID, KEY.CONNECTED_DEVICES.DEVICE_NAME, KEY.CONNECTED_DEVICES.DEVICE_PLATFORM);
         public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT KEY, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME);
         public static final String SQL_CREATE_TABLE_MSGS_SENDING = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS_SENDING, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO);
 
         public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
-        public static final String SQL_QUERY_DEVICE_RELATED_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d AND ( " + KEY.MSGS.MSG_FROM + " == %s OR " + KEY.MSGS.MSG_TO + " LIKE %s ) ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
-        public static final String SQL_QUERY_MSG_DETAIL = "SELECT * FROM " + TB_MSGS + " WHERE " + KEY.MSGS.MSG_ID + " == %d";
+        public static final String SQL_QUERY_DEVICE_RELATED_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d AND ( " + KEY.MSGS.MSG_FROM + " == '%s' OR " + KEY.MSGS.MSG_TO + " LIKE '%s' ) ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
+        public static final String SQL_QUERY_MSG_DETAIL = "SELECT * FROM " + TB_MSGS + " WHERE " + KEY.MSGS.MSG_ID + " == '%s'";
         public static final String SQL_QUERY_ALL_SENDING_MSGS = "SELECT * FROM " + TB_MSGS_SENDING;
+
+        public static final String SQL_INSERT_OR_UPDATE_DEVICE = "INSERT OR REPLACE INTO " + TB_CONNECTED_DEVICES + "(" + KEY.CONNECTED_DEVICES.DEVICE_ID + ", " + KEY.CONNECTED_DEVICES.DEVICE_NAME + " ," + KEY.CONNECTED_DEVICES.DEVICE_PLATFORM + ") VALUES('%s', '%s', '%s')";
 
         public static final class KEY {
             public static final class CONNECTED_DEVICES {
@@ -91,11 +91,27 @@ public class Constants {
             }
         }
 
-        public static final String MSG_TYPE_STATE_MANAGING = "0";
-        public static final String MSG_TYPE_STATE_SENDED = "1";
-        public static final String MSG_TYPE_STATE_FAILED = "-1";
+        public static final String MSG_SEND_STATE_IN_SENDING = "0";
+        public static final String MSG_SEND_STATE_SUCCEEDED = "1";
+        public static final String MSG_SEND_STATE_FAILED = "-1";
 
         public static final String SPLIT_CHAR = ",";
+
+        public static final String toReadableSendState(String sendState) {
+            String result = "unknown";
+            switch (sendState) {
+                case MSG_SEND_STATE_SUCCEEDED:
+                    result = "succeeded";
+                    break;
+                case MSG_SEND_STATE_FAILED:
+                    result = "failed";
+                    break;
+                case MSG_SEND_STATE_IN_SENDING:
+                    result = "sending...";
+                    break;
+            }
+            return result;
+        }
     }
 
 

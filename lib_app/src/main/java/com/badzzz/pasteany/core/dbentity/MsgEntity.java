@@ -43,7 +43,7 @@ public class MsgEntity {
         if (deviceIDs != null && deviceIDs.length > 0) {
             Logger.i(TAG, "mark in sending state to failed for deviceIDS: " + Arrays.toString(deviceIDs));
             for (String toDeviceID : deviceIDs) {
-                msgSendStates.put(toDeviceID, Constants.DB.MSG_TYPE_STATE_FAILED);
+                msgSendStates.put(toDeviceID, Constants.DB.MSG_SEND_STATE_FAILED);
             }
             DBManagerWrapper.getInstance().updateMsgState(this, idbActionListener);
         } else {
@@ -104,7 +104,7 @@ public class MsgEntity {
     public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, int msgLen, String... toDeviceIds) {
         Map<String, String> msgSendStates = null;
         if (toDeviceIds != null) {
-            msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_TYPE_STATE_MANAGING));
+            msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_SEND_STATE_IN_SENDING));
         }
         return new MsgEntity(-1, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
     }

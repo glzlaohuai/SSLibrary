@@ -34,8 +34,8 @@ public abstract class IDBManager {
         return doDelete(tableName, keys, values);
     }
 
-    public synchronized void executeSql(String sql) {
-        doExecuteSql(sql);
+    public synchronized boolean executeSql(String sql) {
+        return doExecuteSql(sql);
     }
 
 

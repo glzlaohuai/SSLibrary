@@ -9,6 +9,7 @@ import com.badzzz.pasteany.core.nsd.NsdServiceHandler;
 import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
+import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.lib_common.Logger;
@@ -273,6 +274,8 @@ public class ConnectedPeersManager {
                 destroyStalePeersIfExistsAfterIncomingNewPeer(peer);
                 addPeerToMap(peer);
                 connectedPeerEventListenerGroup.onIncomingPeer(peer);
+                //add to device table
+                DBManagerWrapper.getInstance().addDeviceInfo(PeerUtils.getDeviceIDFromPeerTag(msgID.getDevice()), PeerUtils.getDeviceNameFromPeerTag(msgID.getDevice()), PeerUtils.getPlatformFromPeerTag(msgID.getDevice()), new DBManagerWrapper.IDBActionListenerWrapper());
             }
         }
     }

@@ -37,7 +37,7 @@ public class XApplication extends Application {
         PreferenceManagerWrapper.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
         PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
         androidPlatformManager.initPlatform();
-
+        
         //just for test, logPrint
         forTest();
     }

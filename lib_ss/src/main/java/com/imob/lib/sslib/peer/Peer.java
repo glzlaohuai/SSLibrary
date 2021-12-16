@@ -406,6 +406,12 @@ public class Peer {
         });
     }
 
+
+
+
+
+
+
     private void callbackMsgSendPending(Msg msg) {
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendPending(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());

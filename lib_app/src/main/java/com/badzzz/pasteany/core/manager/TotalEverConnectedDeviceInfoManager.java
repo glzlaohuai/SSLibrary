@@ -23,11 +23,36 @@ public class TotalEverConnectedDeviceInfoManager {
 
     private static boolean hasInited = false;
     private static boolean fetched = false;
-    private static ITotalEverConnectedDeviceInfoListener deviceInfoListener;
+    private static ITotalEverConnectedDeviceInfoListenerGroup deviceInfoListener = new ITotalEverConnectedDeviceInfoListenerGroup();
 
 
     public interface ITotalEverConnectedDeviceInfoListener {
         void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all);
+    }
+
+
+    public static class ITotalEverConnectedDeviceInfoListenerGroup implements ITotalEverConnectedDeviceInfoListener {
+
+        private Set<ITotalEverConnectedDeviceInfoListener> set = new HashSet<>();
+
+        public void add(ITotalEverConnectedDeviceInfoListener listener) {
+            if (listener != null) {
+                set.add(listener);
+            }
+        }
+
+        public void remove(ITotalEverConnectedDeviceInfoListener listener) {
+            if (listener != null) {
+                set.remove(listener);
+            }
+        }
+
+        @Override
+        public void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
+            for (ITotalEverConnectedDeviceInfoListener listener : set) {
+                listener.onUpdated(all);
+            }
+        }
     }
 
 
@@ -115,4 +140,22 @@ public class TotalEverConnectedDeviceInfoManager {
         return totalKnownDevices;
     }
 
+    public static String getDeviceNameById(String id) {
+        if (id == null || !totalKnownDevices.containsKey(id)) return null;
+        return totalKnownDevices.get(id).getName();
+    }
+
+    public static String getPlatformNameById(String id) {
+        if (id == null || !totalKnownDevices.containsKey(id)) return null;
+        return totalKnownDevices.get(id).getPlatform();
+    }
+
+
+    public static void monitorTotalEverConnectedDeviceListUpdate(ITotalEverConnectedDeviceInfoListener listener) {
+        deviceInfoListener.add(listener);
+    }
+
+    public static void unmonitorTotalEventConnectedDeviceListUpdate(ITotalEverConnectedDeviceInfoListener listener) {
+        deviceInfoListener.remove(listener);
+    }
 }

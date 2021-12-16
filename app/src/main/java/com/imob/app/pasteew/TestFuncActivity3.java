@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
+import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
+import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
@@ -41,6 +43,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private TextView connectedPeersView;
     private ListView msgListView;
 
+    private boolean isLoading = false;
+
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
         @Override
         public void onIncomingPeer(Peer peer) {
@@ -57,6 +61,13 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     };
 
+    private TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
+        @Override
+        public void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
+
+            notifyMsgAdapter();
+        }
+    };
 
     private Comparator<MsgEntity> comparator = new Comparator<MsgEntity>() {
         @Override
@@ -106,14 +117,18 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
             sb.append("time: " + new Date(msgEntity.getMsgTime()).toString());
 
+
+            Map<String, IDeviceInfoManager.DeviceInfo> totalKnownDevices = TotalEverConnectedDeviceInfoManager.getTotalKnownDevices();
+
+
             msgView.setText(sb.toString());
-            msgFromView.setText("fromDeviceID: " + msgEntity.getFromDeviceID());
+            msgFromView.setText("fromDeviceID: " + msgEntity.getFromDeviceID() + "\n" + "fromDeviceName: " + TotalEverConnectedDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()));
 
             Map<String, String> msgSendStates = msgEntity.getMsgSendStates();
             sendingStateLayout.removeAllViews();
-            for (String key : msgSendStates.keySet()) {
+            for (String toID : msgSendStates.keySet()) {
                 TextView textView = new TextView(TestFuncActivity3.this);
-                textView.setText(key + ", " + Constants.DB.toReadableSendState(msgSendStates.get(key)));
+                textView.setText(TotalEverConnectedDeviceInfoManager.getDeviceNameById(toID) + ", " + Constants.DB.toReadableSendState(msgSendStates.get(toID)));
                 textView.setPadding(15, 15, 15, 15);
                 textView.setBackgroundColor(Color.BLUE);
                 textView.setTextColor(Color.WHITE);
@@ -124,6 +139,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             return view;
         }
     };
+
 
     private void updateConnectedPeersInfoView() {
         runOnUiThread(new Runnable() {
@@ -151,9 +167,36 @@ public class TestFuncActivity3 extends AppCompatActivity {
         });
 
 
+        findViewById(R.id.loadNextBatch).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadNextBatchMsg();
+            }
+        });
+
+
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
+        TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
         updateConnectedPeersInfoView();
         queryAllInSendingMsgsAndMarkThemAsFailed();
+    }
+
+
+    private void loadNextBatchMsg() {
+        if (!isLoading) {
+            isLoading = true;
+
+            int maxID = msgEntities.size() > 0 ? msgEntities.get(0).getAutoID() : Integer.MAX_VALUE;
+            DBManagerWrapper.getInstance().queryAllMsgs(maxID, 2, new DBManagerWrapper.IDBActionFinishListener() {
+                @Override
+                public void onFinished() {
+                    msgEntities.addAll(MsgEntity.buildWithDBQueryList(getResultList()));
+                    Collections.sort(msgEntities, comparator);
+
+                    notifyMsgAdapter();
+                }
+            });
+        }
     }
 
 
@@ -172,15 +215,18 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
 
     private void queryAllInSendingMsgsAndMarkThemAsFailed() {
+        isLoading = true;
         DBManagerWrapper.getInstance().queryAllSendingMsgsAndMarkThemAsFailed(new DBManagerWrapper.IDBActionFinishListener() {
             @Override
             public void onFinished() {
-                DBManagerWrapper.getInstance().queryAllMsgs(Integer.MAX_VALUE, 1000, new DBManagerWrapper.IDBActionFinishListener() {
+                DBManagerWrapper.getInstance().queryAllMsgs(Integer.MAX_VALUE, 2, new DBManagerWrapper.IDBActionFinishListener() {
                     @Override
                     public void onFinished() {
                         msgEntities.addAll(MsgEntity.buildWithDBQueryList(getResultList()));
                         Collections.sort(msgEntities, comparator);
                         notifyMsgAdapter();
+
+                        isLoading = false;
                     }
                 });
             }
@@ -217,7 +263,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         if (msgEntity.isValid()) {
             doSendMsgEntity(msgEntity, tagSet);
         } else {
-            Toast.makeText(this, "not valid", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "not valid, maybe has no peers connected now.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -254,5 +300,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
         super.onDestroy();
 
         ConnectedPeersManager.unmonitorConnectedPeersEvent(connectedPeerEventListener);
+        TotalEverConnectedDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
     }
 }

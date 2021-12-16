@@ -71,7 +71,7 @@ public class Constants {
         public static final String SQL_QUERY_ALL_SENDING_MSGS = "SELECT * FROM " + TB_MSGS_SENDING;
         public static final String SQL_QUERY_ALL_DEVICES = "SELECT * FROM " + TB_DEVICES;
 
-        public static final String SQL_INSERT_OR_UPDATE_DEVICE = "INSERT OR REPLACE INTO " + TB_DEVICES + "(" + KEY.CONNECTED_DEVICES.DEVICE_ID + ", " + KEY.CONNECTED_DEVICES.DEVICE_NAME + " ," + KEY.CONNECTED_DEVICES.DEVICE_PLATFORM + ") VALUES('%s', '%s', '%s')";
+        public static final String SQL_INSERT_OR_UPDATE_DEVICE = "INSERT OR REPLACE INTO " + TB_DEVICES + "(" + KEY.CONNECTED_DEVICES.DEVICE_ID + ", " + KEY.CONNECTED_DEVICES.DEVICE_NAME + ", " + KEY.CONNECTED_DEVICES.DEVICE_PLATFORM + ") VALUES('%s', '%s', '%s')";
 
         public static final class KEY {
             public static final class CONNECTED_DEVICES {

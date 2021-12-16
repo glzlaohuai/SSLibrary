@@ -75,10 +75,20 @@ public abstract class IDeviceInfoManager {
 
         public String toJson() {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(Constants.Device.KEY_DEVICEID, id);
-            jsonObject.put(Constants.Device.KEY_DEVICE_NAME, name);
-            jsonObject.put(Constants.Device.KEY_PLATFORM, platform);
+            try {
+                jsonObject.put(Constants.Device.KEY_DEVICEID, id);
+                jsonObject.put(Constants.Device.KEY_DEVICE_NAME, name);
+                jsonObject.put(Constants.Device.KEY_PLATFORM, platform);
+            } catch (Throwable e) {
+                Logger.e(e);
+            }
             return jsonObject.toString();
+        }
+
+
+        @Override
+        public String toString() {
+            return toJson();
         }
     }
 

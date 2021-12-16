@@ -85,6 +85,7 @@ public class TotalEverConnectedDeviceInfoManager {
                 }
                 getDeviceInfoFromConnectedPeersAndAddToMap();
                 callbackDeviceInfoUpdated();
+                Logger.i(TAG, "total known devices from db: " + totalKnownDevices);
                 fetched = true;
             }
         });

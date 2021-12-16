@@ -85,7 +85,7 @@ public class MsgEntity {
 
 
     public final static List<MsgEntity> buildWithDBQueryList(List<Map<String, String>> list) {
-        if (list == null || list.isEmpty()) {
+        if (list == null) {
             return null;
         }
 

@@ -8,6 +8,7 @@ import com.badzzz.pasteany.core.utils.Constants;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.utils.SSThreadFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +67,7 @@ public class DBManagerWrapper {
         }
 
         public List<Map<String, String>> getResultList() {
-            return resultList;
+            return resultList == null ? new ArrayList<Map<String, String>>() : resultList;
         }
     }
 
@@ -126,6 +127,7 @@ public class DBManagerWrapper {
 
     public void queryAllDevices(IDBActionListener listener) {
         String sql = Constants.DB.SQL_QUERY_ALL_DEVICES;
+        doQuery(sql, listener);
     }
 
     public void queryAllSendingMsgsAndMarkThemAsFailed(final IDBActionFinishListener listener) {

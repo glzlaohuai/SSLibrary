@@ -34,7 +34,7 @@ public class DeviceEntity extends IDeviceInfoManager.DeviceInfo {
 
 
     public static List<DeviceEntity> buildWithDBQueryList(List<Map<String, String>> dbList) {
-        if (dbList == null || dbList.isEmpty()) {
+        if (dbList == null) {
             return null;
         }
 

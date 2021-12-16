@@ -14,14 +14,14 @@
         android:id="@+id/sendBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="test" />
+        android:text="send test msg" />
 
 
     <Button
         android:id="@+id/loadNextBatch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="test" />
+        android:text="load next batch" />
 
 
     <ListView

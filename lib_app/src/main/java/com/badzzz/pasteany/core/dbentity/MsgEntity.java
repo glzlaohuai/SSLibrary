@@ -193,18 +193,16 @@ public class MsgEntity {
         return msgTime;
     }
 
-
     public boolean isValid() {
         return msgID != null && !msgID.isEmpty() && msgType != null && !msgType.isEmpty() && msgData != null && !msgData.isEmpty() && fromDeviceID != null && !fromDeviceID.isEmpty() && msgLen > 0 && msgTime > 0 && msgSendStates != null && !msgSendStates.isEmpty();
     }
 
-
-    public void insertIntoMsgSendingTable(final DBManagerWrapper.IDBActionFinishListener listener) {
+    public void insertIntoMsgSendingTable(final DBManagerWrapper.IDBActionListener listener) {
         DBManagerWrapper.getInstance().addSendingMsg(this, listener);
     }
 
 
-    public void insertIntoMsgTable(DBManagerWrapper.IDBActionFinishListener listener) {
+    public void insertIntoMsgTable(DBManagerWrapper.IDBActionListener listener) {
         DBManagerWrapper.getInstance().addMsg(this, listener);
     }
 

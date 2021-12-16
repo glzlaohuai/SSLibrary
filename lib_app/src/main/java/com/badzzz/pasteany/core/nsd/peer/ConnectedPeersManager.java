@@ -241,6 +241,9 @@ public class ConnectedPeersManager {
                 return;
             }
 
+            //just in case if concurrent modify exception occurs
+            sameTagPeersSet = new HashSet<>(sameTagPeersSet);
+
             for (Peer peer : sameTagPeersSet) {
                 if (peer == incomingPeer) continue;
                 if (peer.getTag().equals(incomingPeer.getTag()) && peer.getLocalNode().isServerNode()) {

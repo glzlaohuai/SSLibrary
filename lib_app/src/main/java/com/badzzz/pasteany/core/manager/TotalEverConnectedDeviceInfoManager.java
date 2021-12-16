@@ -22,6 +22,7 @@ public class TotalEverConnectedDeviceInfoManager {
     private final static Map<String, IDeviceInfoManager.DeviceInfo> totalKnownDevices = new HashMap<>();
 
     private static boolean hasInited = false;
+    private static boolean fetched = false;
     private static ITotalEverConnectedDeviceInfoListener deviceInfoListener;
 
 
@@ -59,6 +60,7 @@ public class TotalEverConnectedDeviceInfoManager {
                 }
                 getDeviceInfoFromConnectedPeersAndAddToMap();
                 callbackDeviceInfoUpdated();
+                fetched = true;
             }
         });
 
@@ -69,6 +71,11 @@ public class TotalEverConnectedDeviceInfoManager {
                 afterPeerIncoming(peer);
             }
         });
+    }
+
+    //read from db finished or not
+    public static boolean isFetchedAlready() {
+        return fetched;
     }
 
 

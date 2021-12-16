@@ -252,7 +252,6 @@ public class ConnectedPeersManager {
                 }
             }
         }
-
     }
 
     private static void addPeerToMap(Peer peer) {

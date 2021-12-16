@@ -6,6 +6,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;
 
@@ -69,9 +70,17 @@ public class TotalEverConnectedDeviceInfoManager {
         }
     }
 
+
+    private static void addSelfDeviceInfoToTotalKnownDevice() {
+        IDeviceInfoManager deviceInfoManager = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager();
+        IDeviceInfoManager.DeviceInfo deviceInfo = new IDeviceInfoManager.DeviceInfo(deviceInfoManager.getDeviceID(), deviceInfoManager.getDeviceName(), PlatformManagerHolder.get().getPlatformName());
+        totalKnownDevices.put(deviceInfo.getId(), deviceInfo);
+    }
+
     public synchronized final static void init() {
         if (hasInited) return;
         hasInited = true;
+        addSelfDeviceInfoToTotalKnownDevice();
         //get all known devices from db
         DBManagerWrapper.getInstance().queryAllDevices(new DBManagerWrapper.IDBActionFinishListener() {
             @Override

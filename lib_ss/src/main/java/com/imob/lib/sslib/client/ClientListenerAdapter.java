@@ -104,7 +104,7 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
 
     }
 

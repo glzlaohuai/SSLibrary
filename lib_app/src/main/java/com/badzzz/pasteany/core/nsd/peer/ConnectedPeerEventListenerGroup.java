@@ -93,9 +93,9 @@ public class ConnectedPeerEventListenerGroup implements ConnectedPeerEventListen
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
         for (ConnectedPeerEventListener listener : queue) {
-            listener.onIncomingMsgReadSucceeded(peer, id);
+            listener.onIncomingMsgReadSucceeded(peer, id, available);
         }
     }
 

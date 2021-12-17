@@ -105,11 +105,11 @@ public class ConnectedPeersManager {
         }
 
         @Override
-        public void onIncomingMsgReadSucceeded(final Peer peer, final String id) {
-            super.onIncomingMsgReadSucceeded(peer, id);
+        public void onIncomingMsgReadSucceeded(final Peer peer, final String id, int available) {
+            super.onIncomingMsgReadSucceeded(peer, id, available);
 
             if (isThisMsgTypeNeedCallback(id)) {
-                connectedPeerEventListenerGroup.onIncomingMsgReadSucceeded(peer, id);
+                connectedPeerEventListenerGroup.onIncomingMsgReadSucceeded(peer, id, available);
                 //if it's fileMsg, the merge all received file chunk into the completed final file, and callback the merge result
                 MsgID msgID = MsgID.buildWithJsonString(id);
                 if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {

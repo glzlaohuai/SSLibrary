@@ -112,8 +112,8 @@ public class APIRequester {
 
 
                 @Override
-                public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-                    super.onIncomingMsgReadSucceeded(peer, id);
+                public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
+                    super.onIncomingMsgReadSucceeded(peer, id,available);
 
                     MsgID tmp = createMsgID(id);
 

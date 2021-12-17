@@ -407,11 +407,6 @@ public class Peer {
     }
 
 
-
-
-
-
-
     private void callbackMsgSendPending(Msg msg) {
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendPending(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
@@ -664,7 +659,7 @@ public class Peer {
                                 }
 
                                 if (readed == available) {
-                                    listener.onIncomingMsgReadSucceeded(Peer.this, id);
+                                    listener.onIncomingMsgReadSucceeded(Peer.this, id, readed);
                                 } else {
                                     listener.onIncomingMsgReadFailed(Peer.this, id, available, readed);
                                 }

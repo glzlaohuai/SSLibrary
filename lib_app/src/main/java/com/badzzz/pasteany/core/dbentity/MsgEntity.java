@@ -25,6 +25,7 @@ public class MsgEntity {
     private int msgLen;
     private long msgTime;
 
+    private Map<String, Integer> msgSendProgress;
     private Map<String, String> msgSendStates;
 
     private MsgEntity(int autoID, String msgID, String msgType, String msgData, String fromDeviceID, long time, int msgLen, Map<String, String> msgSendStates) {
@@ -36,6 +37,12 @@ public class MsgEntity {
         this.msgLen = msgLen;
         this.msgTime = time;
         this.msgSendStates = msgSendStates;
+        if (msgSendStates != null) {
+            Set<String> keySet = msgSendStates.keySet();
+            for (String key : keySet) {
+                msgSendProgress.put(key, 0);
+            }
+        }
     }
 
 
@@ -51,10 +58,17 @@ public class MsgEntity {
         }
     }
 
-    public void markMsgSendStateAndUpdateDB(String toDeviceID, String sendState, DBManagerWrapper.IDBActionFinishListener listener) {
+    public void markMsgSendStateAndUpdateDB(String toDeviceID, String sendState, DBManagerWrapper.IDBActionListener listener) {
         Logger.i(TAG, "msg send state update, toDeviceID: " + toDeviceID + ", state: " + sendState);
         msgSendStates.put(toDeviceID, sendState);
         DBManagerWrapper.getInstance().updateMsgState(this, listener);
+    }
+
+
+    public void setMsgSendStates(String toDeviceID, String sendState) {
+        if (toDeviceID != null && sendState != null && !toDeviceID.isEmpty() && !sendState.isEmpty()) {
+            msgSendStates.put(toDeviceID, sendState);
+        }
     }
 
 
@@ -160,6 +174,23 @@ public class MsgEntity {
         }
     }
 
+    public void setProgressForDeviceID(String toDeviceID, int progress) {
+        if (toDeviceID != null) {
+            msgSendProgress.put(toDeviceID, progress);
+        }
+    }
+
+    /**
+     *
+     * @param toDeviceID
+     * @return real progress or -1 if did not the given deviceID
+     */
+    public int getProgressByDeviceID(String toDeviceID) {
+        if (toDeviceID != null && msgSendProgress.containsKey(toDeviceID)) {
+            return msgSendProgress.get(toDeviceID);
+        }
+        return -1;
+    }
 
     public int getAutoID() {
         return autoID;

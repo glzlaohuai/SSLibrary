@@ -194,10 +194,10 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-        base.onIncomingMsgReadSucceeded(peer, id);
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
+        base.onIncomingMsgReadSucceeded(peer, id, available);
         if (printLog) {
-            Logger.i(TAG, "onIncomingMsgReadSucceeded, peer: " + peer.getTag() + ", id: " + id);
+            Logger.i(TAG, "onIncomingMsgReadSucceeded, peer: " + peer.getTag() + ", id: " + id + ", available: " + available);
         }
     }
 

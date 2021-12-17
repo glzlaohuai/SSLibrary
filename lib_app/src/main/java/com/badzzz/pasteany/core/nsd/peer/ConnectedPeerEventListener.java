@@ -24,7 +24,7 @@ public interface ConnectedPeerEventListener {
 
     void onIncomingStringMsg(Peer peer, String id, String msg);
 
-    void onIncomingMsgReadSucceeded(Peer peer, String id);
+    void onIncomingMsgReadSucceeded(Peer peer, String id, int available);
 
     void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total);
 

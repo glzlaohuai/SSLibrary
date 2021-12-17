@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.badzzz.pasteany.core.api.MsgCreator;
+import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
 import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
@@ -45,6 +46,9 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private boolean isLoading = false;
 
+    private String selfDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
+
+
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
         @Override
         public void onIncomingPeer(Peer peer) {
@@ -58,6 +62,68 @@ public class TestFuncActivity3 extends AppCompatActivity {
             super.onPeerLost(peer);
 
             updateConnectedPeersInfoView();
+        }
+
+        @Override
+        public void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes) {
+            super.onIncomingFileChunk(peer, id, soFar, chunkSize, available, bytes);
+
+            //first chunk, add into msgEntities
+            if (chunkSize == soFar) {
+                MsgID msgID = MsgID.buildWithJsonString(id);
+                MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), available, selfDeviceID);
+                msgEntities.add(msgEntity);
+            }
+        }
+
+
+        @Override
+        public void onIncomingStringMsg(Peer peer, String id, String msg) {
+            super.onIncomingStringMsg(peer, id, msg);
+
+
+        }
+
+        @Override
+        public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
+            super.onIncomingMsgReadSucceeded(peer, id, available);
+
+
+        }
+
+        @Override
+        public void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total) {
+            super.onIncomingMsgReadFailed(peer, id, soFar, total);
+
+
+        }
+
+        @Override
+        public void onMsgSendFailed(Peer peer, String id) {
+            super.onMsgSendFailed(peer, id);
+
+
+        }
+
+        @Override
+        public void onMsgSendStarted(Peer peer, String id) {
+            super.onMsgSendStarted(peer, id);
+
+
+        }
+
+        @Override
+        public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
+            super.onNotAllMsgChunkSendedConfirmed(peer, id);
+
+
+        }
+
+        @Override
+        public void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total) {
+            super.onSendedMsgChunkConfirmed(peer, id, soFar, total);
+
+
         }
     };
 
@@ -177,6 +243,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
+        
         updateConnectedPeersInfoView();
         queryAllInSendingMsgsAndMarkThemAsFailed();
     }
@@ -270,25 +337,16 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private void doSendMsgEntity(MsgEntity msgEntity, Set<String> tagSet) {
         msgEntities.add(msgEntity);
 
-        msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionFinishListener() {
-            @Override
-            public void onFinished() {
+        msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerWrapper());
+        msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
 
-            }
-        });
-
-        msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionFinishListener() {
-            @Override
-            public void onFinished() {
-
-            }
-        });
         msgAdapter.notifyDataSetChanged();
 
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
             if (peer == null) {
                 //send failed
+                msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(new DBManagerWrapper.IDBActionListenerWrapper(), PeerUtils.getDeviceIDFromPeerTag(tag));
             } else {
                 peer.sendMessage(MsgCreator.createNormalStringMsg(msgEntity.getMsgID(), msgEntity.getMsgData()));
             }

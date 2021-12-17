@@ -148,9 +148,9 @@ public class PeerListenerGroup implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
         for (PeerListener listener : queue) {
-            listener.onIncomingMsgReadSucceeded(peer, id);
+            listener.onIncomingMsgReadSucceeded(peer, id, available);
         }
     }
 

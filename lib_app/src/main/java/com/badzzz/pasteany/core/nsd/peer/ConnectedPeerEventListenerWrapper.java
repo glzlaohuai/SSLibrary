@@ -104,12 +104,12 @@ public class ConnectedPeerEventListenerWrapper implements ConnectedPeerEventList
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
 
-        base.onIncomingMsgReadSucceeded(peer, id);
+        base.onIncomingMsgReadSucceeded(peer, id, available);
 
         if (printLog) {
-            Logger.i(tag, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
+            Logger.i(tag, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id + ", available: " + available);
         }
     }
 

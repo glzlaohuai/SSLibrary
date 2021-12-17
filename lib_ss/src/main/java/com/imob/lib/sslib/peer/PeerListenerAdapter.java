@@ -87,7 +87,7 @@ public class PeerListenerAdapter implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
 
     }
 

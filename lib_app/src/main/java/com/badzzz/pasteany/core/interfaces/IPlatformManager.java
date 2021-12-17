@@ -1,5 +1,6 @@
 package com.badzzz.pasteany.core.interfaces;
 
+import com.badzzz.pasteany.core.manager.IncomingMsgDBManager;
 import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
@@ -24,6 +25,7 @@ public abstract class IPlatformManager {
             kickOffNsdServiceIfServiceNameSet();
             ConnectedPeersManager.init();
             TotalEverConnectedDeviceInfoManager.init();
+            IncomingMsgDBManager.init();
             hasInited = true;
         }
     }

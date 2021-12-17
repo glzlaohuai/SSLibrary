@@ -35,7 +35,7 @@ public interface PeerListener {
 
     void onIncomingMsgChunkReadSucceeded(Peer peer, String id, int chunkSize, int soFar, int available, byte[] chunkBytes);
 
-    void onIncomingMsgReadSucceeded(Peer peer, String id);
+    void onIncomingMsgReadSucceeded(Peer peer, String id, int total);
 
     void onIncomingMsgReadFailed(Peer peer, String id, int total, int soFar);
 

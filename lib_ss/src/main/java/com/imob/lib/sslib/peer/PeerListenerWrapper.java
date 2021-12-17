@@ -182,8 +182,8 @@ public class PeerListenerWrapper implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-        base.onIncomingMsgReadSucceeded(peer, id);
+    public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
+        base.onIncomingMsgReadSucceeded(peer, id,available);
         if (printLog) {
             Logger.i(tag, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
 

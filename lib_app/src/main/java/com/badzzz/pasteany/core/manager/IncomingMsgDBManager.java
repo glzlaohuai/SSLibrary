@@ -4,6 +4,7 @@ import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
+import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
@@ -15,9 +16,13 @@ public class IncomingMsgDBManager {
 
     private static boolean inited = false;
 
+    private static String selfDeviceID;
+
+
     public synchronized static void init() {
         if (!inited) {
             inited = true;
+            selfDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
             doInit();
         }
     }
@@ -56,18 +61,34 @@ public class IncomingMsgDBManager {
                 super.onIncomingStringMsg(peer, id, msg);
 
                 MsgID msgID = MsgID.buildWithJsonString(id);
-                MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msg, PeerUtils.getDeviceIDFromPeer(peer), msg.getBytes().length, PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID());
+
+                MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msg, PeerUtils.getDeviceIDFromPeer(peer), msg.getBytes().length, selfDeviceID);
+                msgEntity.setMsgSendStates(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED);
                 msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
             }
 
             @Override
-            public void onIncomingMsgReadSucceeded(Peer peer, String id) {
-                super.onIncomingMsgReadSucceeded(peer, id);
+            public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
+                super.onIncomingMsgReadSucceeded(peer, id, available);
+
+                MsgID msgID = MsgID.buildWithJsonString(id);
+                //only handle file type incoming msg
+                if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
+                    MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), available, selfDeviceID);
+                    msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(new DBManagerWrapper.IDBActionListenerWrapper(), selfDeviceID);
+                }
             }
 
             @Override
             public void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total) {
                 super.onIncomingMsgReadFailed(peer, id, soFar, total);
+
+                MsgID msgID = MsgID.buildWithJsonString(id);
+                //only handle file incoming msg
+                if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
+                    MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), total, selfDeviceID);
+                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_FAILED, new DBManagerWrapper.IDBActionListenerWrapper());
+                }
             }
         });
     }

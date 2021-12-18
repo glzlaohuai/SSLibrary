@@ -9,32 +9,22 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.badzzz.pasteany.core.api.MsgCreator;
-import com.badzzz.pasteany.core.api.msg.MsgID;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
+import com.badzzz.pasteany.core.manager.MsgEntitiesManager;
 import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
-import com.badzzz.pasteany.core.utils.PeerUtils;
-import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.imob.lib.sslib.msg.StringMsg;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,7 +34,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private TextView connectedPeersView;
     private ListView msgListView;
 
-    private boolean isLoading = false;
+    private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
+
 
     private String selfDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
 
@@ -63,68 +54,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
             updateConnectedPeersInfoView();
         }
-
-        @Override
-        public void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes) {
-            super.onIncomingFileChunk(peer, id, soFar, chunkSize, available, bytes);
-
-            //first chunk, add into msgEntities
-            if (chunkSize == soFar) {
-                MsgID msgID = MsgID.buildWithJsonString(id);
-                MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), available, selfDeviceID);
-                msgEntities.add(msgEntity);
-            }
-        }
-
-
-        @Override
-        public void onIncomingStringMsg(Peer peer, String id, String msg) {
-            super.onIncomingStringMsg(peer, id, msg);
-
-
-        }
-
-        @Override
-        public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
-            super.onIncomingMsgReadSucceeded(peer, id, available);
-
-
-        }
-
-        @Override
-        public void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total) {
-            super.onIncomingMsgReadFailed(peer, id, soFar, total);
-
-
-        }
-
-        @Override
-        public void onMsgSendFailed(Peer peer, String id) {
-            super.onMsgSendFailed(peer, id);
-
-
-        }
-
-        @Override
-        public void onMsgSendStarted(Peer peer, String id) {
-            super.onMsgSendStarted(peer, id);
-
-
-        }
-
-        @Override
-        public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
-            super.onNotAllMsgChunkSendedConfirmed(peer, id);
-
-
-        }
-
-        @Override
-        public void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total) {
-            super.onSendedMsgChunkConfirmed(peer, id, soFar, total);
-
-
-        }
     };
 
     private TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
@@ -135,17 +64,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     };
 
-    private Comparator<MsgEntity> comparator = new Comparator<MsgEntity>() {
-        @Override
-        public int compare(MsgEntity o1, MsgEntity o2) {
-            return o1.getAutoID() - o2.getAutoID();
-        }
-    };
-
-
-    private List<MsgEntity> msgEntities = new ArrayList<>();
-
     private BaseAdapter msgAdapter = new BaseAdapter() {
+
         @Override
         public int getCount() {
             return msgEntities.size();
@@ -236,34 +156,22 @@ public class TestFuncActivity3 extends AppCompatActivity {
         findViewById(R.id.loadNextBatch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadNextBatchMsg();
+                MsgEntitiesManager.loadNextBatch(new MsgEntitiesManager.IMsgEntityBatchLoadListener() {
+                    @Override
+                    public void onFinished() {
+                        msgEntities.clear();
+                        msgEntities.addAll(MsgEntitiesManager.getAllMsgEntities());
+
+                        notifyMsgAdapter();
+                    }
+                });
             }
         });
 
-
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
-        
+
         updateConnectedPeersInfoView();
-        queryAllInSendingMsgsAndMarkThemAsFailed();
-    }
-
-
-    private void loadNextBatchMsg() {
-        if (!isLoading) {
-            isLoading = true;
-
-            int maxID = msgEntities.size() > 0 ? msgEntities.get(0).getAutoID() : Integer.MAX_VALUE;
-            DBManagerWrapper.getInstance().queryAllMsgs(maxID, 2, new DBManagerWrapper.IDBActionFinishListener() {
-                @Override
-                public void onFinished() {
-                    msgEntities.addAll(MsgEntity.buildWithDBQueryList(getResultList()));
-                    Collections.sort(msgEntities, comparator);
-
-                    notifyMsgAdapter();
-                }
-            });
-        }
     }
 
 
@@ -280,77 +188,9 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     }
 
-
-    private void queryAllInSendingMsgsAndMarkThemAsFailed() {
-        isLoading = true;
-        DBManagerWrapper.getInstance().queryAllSendingMsgsAndMarkThemAsFailed(new DBManagerWrapper.IDBActionFinishListener() {
-            @Override
-            public void onFinished() {
-                DBManagerWrapper.getInstance().queryAllMsgs(Integer.MAX_VALUE, 2, new DBManagerWrapper.IDBActionFinishListener() {
-                    @Override
-                    public void onFinished() {
-                        msgEntities.addAll(MsgEntity.buildWithDBQueryList(getResultList()));
-                        Collections.sort(msgEntities, comparator);
-                        notifyMsgAdapter();
-
-                        isLoading = false;
-                    }
-                });
-            }
-        });
-    }
-
-
-    private static String[] peerTagSetToDeviceIdArray(Set<String> tagSet) {
-        try {
-            String[] tags = tagSet.toArray(new String[0]);
-            for (int i = 0; i < tags.length; i++) {
-                tags[i] = PeerUtils.getDeviceIDFromPeerTag(tags[i]);
-            }
-            return tags;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
     private void sendTestMsgsToAllConnectedPeers() {
-        //in canse if concurrent exception occure
-        Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
+        
 
-        String msgID = UUID.randomUUID().toString();
-        String msgContent = "hello world, " + UUID.randomUUID().toString();
-        StringMsg stringMsg = MsgCreator.createNormalStringMsg(msgID, msgContent);
-
-        String fromDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
-
-        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msgContent, fromDeviceID, stringMsg.getAvailable(), peerTagSetToDeviceIdArray(tagSet));
-
-        if (msgEntity.isValid()) {
-            doSendMsgEntity(msgEntity, tagSet);
-        } else {
-            Toast.makeText(this, "not valid, maybe has no peers connected now.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void doSendMsgEntity(MsgEntity msgEntity, Set<String> tagSet) {
-        msgEntities.add(msgEntity);
-
-        msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerWrapper());
-        msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
-
-        msgAdapter.notifyDataSetChanged();
-
-        for (String tag : tagSet) {
-            Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
-            if (peer == null) {
-                //send failed
-                msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(new DBManagerWrapper.IDBActionListenerWrapper(), PeerUtils.getDeviceIDFromPeerTag(tag));
-            } else {
-                peer.sendMessage(MsgCreator.createNormalStringMsg(msgEntity.getMsgID(), msgEntity.getMsgData()));
-            }
-        }
     }
 
     @Override

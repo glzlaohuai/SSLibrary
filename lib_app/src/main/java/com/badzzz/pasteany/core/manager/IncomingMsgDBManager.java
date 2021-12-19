@@ -75,7 +75,7 @@ public class IncomingMsgDBManager {
                 //only handle file type incoming msg
                 if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
                     MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), available, selfDeviceID);
-                    msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(new DBManagerWrapper.IDBActionListenerWrapper(), selfDeviceID);
+                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED, new DBManagerWrapper.IDBActionListenerWrapper());
                 }
             }
 

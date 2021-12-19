@@ -78,7 +78,7 @@ public abstract class IFileManager {
     }
 
 
-    public File getDirWithDeviceIDAndMsgID(String deviceID, String msgID) {
+    public File getFinalFileSaveDirWithDeviceIDAndMsgID(String deviceID, String msgID) {
 
         File deviceDir = getDirWithDeviceID(deviceID);
         File msgDir = new File(deviceDir, Md5.md5(msgID));
@@ -97,7 +97,7 @@ public abstract class IFileManager {
 
         final String fileName = chunkFrom + "-" + chunkTo;
 
-        final File chunkFile = new File(getDirWithDeviceIDAndMsgID(deviceID, msgID), fileName);
+        final File chunkFile = new File(getFinalFileSaveDirWithDeviceIDAndMsgID(deviceID, msgID), fileName);
         if (FileUtils.writeBytesToFile(chunkFile, bytes, 0, chunkSize)) {
             listener.onSuccess(chunkFile);
         } else {
@@ -106,7 +106,7 @@ public abstract class IFileManager {
     }
 
     public void mergeAllFileChunks(String deviceID, String msgID, String fileName, FileMergeListener listener) {
-        File dir = getDirWithDeviceIDAndMsgID(deviceID, msgID);
+        File dir = getFinalFileSaveDirWithDeviceIDAndMsgID(deviceID, msgID);
 
         File[] files = dir.listFiles();
         if (files == null) {

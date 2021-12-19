@@ -167,7 +167,7 @@ public class DBManagerWrapper {
                                 }
                             }
                         };
-                        loopUpdateMsgSendState(msgIDToDeviceIDsMap, wrapListener);
+                        loopUpdateMsgSendStateToFailed(msgIDToDeviceIDsMap, wrapListener);
                     } else {
                         listener.failed();
                     }
@@ -179,7 +179,7 @@ public class DBManagerWrapper {
     }
 
 
-    private void loopUpdateMsgSendState(final Map<String, Set<String>> map, final IDBActionFinishListener finishListener) {
+    private void loopUpdateMsgSendStateToFailed(final Map<String, Set<String>> map, final IDBActionFinishListener finishListener) {
         if (map == null || map.isEmpty()) {
             finishListener.onFinished();
             return;
@@ -193,7 +193,7 @@ public class DBManagerWrapper {
                 if (resultList == null || resultList.isEmpty()) {
                     Logger.i(TAG, "got no msg detail before try to update msg state, something went wrong. msgID is: " + msgID);
                     map.remove(msgID);
-                    loopUpdateMsgSendState(map, finishListener);
+                    loopUpdateMsgSendStateToFailed(map, finishListener);
                 } else {
                     Logger.i(TAG, "got msg detail for msgID: " + msgID + ", update its send state.");
                     MsgEntity msgEntity = MsgEntity.buildWithDBItem(resultList.get(0));

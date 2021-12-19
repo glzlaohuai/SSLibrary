@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -189,8 +190,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
     }
 
     private void sendTestMsgsToAllConnectedPeers() {
-        
-
+        MsgEntitiesManager.sendStringMsgToPeers(UUID.randomUUID().toString(), "this is a test msg ", ConnectedPeersManager.getConnectedPeersTagSet());
     }
 
     @Override

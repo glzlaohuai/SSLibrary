@@ -118,21 +118,17 @@ public class MsgEntitiesManager {
             @Override
             public void onIncomingFileChunk(Peer peer, String id, int soFar, int chunkSize, int available, byte[] bytes) {
                 super.onIncomingFileChunk(peer, id, soFar, chunkSize, available, bytes);
-                //got msgEntity and set its send progress
 
                 //incoming first, generate msgEntity and add to list
                 if (soFar == chunkSize) {
+                    File finalFile = PeerUtils.getReceivedFileInLocalFromFileTypeMsgSendedByPeer(peer, id);
                     MsgID msgID = MsgID.buildWithJsonString(id);
-                    String fromDeviceID = PeerUtils.getDeviceIDFromPeer(peer);
+                    MsgEntity msgEntity = handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
 
-                    File finalFile = new File(PlatformManagerHolder.get().getAppManager().getFileManager().getFinalFileSaveDirWithDeviceIDAndMsgID(fromDeviceID, id), new File(msgID.getData()).getName());
-                    MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), Constants.PeerMsgType.TYPE_FILE, finalFile.getAbsolutePath(), fromDeviceID, available, selfDeviceID);
-
-                    msgEntities.addLast(msgEntity);
-                    addToSendingMsgEntityMap(msgID.getId(), msgEntity, selfDeviceID);
-                    msgEntity.setProgressForDeviceID(selfDeviceID, (int) (soFar * 100.0f / available));
-
-                    msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(Arrays.asList(msgEntity));
+                    if (msgEntity != null) {
+                        msgEntity.setProgressForDeviceID(selfDeviceID, (int) (soFar * 100.0f / available));
+                        msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
+                    }
                 }
             }
 
@@ -151,18 +147,24 @@ public class MsgEntitiesManager {
             public void onIncomingStringMsg(Peer peer, String id, String msg) {
                 super.onIncomingStringMsg(peer, id, msg);
 
+                String msgID = MsgID.buildWithJsonString(id).getId();
 
-
+                handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msg, msg.getBytes().length, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
+                markMsgSendStateAndCallback(selfDeviceID, msgID, Constants.DB.MSG_SEND_STATE_SUCCEEDED);
             }
 
             @Override
             public void onIncomingMsgReadFailed(Peer peer, String id, int soFar, int total) {
                 super.onIncomingMsgReadFailed(peer, id, soFar, total);
+
+                markMsgSendStateAndCallback(selfDeviceID, MsgID.buildWithJsonString(id).getId(), Constants.DB.MSG_SEND_STATE_FAILED);
             }
 
             @Override
             public void onMsgSendFailed(Peer peer, String id) {
                 super.onMsgSendFailed(peer, id);
+
+                markMsgSendStateAndCallback(PeerUtils.getDeviceIDFromPeer(peer), MsgID.buildWithJsonString(id).getId(), Constants.DB.MSG_SEND_STATE_FAILED);
             }
 
             @Override
@@ -173,15 +175,43 @@ public class MsgEntitiesManager {
             @Override
             public void onNotAllMsgChunkSendedConfirmed(Peer peer, String id) {
                 super.onNotAllMsgChunkSendedConfirmed(peer, id);
+
+                markMsgSendStateAndCallback(PeerUtils.getDeviceIDFromPeer(peer), MsgID.buildWithJsonString(id).getId(), Constants.DB.MSG_SEND_STATE_FAILED);
             }
 
             @Override
             public void onSendedMsgChunkConfirmed(Peer peer, String id, int soFar, int total) {
                 super.onSendedMsgChunkConfirmed(peer, id, soFar, total);
+
+                MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(MsgID.buildWithJsonString(id).getId(), PeerUtils.getDeviceIDFromPeer(peer));
+                if (msgEntity != null) {
+                    msgEntity.setProgressForDeviceID(PeerUtils.getDeviceIDFromPeer(peer), (int) (soFar * 100.0f / total));
+                }
             }
         });
+    }
+
+    private static void markMsgSendStateAndCallback(String toID, String msgID, String state) {
+        MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(msgID, toID);
+        if (msgEntity != null) {
+            removeItemFromSendingMsgEntityMap(msgID, toID);
+            msgEntity.markMsgSendStateAndUpdateDB(toID, state, new DBManagerWrapper.IDBActionListenerWrapper());
+            msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
+        }
+    }
 
 
+    private synchronized static MsgEntity handleNewMsgEntity(String msgID, String type, String content, int available, String fromID, String... toIDs) {
+        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, type, content, fromID, available, toIDs);
+        if (msgEntity.isValid()) {
+            msgEntities.addLast(msgEntity);
+            addToSendingMsgEntityMap(msgID, msgEntity, toIDs);
+            msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerWrapper());
+            msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
+            msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(Arrays.asList(msgEntity));
+            return msgEntity;
+        }
+        return null;
     }
 
     public static boolean hasEverLoaded() {
@@ -258,7 +288,7 @@ public class MsgEntitiesManager {
     }
 
 
-    private static void addToSendingMsgEntityMap(String msgID, MsgEntity msgEntity, String... toDeviceIDs) {
+    private synchronized static void addToSendingMsgEntityMap(String msgID, MsgEntity msgEntity, String... toDeviceIDs) {
         if (msgID == null || msgID.isEmpty() || msgEntity == null || !msgEntity.isValid() || toDeviceIDs == null || toDeviceIDs.length == 0) {
             return;
         } else {
@@ -277,7 +307,7 @@ public class MsgEntitiesManager {
     }
 
 
-    private static void removeItemFromSendingMsgEntityMap(String msgID, String toDeviceID) {
+    private synchronized static void removeItemFromSendingMsgEntityMap(String msgID, String toDeviceID) {
         if (msgID == null || msgID.isEmpty() || toDeviceID == null || toDeviceID.isEmpty()) {
             return;
         } else {
@@ -285,8 +315,6 @@ public class MsgEntitiesManager {
         }
     }
 
-
-    // TODO: 2021/12/19  
     public static void sendStringMsgToPeers(String msgID, String content, Set<String> tagSet) {
         Logger.i(TAG, "send string msg to peers, msgID: " + msgID + ", content: " + content + ", tagSet: " + tagSet);
         if (msgID == null || msgID.isEmpty() || content == null || content.isEmpty() || tagSet == null || tagSet.size() == 0) {
@@ -295,44 +323,20 @@ public class MsgEntitiesManager {
         }
 
         String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
-
-        final MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, selfDeviceID, content.getBytes().length, toDeviceIDs);
-        msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerWrapper());
-        msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
-        msgEntities.addLast(msgEntity);
-        addToSendingMsgEntityMap(msgID, msgEntity, toDeviceIDs);
-        msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(Arrays.asList(msgEntity));
+        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, content.getBytes().length, selfDeviceID, toDeviceIDs);
 
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
             if (peer == null) {
                 //send msg failed immediately, currently peer is alread lost.
-                afterMsgSendFailed(PeerUtils.getDeviceIDFromPeerTag(tag), msgID);
+                markMsgSendStateAndCallback(tag, msgID, Constants.DB.MSG_SEND_STATE_FAILED);
             } else {
                 peer.sendMessage(MsgCreator.createNormalStringMsg(msgID, content));
             }
         }
     }
 
-
-    private static void afterMsgSendFailed(String toID, String msgID) {
-        Logger.i(TAG, "stuff after msg send failed, msgID: " + msgID + ", toDeviceID: " + toID);
-
-        if (toID == null || toID.isEmpty() || msgID == null || msgID.isEmpty()) {
-            return;
-        } else {
-
-            MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(msgID, toID);
-            removeItemFromSendingMsgEntityMap(msgID, toID);
-
-            if (msgEntity != null) {
-                msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(new DBManagerWrapper.IDBActionListenerWrapper(), toID);
-                msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
-            }
-        }
-    }
-
-    public static void sendFileMsgToPeers(String msgID, String file, Set<String> tagSet) {
+    public static void sendFileMsgToPeers(String msgID, File file, Set<String> tagSet) {
         Logger.i(TAG, "send file msg to peers, msgID: " + msgID + ", file: " + file + ", tagSet: " + tagSet);
 
 

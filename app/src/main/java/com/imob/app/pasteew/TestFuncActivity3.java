@@ -18,7 +18,6 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
-import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.util.ArrayList;
@@ -36,9 +35,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private ListView msgListView;
 
     private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
-
-
-    private String selfDeviceID = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID();
 
 
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
@@ -61,6 +57,30 @@ public class TestFuncActivity3 extends AppCompatActivity {
         @Override
         public void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
 
+            notifyMsgAdapter();
+        }
+    };
+
+
+    private MsgEntitiesManager.IMsgEntityBatchLoadListener batchLoadListener = new MsgEntitiesManager.IMsgEntityBatchLoadListener() {
+        @Override
+        public void onFinished() {
+            msgEntities.clear();
+            msgEntities.addAll(MsgEntitiesManager.getAllMsgEntities());
+
+            notifyMsgAdapter();
+        }
+    };
+
+
+    private MsgEntitiesManager.IMsgEntityListUpdateListener msgEntityListUpdateListener = new MsgEntitiesManager.IMsgEntityListUpdateListener() {
+        @Override
+        public void onGotNewMsgEntities(List<MsgEntity> msgEntityList) {
+            updateMsgEntitiesAndNotifyAdapter();
+        }
+
+        @Override
+        public void onMsgEntitySendStateUpdated(MsgEntity msgEntity) {
             notifyMsgAdapter();
         }
     };
@@ -94,7 +114,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
             MsgEntity msgEntity = msgEntities.get(position);
             StringBuilder sb = new StringBuilder();
 
-
             sb.append("msgID: " + msgEntity.getMsgID());
             sb.append("\n");
             sb.append("msgType: " + msgEntity.getMsgType());
@@ -117,7 +136,16 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 TextView textView = new TextView(TestFuncActivity3.this);
                 textView.setText(TotalEverConnectedDeviceInfoManager.getDeviceNameById(toID) + ", " + Constants.DB.toReadableSendState(msgSendStates.get(toID)));
                 textView.setPadding(15, 15, 15, 15);
-                textView.setBackgroundColor(Color.BLUE);
+
+                if (msgSendStates.get(toID).equals(Constants.DB.MSG_SEND_STATE_FAILED)) {
+                    textView.setBackgroundColor(Color.RED);
+                } else if (msgSendStates.get(toID).equals(Constants.DB.MSG_SEND_STATE_SUCCEEDED)) {
+                    textView.setBackgroundColor(Color.BLUE);
+                } else {
+                    //in sending state
+                    textView.setBackgroundColor(Color.YELLOW);
+                    textView.append("\n" + msgEntity.getProgressByDeviceID(toID) + "%");
+                }
                 textView.setTextColor(Color.WHITE);
                 sendingStateLayout.addView(textView);
 
@@ -157,24 +185,33 @@ public class TestFuncActivity3 extends AppCompatActivity {
         findViewById(R.id.loadNextBatch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MsgEntitiesManager.loadNextBatch(new MsgEntitiesManager.IMsgEntityBatchLoadListener() {
-                    @Override
-                    public void onFinished() {
-                        msgEntities.clear();
-                        msgEntities.addAll(MsgEntitiesManager.getAllMsgEntities());
-
-                        notifyMsgAdapter();
-                    }
-                });
+                MsgEntitiesManager.loadNextBatch(batchLoadListener);
             }
         });
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
+        MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
 
         updateConnectedPeersInfoView();
+        loadMsgBatchOrFillMsgEntitiesList();
     }
 
+    private void loadMsgBatchOrFillMsgEntitiesList() {
+        if (!MsgEntitiesManager.hasEverLoaded()) {
+            MsgEntitiesManager.loadNextBatch(batchLoadListener);
+        } else {
+            updateMsgEntitiesAndNotifyAdapter();
+        }
+    }
+
+
+    private synchronized void updateMsgEntitiesAndNotifyAdapter() {
+        msgEntities.clear();
+        msgEntities.addAll(MsgEntitiesManager.getAllMsgEntities());
+
+        notifyMsgAdapter();
+    }
 
     private void notifyMsgAdapter() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
@@ -190,7 +227,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
     }
 
     private void sendTestMsgsToAllConnectedPeers() {
-        MsgEntitiesManager.sendStringMsgToPeers(UUID.randomUUID().toString(), "this is a test msg ", ConnectedPeersManager.getConnectedPeersTagSet());
+        MsgEntitiesManager.sendStringMsgToPeers(UUID.randomUUID().toString(), "this is a test msg, time: " + new Date().toLocaleString(), ConnectedPeersManager.getConnectedPeersTagSet());
     }
 
     @Override
@@ -199,5 +236,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         ConnectedPeersManager.unmonitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
+        MsgEntitiesManager.unmonitorMsgEntitiesUpdate(msgEntityListUpdateListener);
+
     }
 }

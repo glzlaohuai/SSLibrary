@@ -121,6 +121,7 @@ public class MsgEntitiesManager {
 
                 //incoming first, generate msgEntity and add to list
                 if (soFar == chunkSize) {
+                    Logger.i(TAG, "incoming first file chunk, generate msgEntity and callback, id: " + id + ", peer: " + peer);
                     File finalFile = PeerUtils.getReceivedFileInLocalFromFileTypeMsgSendedByPeer(peer, id);
                     MsgID msgID = MsgID.buildWithJsonString(id);
                     MsgEntity msgEntity = handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
@@ -146,6 +147,8 @@ public class MsgEntitiesManager {
             @Override
             public void onIncomingStringMsg(Peer peer, String id, String msg) {
                 super.onIncomingStringMsg(peer, id, msg);
+
+                Logger.i(TAG, "incoming string msg, generate msgEntity and handle it, msgID: " + id + ", msg: " + msg + ", peer: " + peer);
 
                 String msgID = MsgID.buildWithJsonString(id).getId();
 

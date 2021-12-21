@@ -122,7 +122,7 @@ public class TotalEverConnectedDeviceInfoManager {
 
             if (!isIncomingDeviceAlreadyKnownAndNoInfoChanged(deviceEntity)) {
                 Logger.i(TAG, "incoming device is not in db or info changed, update/insert it: " + deviceEntity);
-                DBManagerWrapper.getInstance().addDeviceInfo(deviceEntity, new DBManagerWrapper.IDBActionListenerWrapper());
+                DBManagerWrapper.getInstance().addDeviceInfo(deviceEntity, new DBManagerWrapper.IDBActionListenerAdapter());
             }
 
             totalKnownDevices.put(deviceEntity.getId(), deviceEntity);

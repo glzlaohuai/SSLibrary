@@ -64,7 +64,7 @@ public class IncomingMsgDBManager {
 
                 MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msg, PeerUtils.getDeviceIDFromPeer(peer), msg.getBytes().length, selfDeviceID);
                 msgEntity.setMsgSendStates(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED);
-                msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
+                msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerAdapter());
             }
 
             @Override
@@ -75,7 +75,7 @@ public class IncomingMsgDBManager {
                 //only handle file type incoming msg
                 if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
                     MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), available, selfDeviceID);
-                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED, new DBManagerWrapper.IDBActionListenerWrapper());
+                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED, new DBManagerWrapper.IDBActionListenerAdapter());
                 }
             }
 
@@ -87,7 +87,7 @@ public class IncomingMsgDBManager {
                 //only handle file incoming msg
                 if (msgID.getType().equals(Constants.PeerMsgType.TYPE_FILE)) {
                     MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID.getId(), msgID.getType(), msgID.getData(), PeerUtils.getDeviceIDFromPeer(peer), total, selfDeviceID);
-                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_FAILED, new DBManagerWrapper.IDBActionListenerWrapper());
+                    msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_FAILED, new DBManagerWrapper.IDBActionListenerAdapter());
                 }
             }
         });

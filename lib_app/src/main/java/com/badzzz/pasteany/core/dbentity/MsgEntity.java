@@ -48,11 +48,13 @@ public class MsgEntity {
     }
 
 
-    public void markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(DBManagerWrapper.IDBActionListener idbActionListener, String... deviceIDs) {
+    public void markMsgSendStatesAsFailedIfInSendingStateByToDeviceIDAndUpdateDB(DBManagerWrapper.IDBActionListener idbActionListener, String... deviceIDs) {
         if (deviceIDs != null && deviceIDs.length > 0) {
             Logger.i(TAG, "mark in sending state to failed for deviceIDS: " + Arrays.toString(deviceIDs));
             for (String toDeviceID : deviceIDs) {
-                msgSendStates.put(toDeviceID, Constants.DB.MSG_SEND_STATE_FAILED);
+                if (msgSendStates.containsKey(toDeviceID) && msgSendStates.get(toDeviceID).equals(Constants.DB.MSG_SEND_STATE_IN_SENDING)) {
+                    msgSendStates.put(toDeviceID, Constants.DB.MSG_SEND_STATE_FAILED);
+                }
             }
             DBManagerWrapper.getInstance().updateMsgState(this, idbActionListener);
         } else {
@@ -232,6 +234,14 @@ public class MsgEntity {
 
     public void insertIntoMsgSendingTable(final DBManagerWrapper.IDBActionListener listener) {
         DBManagerWrapper.getInstance().addSendingMsg(this, listener);
+    }
+
+    public void removeItemFromMsgSendingTableAfterSendDone(String toDeviceID, DBManagerWrapper.IDBActionListener listener) {
+        if (toDeviceID != null && msgSendStates.containsKey(toDeviceID)) {
+            DBManagerWrapper.getInstance().removeSendingMsg(msgID, fromDeviceID, toDeviceID, listener);
+        } else {
+            listener.failed();
+        }
     }
 
 

@@ -29,7 +29,7 @@ public class DBManagerWrapper {
     private ExecutorService executorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("dbwrapper"));
 
 
-    public static class IDBActionListenerWrapper implements IDBActionListener {
+    public static class IDBActionListenerAdapter implements IDBActionListener {
 
         @Override
         public void succeeded(List<Map<String, String>> resultList) {
@@ -132,7 +132,7 @@ public class DBManagerWrapper {
 
     public void queryAllSendingMsgsAndMarkThemAsFailed(final IDBActionFinishListener listener) {
 
-        Logger.i(TAG, "query all sending msgs and mark them as send failed");
+        Logger.i(TAG, "query all sending msgs and mark them as send failed if it's still in sending progress");
 
         queryAllSendingMsgs(new IDBActionFinishListener() {
             @Override
@@ -186,16 +186,19 @@ public class DBManagerWrapper {
         }
 
         final String msgID = map.keySet().iterator().next();
+        DBManagerWrapper.getInstance().removeSendingMsg(msgID, new IDBActionListenerAdapter());
+
         queryMsgDetail(msgID, new IDBActionFinishListener() {
             @Override
             public void onFinished() {
                 List<Map<String, String>> resultList = getResultList();
                 if (resultList == null || resultList.isEmpty()) {
                     Logger.i(TAG, "got no msg detail before try to update msg state, something went wrong. msgID is: " + msgID);
+                    finishListener.failed();
                 } else {
                     Logger.i(TAG, "got msg detail for msgID: " + msgID + ", update its send state.");
                     MsgEntity msgEntity = MsgEntity.buildWithDBItem(resultList.get(0));
-                    msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(finishListener, map.get(msgID).toArray(new String[0]));
+                    msgEntity.markMsgSendStatesAsFailedIfInSendingStateByToDeviceIDAndUpdateDB(finishListener, map.get(msgID).toArray(new String[0]));
                 }
                 map.remove(msgID);
                 loopUpdateMsgSendStateToFailed(map, finishListener);
@@ -333,6 +336,13 @@ public class DBManagerWrapper {
     }
 
 
+    /**
+     * remove specific item
+     * @param msgID
+     * @param fromDeviceID
+     * @param toDeviceID
+     * @param listener
+     */
     public void removeSendingMsg(final String msgID, final String fromDeviceID, final String toDeviceID, final IDBActionListener listener) {
         executorService.execute(new Runnable() {
             @Override
@@ -346,4 +356,25 @@ public class DBManagerWrapper {
             }
         });
     }
+
+    /**
+     * remove all items related by msgID
+     * @param msgID
+     * @param listener
+     */
+    public void removeSendingMsg(final String msgID, final IDBActionListener listener) {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean delete = dbManager.delete(Constants.DB.TB_MSGS_SENDING, new String[]{Constants.DB.KEY.MSGS.MSG_ID}, new String[]{msgID});
+                if (delete) {
+                    listener.succeeded(null);
+                } else {
+                    listener.failed();
+                }
+            }
+        });
+    }
+
+
 }

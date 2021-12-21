@@ -55,7 +55,7 @@ public class MsgEntitiesManager {
     };
 
 
-    private static final int MSG_BATCH_LOAD_SIZE = 1;
+    private static final int MSG_BATCH_LOAD_SIZE = 10;
 
     public interface IMsgEntityBatchLoadListener {
         void onFinished();
@@ -193,8 +193,6 @@ public class MsgEntitiesManager {
                     }
                 }
             }
-
-
         });
     }
 
@@ -202,19 +200,19 @@ public class MsgEntitiesManager {
         MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(msgID, toID);
         if (msgEntity != null) {
             removeItemFromSendingMsgEntityMap(msgID, toID);
-            msgEntity.markMsgSendStateAndUpdateDB(toID, state, new DBManagerWrapper.IDBActionListenerWrapper());
+            msgEntity.removeItemFromMsgSendingTableAfterSendDone(toID, new DBManagerWrapper.IDBActionListenerAdapter());
+            msgEntity.markMsgSendStateAndUpdateDB(toID, state, new DBManagerWrapper.IDBActionListenerAdapter());
             msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
         }
     }
-
 
     private synchronized static MsgEntity handleNewMsgEntity(String msgID, String type, String content, int available, String fromID, String... toIDs) {
         MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, type, content, fromID, available, toIDs);
         if (msgEntity.isValid()) {
             msgEntities.addLast(msgEntity);
             addToSendingMsgEntityMap(msgID, msgEntity, toIDs);
-            msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerWrapper());
-            msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerWrapper());
+            msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerAdapter());
+            msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerAdapter());
             msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(Arrays.asList(msgEntity));
             return msgEntity;
         }

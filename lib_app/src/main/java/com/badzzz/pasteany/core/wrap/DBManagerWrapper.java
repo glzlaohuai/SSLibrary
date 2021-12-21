@@ -192,14 +192,13 @@ public class DBManagerWrapper {
                 List<Map<String, String>> resultList = getResultList();
                 if (resultList == null || resultList.isEmpty()) {
                     Logger.i(TAG, "got no msg detail before try to update msg state, something went wrong. msgID is: " + msgID);
-                    map.remove(msgID);
-                    loopUpdateMsgSendStateToFailed(map, finishListener);
                 } else {
                     Logger.i(TAG, "got msg detail for msgID: " + msgID + ", update its send state.");
                     MsgEntity msgEntity = MsgEntity.buildWithDBItem(resultList.get(0));
-
                     msgEntity.markMsgSendStatesAsFailedByToDeviceIDAndUpdateDB(finishListener, map.get(msgID).toArray(new String[0]));
                 }
+                map.remove(msgID);
+                loopUpdateMsgSendStateToFailed(map, finishListener);
             }
         });
 

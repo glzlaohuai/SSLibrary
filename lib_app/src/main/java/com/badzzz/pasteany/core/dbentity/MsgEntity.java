@@ -8,6 +8,7 @@ import com.imob.lib.lib_common.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ public class MsgEntity {
         this.msgTime = time;
         this.msgSendStates = msgSendStates;
         if (msgSendStates != null) {
+            msgSendProgress = new HashMap<>();
             Set<String> keySet = msgSendStates.keySet();
             for (String key : keySet) {
                 msgSendProgress.put(key, 0);

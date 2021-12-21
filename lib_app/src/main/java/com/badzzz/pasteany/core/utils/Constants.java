@@ -65,8 +65,8 @@ public class Constants {
         public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT KEY, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME);
         public static final String SQL_CREATE_TABLE_MSGS_SENDING = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS_SENDING, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO);
 
-        public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
-        public static final String SQL_QUERY_DEVICE_RELATED_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d AND ( " + KEY.MSGS.MSG_FROM + " == '%s' OR " + KEY.MSGS.MSG_TO + " LIKE '%s' ) ORDER BY " + AUTO_INCREAMENT_ID + " DESC LIMIT %d;";
+        public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " DESC LIMIT %d;";
+        public static final String SQL_QUERY_DEVICE_RELATED_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d AND ( " + KEY.MSGS.MSG_FROM + " == '%s' OR " + KEY.MSGS.MSG_TO + " LIKE '%s' ) ORDER BY " + AUTO_INCREAMENT_ID + " ASC LIMIT %d;";
         public static final String SQL_QUERY_MSG_DETAIL = "SELECT * FROM " + TB_MSGS + " WHERE " + KEY.MSGS.MSG_ID + " == '%s'";
         public static final String SQL_QUERY_ALL_SENDING_MSGS = "SELECT * FROM " + TB_MSGS_SENDING;
         public static final String SQL_QUERY_ALL_DEVICES = "SELECT * FROM " + TB_DEVICES;

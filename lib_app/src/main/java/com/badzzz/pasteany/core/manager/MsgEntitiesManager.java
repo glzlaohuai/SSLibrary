@@ -55,7 +55,7 @@ public class MsgEntitiesManager {
     };
 
 
-    private static final int MSG_BATCH_LOAD_SIZE = 10;
+    private static final int MSG_BATCH_LOAD_SIZE = 3;
 
     public interface IMsgEntityBatchLoadListener {
         void onFinished();
@@ -247,7 +247,7 @@ public class MsgEntitiesManager {
                         everLoaded = true;
                         List<MsgEntity> queryedList = MsgEntity.buildWithDBQueryList(getResultList());
                         if (queryedList != null) {
-                            Collections.sort(queryedList, msgEntityComparator);
+                            Collections.reverse(queryedList);
                             msgEntities.addAll(0, queryedList);
                             msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(queryedList);
                         }

@@ -124,7 +124,7 @@ public class MsgEntity {
         if (toDeviceIds != null) {
             msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_SEND_STATE_IN_SENDING));
         }
-        return new MsgEntity(-1, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
+        return new MsgEntity(Integer.MAX_VALUE, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
     }
 
 

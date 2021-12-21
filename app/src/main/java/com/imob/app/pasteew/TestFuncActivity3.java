@@ -114,6 +114,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
             MsgEntity msgEntity = msgEntities.get(position);
             StringBuilder sb = new StringBuilder();
 
+            sb.append("autoID: " + msgEntity.getAutoID());
+            sb.append("\n");
             sb.append("msgID: " + msgEntity.getMsgID());
             sb.append("\n");
             sb.append("msgType: " + msgEntity.getMsgType());
@@ -122,10 +124,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
             sb.append("\n");
 
             sb.append("time: " + new Date(msgEntity.getMsgTime()).toString());
-
-
-            Map<String, IDeviceInfoManager.DeviceInfo> totalKnownDevices = TotalEverConnectedDeviceInfoManager.getTotalKnownDevices();
-
 
             msgView.setText(sb.toString());
             msgFromView.setText("fromDeviceID: " + msgEntity.getFromDeviceID() + "\n" + "fromDeviceName: " + TotalEverConnectedDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()));

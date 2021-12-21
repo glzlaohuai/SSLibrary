@@ -186,8 +186,15 @@ public class MsgEntitiesManager {
                 MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(MsgID.buildWithJsonString(id).getId(), PeerUtils.getDeviceIDFromPeer(peer));
                 if (msgEntity != null) {
                     msgEntity.setProgressForDeviceID(PeerUtils.getDeviceIDFromPeer(peer), (int) (soFar * 100.0f / total));
+                    if (soFar == total) {
+                        markMsgSendStateAndCallback(PeerUtils.getDeviceIDFromPeer(peer), msgEntity.getMsgID(), Constants.DB.MSG_SEND_STATE_SUCCEEDED);
+                    } else {
+                        msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
+                    }
                 }
             }
+
+
         });
     }
 

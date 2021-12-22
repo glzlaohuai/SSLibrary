@@ -151,7 +151,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
                     textView.setBackgroundColor(Color.BLUE);
                 } else {
                     //in sending state
-                    textView.setBackgroundColor(Color.YELLOW);
+                    textView.setBackgroundColor(Color.DKGRAY);
                     textView.append("\n" + msgEntity.getProgressByDeviceID(toID) + "%");
                 }
                 textView.setTextColor(Color.WHITE);
@@ -234,11 +234,13 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private void notifyMsgAdapter() {
         if (Looper.getMainLooper() == Looper.myLooper()) {
             msgAdapter.notifyDataSetChanged();
+            msgListView.smoothScrollToPosition(msgEntities.size() - 1, msgEntities.size() - 1);
         } else {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     msgAdapter.notifyDataSetChanged();
+                    msgListView.smoothScrollToPosition(msgEntities.size() - 1, msgEntities.size() - 1);
                 }
             });
         }

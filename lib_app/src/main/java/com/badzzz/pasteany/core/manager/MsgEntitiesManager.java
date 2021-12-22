@@ -125,9 +125,15 @@ public class MsgEntitiesManager {
                     Logger.i(TAG, "incoming first file chunk, generate msgEntity and callback, id: " + id + ", peer: " + peer);
                     File finalFile = PeerUtils.getReceivedFileInLocalFromFileTypeMsgSendedByPeer(peer, id);
                     MsgID msgID = MsgID.buildWithJsonString(id);
-                    MsgEntity msgEntity = handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
+                    handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
+                }
 
-                    if (msgEntity != null) {
+                MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(MsgID.buildWithJsonString(id).getId(), selfDeviceID);
+
+                if (msgEntity != null) {
+                    if (soFar == available) {
+                        msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED, new DBManagerWrapper.IDBActionListenerAdapter());
+                    } else {
                         msgEntity.setProgressForDeviceID(selfDeviceID, (int) (soFar * 100.0f / available));
                         msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
                     }

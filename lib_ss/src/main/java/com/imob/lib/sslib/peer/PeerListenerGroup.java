@@ -164,7 +164,7 @@ public class PeerListenerGroup implements PeerListener {
     @Override
     public void onIncomingConfirmMsg(Peer peer, String id, int soFar, int total) {
         for (PeerListener listener : queue) {
-            listener.onIncomingConfirmMsg(peer, id, total, soFar);
+            listener.onIncomingConfirmMsg(peer, id, soFar, total);
         }
     }
 

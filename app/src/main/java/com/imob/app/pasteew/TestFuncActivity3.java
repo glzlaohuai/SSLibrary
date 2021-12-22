@@ -1,6 +1,10 @@
 package com.imob.app.pasteew;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.View;
@@ -18,18 +22,24 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class TestFuncActivity3 extends AppCompatActivity {
+
+    private static final int SELECT_FILE_REQUEST_CODE = 0xff;
 
     private TextView connectedPeersView;
     private ListView msgListView;
@@ -179,11 +189,21 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
-
         findViewById(R.id.loadNextBatch).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MsgEntitiesManager.loadNextBatch(batchLoadListener);
+            }
+        });
+
+        findViewById(R.id.sendFileBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.setType("*/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(intent, SELECT_FILE_REQUEST_CODE);
+
             }
         });
 
@@ -235,6 +255,41 @@ public class TestFuncActivity3 extends AppCompatActivity {
         ConnectedPeersManager.unmonitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.unmonitorMsgEntitiesUpdate(msgEntityListUpdateListener);
+    }
+
+
+    @SuppressLint("WrongConstant")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SELECT_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Uri fileUri = data.getData();
+            if (fileUri != null) {
+                int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                // Check for the freshest data.
+                getContentResolver().takePersistableUriPermission(fileUri, takeFlags);
+                sendTestFileMsg(fileUri);
+            }
+        }
+    }
+
+    private void sendTestFileMsg(Uri uri) {
+        Set<InputStream> streamSet = new HashSet<>();
+        try {
+            Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
+            streamSet = new HashSet<>();
+            for (String tag : tagSet) {
+                streamSet.add(getContentResolver().openInputStream(uri));
+            }
+            MsgEntitiesManager.sendFileMsgToPeers(UUID.randomUUID().toString(), "a_test_file.apk", streamSet.iterator().next().available(), streamSet, tagSet);
+        } catch (Exception e) {
+            e.printStackTrace();
+            for (InputStream inputStream : streamSet) {
+                Closer.close(inputStream);
+            }
+        }
 
     }
+
+
 }

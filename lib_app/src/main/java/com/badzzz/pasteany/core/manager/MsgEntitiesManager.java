@@ -13,6 +13,7 @@ import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -344,11 +345,25 @@ public class MsgEntitiesManager {
         }
     }
 
-    public static void sendFileMsgToPeers(String msgID, File file, Set<String> tagSet) {
-        Logger.i(TAG, "send file msg to peers, msgID: " + msgID + ", file: " + file + ", tagSet: " + tagSet);
+    public static void sendFileMsgToPeers(String msgID, String absolutePath, int available, Set<InputStream> inputStreamSet, Set<String> tagSet) {
+        Logger.i(TAG, "send file msg to peers, msgID: " + msgID + ", file: " + absolutePath + ", tagSet: " + tagSet + ", available: " + available);
 
+        if (msgID == null || absolutePath == null || available <= 0 || inputStreamSet == null || tagSet == null || inputStreamSet.size() != tagSet.size() || tagSet.size() == 0) {
+            Logger.i(TAG, "aborted, invalid arguments.");
+            return;
+        }
 
+        String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
+        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_FILE, absolutePath, available, selfDeviceID, toDeviceIDs);
+
+        for (String tag : tagSet) {
+            Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
+            if (peer == null) {
+                //send msg failed immediately, currently peer is alread lost.
+                markMsgSendStateAndCallback(tag, msgID, Constants.DB.MSG_SEND_STATE_FAILED);
+            } else {
+                peer.sendMessage(MsgCreator.createFileMsg(msgID, absolutePath, inputStreamSet.iterator().next()));
+            }
+        }
     }
-
-
 }

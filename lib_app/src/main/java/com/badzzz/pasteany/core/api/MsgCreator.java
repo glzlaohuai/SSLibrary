@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.UUID;
 
 public class MsgCreator {
@@ -68,6 +69,13 @@ public class MsgCreator {
         return StringMsg.create(msgID, content);
     }
 
+
+    public static FileMsg createFileMsg(String id, String absoluteFilePath, InputStream inputStream) {
+        String msgID = createMsgID(id, Constants.PeerMsgType.TYPE_FILE, absoluteFilePath);
+        return new FileMsg(msgID, inputStream);
+
+
+    }
 
     public static StringMsg createPingMsg(String data) {
         String msgID = createMsgID(Constants.PeerMsgType.TYPE_PING, data);

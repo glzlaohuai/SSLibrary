@@ -16,6 +16,11 @@
         android:layout_height="wrap_content"
         android:text="send test msg" />
 
+    <Button
+        android:id="@+id/sendFileBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="send file msg" />
 
     <Button
         android:id="@+id/loadNextBatch"

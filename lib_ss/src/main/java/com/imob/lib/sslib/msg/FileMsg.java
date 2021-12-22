@@ -3,10 +3,11 @@ package com.imob.lib.sslib.msg;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public class FileMsg extends Msg {
 
-    public FileMsg(String id, FileInputStream inputStream) {
+    public FileMsg(String id, InputStream inputStream) {
         super(id, inputStream);
     }
 

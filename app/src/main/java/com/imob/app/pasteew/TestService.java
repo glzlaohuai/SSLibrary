@@ -12,14 +12,17 @@ import android.os.IBinder;
 
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.manager.MsgEntitiesManager;
+import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
+import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +39,7 @@ public class TestService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //        afterStartCommand();
+        afterStartCommand();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -69,7 +72,7 @@ public class TestService extends Service {
     }
 
 
-    private Notification buildNewMsgFoundNotification(MsgEntity msgEntity) {
+    private Notification buildMsgNotification(MsgEntity msgEntity) {
         Notification.Builder builder;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             builder = new Notification.Builder(this, CHANNEL_PASTE_ANY);
@@ -80,7 +83,20 @@ public class TestService extends Service {
         Intent notificationIntent = new Intent(this, TestFuncActivity3.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, NOTIFYCATION_REQUEST_CODE, notificationIntent, 0);
 
-        return builder.setContentTitle(msgEntity.getMsgID()).setContentText("from: " + msgEntity.getFromDeviceID() + "\n" + "data: " + msgEntity.getMsgData()).setSmallIcon(R.mipmap.ic_launcher).setContentIntent(pendingIntent).setPriority(Notification.PRIORITY_HIGH).build();
+        String content = "from: " + TotalEverConnectedDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()) + "\n" + "data: " + msgEntity.getExtra() + "\n";
+
+        StringBuilder sb = new StringBuilder();
+        Map<String, String> msgSendStates = msgEntity.getMsgSendStates();
+        for (Map.Entry<String, String> entry : msgSendStates.entrySet()) {
+            sb.append(TotalEverConnectedDeviceInfoManager.getDeviceNameById(entry.getKey()) + ", " + Constants.DB.toReadableSendState(entry.getValue()));
+            if (entry.getValue().equals(Constants.DB.MSG_SEND_STATE_IN_SENDING)) {
+                sb.append("%" + msgEntity.getProgressByDeviceID(entry.getKey()));
+            }
+            sb.append("\n");
+        }
+        content = content + sb.toString();
+
+        return builder.setContentTitle(msgEntity.getMsgID()).setContentText(content).setSmallIcon(R.mipmap.ic_launcher).setContentIntent(pendingIntent).setPriority(Notification.PRIORITY_HIGH).build();
     }
 
     private void afterStartCommand() {
@@ -133,13 +149,12 @@ public class TestService extends Service {
 
         @Override
         public void onMsgEntitySendStateUpdated(MsgEntity msgEntity) {
-
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(msgEntity.getMsgID(), NEW_MSG_NOTIFICATION_ID, buildMsgNotification(msgEntity));
         }
 
         @Override
         public void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity) {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(msgEntity.getMsgID(), NEW_MSG_NOTIFICATION_ID, buildNewMsgFoundNotification(msgEntity));
 
         }
     };

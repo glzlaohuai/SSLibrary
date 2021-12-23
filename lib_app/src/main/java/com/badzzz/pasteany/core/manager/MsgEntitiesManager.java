@@ -66,6 +66,8 @@ public class MsgEntitiesManager {
         void onGotNewMsgEntities(List<MsgEntity> msgEntityList);
 
         void onMsgEntitySendStateUpdated(MsgEntity msgEntity);
+
+        void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity);
     }
 
     private static class IMsgEntityListUpdateListenerGroup implements IMsgEntityListUpdateListener {
@@ -94,6 +96,13 @@ public class MsgEntitiesManager {
         public void onMsgEntitySendStateUpdated(MsgEntity msgEntity) {
             for (IMsgEntityListUpdateListener listener : set) {
                 listener.onMsgEntitySendStateUpdated(msgEntity);
+            }
+        }
+
+        @Override
+        public void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity) {
+            for (IMsgEntityListUpdateListener listener : set) {
+                listener.onNewMsgEntitySendedOrReceived(msgEntity);
             }
         }
     }
@@ -125,7 +134,7 @@ public class MsgEntitiesManager {
                     Logger.i(TAG, "incoming first file chunk, generate msgEntity and callback, id: " + id + ", peer: " + peer);
                     File finalFile = PeerUtils.getReceivedFileInLocalFromFileTypeMsgSendedByPeer(peer, id);
                     MsgID msgID = MsgID.buildWithJsonString(id);
-                    handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
+                    handleNewMsgEntity(msgID.getId(), msgID.getType(), finalFile.getAbsolutePath(), available, PeerUtils.getDeviceIDFromPeer(peer), finalFile.getName(), selfDeviceID);
                 }
 
                 MsgEntity msgEntity = getSendingMsgEntityByMsgAndDeviceID(MsgID.buildWithJsonString(id).getId(), selfDeviceID);
@@ -159,7 +168,7 @@ public class MsgEntitiesManager {
 
                 String msgID = MsgID.buildWithJsonString(id).getId();
 
-                handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msg, msg.getBytes().length, PeerUtils.getDeviceIDFromPeer(peer), selfDeviceID);
+                handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, msg, msg.getBytes().length, PeerUtils.getDeviceIDFromPeer(peer), msg, selfDeviceID);
                 markMsgSendStateAndCallback(selfDeviceID, msgID, Constants.DB.MSG_SEND_STATE_SUCCEEDED);
             }
 
@@ -216,14 +225,15 @@ public class MsgEntitiesManager {
         }
     }
 
-    private synchronized static MsgEntity handleNewMsgEntity(String msgID, String type, String content, int available, String fromID, String... toIDs) {
-        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, type, content, fromID, available, toIDs);
+    private synchronized static MsgEntity handleNewMsgEntity(String msgID, String type, String content, int available, String fromID, String extra, String... toIDs) {
+        MsgEntity msgEntity = MsgEntity.buildMsgEntity(msgID, type, content, fromID, available, extra, toIDs);
         if (msgEntity.isValid()) {
             msgEntities.addLast(msgEntity);
             addToSendingMsgEntityMap(msgID, msgEntity, toIDs);
             msgEntity.insertIntoMsgSendingTable(new DBManagerWrapper.IDBActionListenerAdapter());
             msgEntity.insertIntoMsgTable(new DBManagerWrapper.IDBActionListenerAdapter());
             msgEntitiesUpdateMonitorListenerGroup.onGotNewMsgEntities(Arrays.asList(msgEntity));
+            msgEntitiesUpdateMonitorListenerGroup.onNewMsgEntitySendedOrReceived(msgEntity);
             return msgEntity;
         }
         return null;
@@ -338,7 +348,7 @@ public class MsgEntitiesManager {
         }
 
         String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
-        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, content.getBytes().length, selfDeviceID, toDeviceIDs);
+        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, content.getBytes().length, selfDeviceID, null, toDeviceIDs);
 
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
@@ -351,16 +361,16 @@ public class MsgEntitiesManager {
         }
     }
 
-    public static void sendFileMsgToPeers(String msgID, String absolutePath, int available, Set<InputStream> inputStreamSet, Set<String> tagSet) {
-        Logger.i(TAG, "send file msg to peers, msgID: " + msgID + ", file: " + absolutePath + ", tagSet: " + tagSet + ", available: " + available);
+    public static void sendFileMsgToPeers(String msgID, String absoluteFilePathOrUri, String fileName, int available, Set<InputStream> inputStreamSet, Set<String> tagSet) {
+        Logger.i(TAG, "send file msg to peers, msgID: " + msgID + ", file: " + absoluteFilePathOrUri + ", tagSet: " + tagSet + ", available: " + available + ", fileName: " + fileName);
 
-        if (msgID == null || absolutePath == null || available <= 0 || inputStreamSet == null || tagSet == null || inputStreamSet.size() != tagSet.size() || tagSet.size() == 0) {
+        if (msgID == null || absoluteFilePathOrUri == null || available <= 0 || inputStreamSet == null || tagSet == null || inputStreamSet.size() != tagSet.size() || tagSet.size() == 0) {
             Logger.i(TAG, "aborted, invalid arguments.");
             return;
         }
 
         String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
-        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_FILE, absolutePath, available, selfDeviceID, toDeviceIDs);
+        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_FILE, absoluteFilePathOrUri, available, selfDeviceID, fileName, toDeviceIDs);
 
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
@@ -368,7 +378,7 @@ public class MsgEntitiesManager {
                 //send msg failed immediately, currently peer is alread lost.
                 markMsgSendStateAndCallback(tag, msgID, Constants.DB.MSG_SEND_STATE_FAILED);
             } else {
-                peer.sendMessage(MsgCreator.createFileMsg(msgID, absolutePath, inputStreamSet.iterator().next()));
+                peer.sendMessage(MsgCreator.createFileMsg(msgID, fileName, inputStreamSet.iterator().next()));
             }
         }
     }

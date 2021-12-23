@@ -2,6 +2,7 @@ package com.imob.app.pasteew;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
@@ -37,9 +38,19 @@ public class XApplication extends Application {
         PreferenceManagerWrapper.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
         PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
         androidPlatformManager.initPlatform();
-        
+
         //just for test, logPrint
         forTest();
+        kickOffService();
+    }
+
+    private void kickOffService() {
+        Intent intent = new Intent(getApplicationContext(), TestService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 
     private void forTest() {

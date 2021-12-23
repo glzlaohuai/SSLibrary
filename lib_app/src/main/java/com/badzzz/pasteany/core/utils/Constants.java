@@ -62,7 +62,7 @@ public class Constants {
         public static final String TB_MSGS_SENDING = "msgs_sending";
 
         public static final String SQL_CREATE_TABLE_DEVICES = String.format("CREATE TABLE %s (%s TEXT PRIMARY KEY, %s TEXT, %s TEXT)", TB_DEVICES, KEY.CONNECTED_DEVICES.DEVICE_ID, KEY.CONNECTED_DEVICES.DEVICE_NAME, KEY.CONNECTED_DEVICES.DEVICE_PLATFORM);
-        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT KEY, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME);
+        public static final String SQL_CREATE_TABLE_MSGS = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT KEY, %s TEXT, %s TEXT,%s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_TYPE, KEY.MSGS.MSG_DATA, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO, KEY.MSGS.MSG_LEN, KEY.MSGS.MSG_STATE, KEY.MSGS.MSG_TIME, KEY.MSGS.MSG_EXTRA);
         public static final String SQL_CREATE_TABLE_MSGS_SENDING = String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT)", TB_MSGS_SENDING, AUTO_INCREAMENT_ID, KEY.MSGS.MSG_ID, KEY.MSGS.MSG_FROM, KEY.MSGS.MSG_TO);
 
         public static final String SQL_QUERY_MSGS = "SELECT * FROM " + TB_MSGS + " WHERE " + AUTO_INCREAMENT_ID + " < %d ORDER BY " + AUTO_INCREAMENT_ID + " DESC LIMIT %d;";
@@ -89,6 +89,7 @@ public class Constants {
                 public static final String MSG_LEN = "msg_len";
                 public static final String MSG_STATE = "msg_state";
                 public static final String MSG_TIME = "msg_time";
+                public static final String MSG_EXTRA = "msg_extra";
             }
         }
 

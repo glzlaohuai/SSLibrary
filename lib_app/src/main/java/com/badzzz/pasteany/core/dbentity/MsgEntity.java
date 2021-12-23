@@ -25,11 +25,12 @@ public class MsgEntity {
     private String fromDeviceID;
     private int msgLen;
     private long msgTime;
+    private String extra;
 
     private Map<String, Integer> msgSendProgress;
     private Map<String, String> msgSendStates;
 
-    private MsgEntity(int autoID, String msgID, String msgType, String msgData, String fromDeviceID, long time, int msgLen, Map<String, String> msgSendStates) {
+    private MsgEntity(int autoID, String msgID, String msgType, String msgData, String fromDeviceID, long time, int msgLen, Map<String, String> msgSendStates, String extra) {
         this.autoID = autoID;
         this.msgID = msgID;
         this.msgType = msgType;
@@ -38,6 +39,7 @@ public class MsgEntity {
         this.msgLen = msgLen;
         this.msgTime = time;
         this.msgSendStates = msgSendStates;
+        this.extra = extra;
         if (msgSendStates != null) {
             msgSendProgress = new HashMap<>();
             Set<String> keySet = msgSendStates.keySet();
@@ -46,7 +48,6 @@ public class MsgEntity {
             }
         }
     }
-
 
     public void markMsgSendStatesAsFailedIfInSendingStateByToDeviceIDAndUpdateDB(DBManagerWrapper.IDBActionListener idbActionListener, String... deviceIDs) {
         if (deviceIDs != null && deviceIDs.length > 0) {
@@ -90,11 +91,12 @@ public class MsgEntity {
             int msgLen = Integer.parseInt(item.get(Constants.DB.KEY.MSGS.MSG_LEN));
             String state = item.get(Constants.DB.KEY.MSGS.MSG_STATE);
             long msgTime = Long.parseLong(item.get(Constants.DB.KEY.MSGS.MSG_TIME));
+            String extra = item.get(Constants.DB.KEY.MSGS.MSG_EXTRA);
 
             String[] toIds = toDeviceID.split(Constants.DB.SPLIT_CHAR);
             String[] states = state.split(Constants.DB.SPLIT_CHAR);
 
-            return new MsgEntity(autoID, msgID, msgType, msgData, fromDeviceID, msgTime, msgLen, MapUtils.buildMap(toIds, states));
+            return new MsgEntity(autoID, msgID, msgType, msgData, fromDeviceID, msgTime, msgLen, MapUtils.buildMap(toIds, states), extra);
         } catch (Throwable throwable) {
             Logger.e(throwable);
             return null;
@@ -119,12 +121,12 @@ public class MsgEntity {
     }
 
 
-    public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, int msgLen, String... toDeviceIds) {
+    public final static MsgEntity buildMsgEntity(String msgID, String msgType, String msgData, String fromDeviceID, int msgLen, String extra, String... toDeviceIds) {
         Map<String, String> msgSendStates = null;
         if (toDeviceIds != null) {
             msgSendStates = MapUtils.buildMap(toDeviceIds, ArrayUtils.createAndFill(toDeviceIds.length, Constants.DB.MSG_SEND_STATE_IN_SENDING));
         }
-        return new MsgEntity(Integer.MAX_VALUE, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates);
+        return new MsgEntity(Integer.MAX_VALUE, msgID, msgType, msgData, fromDeviceID, System.currentTimeMillis(), msgLen, msgSendStates, extra);
     }
 
 
@@ -226,6 +228,10 @@ public class MsgEntity {
 
     public long getMsgTime() {
         return msgTime;
+    }
+
+    public String getExtra() {
+        return extra;
     }
 
     public boolean isValid() {

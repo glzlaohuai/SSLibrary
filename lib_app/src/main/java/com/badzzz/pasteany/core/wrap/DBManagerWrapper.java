@@ -321,7 +321,7 @@ public class DBManagerWrapper {
                 @Override
                 public void run() {
                     MsgEntity.MsgSendStateInDBFormate msgSendStateInDBFormate = MsgEntity.MsgSendStateInDBFormate.buildWithMsgSendStateMap(msgEntity.getMsgSendStates());
-                    boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME}, new String[]{msgEntity.getMsgID(), msgEntity.getFromDeviceID(), msgSendStateInDBFormate.getDeviceIDs(), msgEntity.getMsgType(), msgEntity.getMsgData(), String.valueOf(msgEntity.getMsgLen()), msgSendStateInDBFormate.getSendStates(), String.valueOf(msgEntity.getMsgTime())});
+                    boolean insert = dbManager.insert(Constants.DB.TB_MSGS, new String[]{Constants.DB.KEY.MSGS.MSG_ID, Constants.DB.KEY.MSGS.MSG_FROM, Constants.DB.KEY.MSGS.MSG_TO, Constants.DB.KEY.MSGS.MSG_TYPE, Constants.DB.KEY.MSGS.MSG_DATA, Constants.DB.KEY.MSGS.MSG_LEN, Constants.DB.KEY.MSGS.MSG_STATE, Constants.DB.KEY.MSGS.MSG_TIME, Constants.DB.KEY.MSGS.MSG_EXTRA}, new String[]{msgEntity.getMsgID(), msgEntity.getFromDeviceID(), msgSendStateInDBFormate.getDeviceIDs(), msgEntity.getMsgType(), msgEntity.getMsgData(), String.valueOf(msgEntity.getMsgLen()), msgSendStateInDBFormate.getSendStates(), String.valueOf(msgEntity.getMsgTime()), msgEntity.getExtra()});
                     if (insert) {
                         listener.succeeded(null);
                     } else {

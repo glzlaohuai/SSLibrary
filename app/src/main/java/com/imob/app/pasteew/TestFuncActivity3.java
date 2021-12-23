@@ -94,6 +94,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         public void onMsgEntitySendStateUpdated(MsgEntity msgEntity) {
             notifyMsgAdapter();
         }
+
+        @Override
+        public void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity) {
+            
+        }
     };
 
     private BaseAdapter msgAdapter = new BaseAdapter() {
@@ -132,6 +137,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
             sb.append("msgType: " + msgEntity.getMsgType());
             sb.append("\n");
             sb.append("msgData: " + msgEntity.getMsgData());
+            sb.append("\n");
+            sb.append("msgExtra: " + msgEntity.getExtra());
             sb.append("\n");
 
             sb.append("time: " + new Date(msgEntity.getMsgTime()).toString());
@@ -289,7 +296,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             for (String tag : tagSet) {
                 streamSet.add(getContentResolver().openInputStream(uri));
             }
-            MsgEntitiesManager.sendFileMsgToPeers(UUID.randomUUID().toString(), fileInfo.getName(), fileInfo.getSize(), streamSet, tagSet);
+            MsgEntitiesManager.sendFileMsgToPeers(UUID.randomUUID().toString(), uri.toString(), fileInfo.getName(), fileInfo.getSize(), streamSet, tagSet);
         } catch (Exception e) {
             e.printStackTrace();
             for (InputStream inputStream : streamSet) {

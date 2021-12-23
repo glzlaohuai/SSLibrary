@@ -144,8 +144,8 @@ public class MsgEntitiesManager {
                         msgEntity.markMsgSendStateAndUpdateDB(selfDeviceID, Constants.DB.MSG_SEND_STATE_SUCCEEDED, new DBManagerWrapper.IDBActionListenerAdapter());
                     } else {
                         msgEntity.setProgressForDeviceID(selfDeviceID, (int) (soFar * 100.0f / available));
-                        msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
                     }
+                    msgEntitiesUpdateMonitorListenerGroup.onMsgEntitySendStateUpdated(msgEntity);
                 }
             }
 

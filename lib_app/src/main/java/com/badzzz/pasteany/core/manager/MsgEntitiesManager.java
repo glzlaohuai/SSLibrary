@@ -348,7 +348,7 @@ public class MsgEntitiesManager {
         }
 
         String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
-        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, content.getBytes().length, selfDeviceID, null, toDeviceIDs);
+        handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_STR, content, content.getBytes().length, selfDeviceID, content, toDeviceIDs);
 
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);

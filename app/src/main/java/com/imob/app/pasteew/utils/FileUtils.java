@@ -1,13 +1,36 @@
 package com.imob.app.pasteew.utils;
 
-import com.imob.lib.lib_common.Closer;
-import com.imob.lib.lib_common.Logger;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class FileUtils {
+
+    public static class FileInfo {
+        private String name;
+        private int size;
+
+        public boolean isValid() {
+            return !name.isEmpty() && size > 0;
+        }
+
+        public FileInfo(String name, int size) {
+            this.name = name;
+            this.size = size;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getSize() {
+            return size;
+        }
+    }
 
     public static void deleteAllFiles(File file) {
         if (file != null && file.exists()) {
@@ -33,28 +56,22 @@ public class FileUtils {
         }
     }
 
+    public static FileInfo retrieveFileInfoFromContentUri(Context context, Uri uri) {
+        if (context == null || uri == null) return null;
+        ContentResolver contentResolver = context.getContentResolver();
+        if (contentResolver != null) {
+            Cursor cursor = contentResolver.query(uri, null, null, null, null);
+            if (cursor != null) {
+                int nameCursorIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int sizeCursorIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                cursor.moveToFirst();
+                String name = cursor.getString(nameCursorIndex);
+                int fileSize = cursor.getInt(sizeCursorIndex);
 
-    public static boolean inputToOutput(InputStream inputStream, OutputStream outputStream) {
-        byte[] bytes = new byte[1024];
-
-        try {
-            int readed;
-            while ((readed = inputStream.read(bytes)) > 0) {
-                outputStream.write(bytes, 0, readed);
-
-                if (readed < bytes.length) {
-                    break;
-                }
+                return new FileInfo(name, fileSize);
             }
-            outputStream.flush();
-        } catch (Exception e) {
-            Logger.e(e);
-            return false;
-        } finally {
-            Closer.close(inputStream);
-            Closer.close(outputStream);
         }
-        return true;
+        return null;
     }
 
 

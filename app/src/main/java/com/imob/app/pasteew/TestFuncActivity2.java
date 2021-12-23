@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
-import com.imob.app.pasteew.utils.FileUtils;
+import com.badzzz.pasteany.core.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
 

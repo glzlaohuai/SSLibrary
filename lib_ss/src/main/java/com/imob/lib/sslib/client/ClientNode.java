@@ -83,7 +83,7 @@ public class ClientNode implements INode {
 
         try {
             Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 5 * 1000);
+            socket.connect(new InetSocketAddress(InetAddress.getByName(ip), port), 10 * 1000);
             listener.onClientCreated(ClientNode.this);
             peer = new Peer(socket, ClientNode.this, listener);
             peer.setTimeout(timeout);

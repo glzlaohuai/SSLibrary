@@ -5,8 +5,8 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
+import com.badzzz.pasteany.core.utils.FileUtils;
 import com.imob.app.pasteew.utils.DialogUtils;
-import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.sslib.client.ClientListenerAdapter;

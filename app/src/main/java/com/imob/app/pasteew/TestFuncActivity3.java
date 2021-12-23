@@ -22,6 +22,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
 
@@ -270,6 +271,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 // Check for the freshest data.
                 getContentResolver().takePersistableUriPermission(fileUri, takeFlags);
+
                 sendTestFileMsg(fileUri);
             }
         }
@@ -277,13 +279,17 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private void sendTestFileMsg(Uri uri) {
         Set<InputStream> streamSet = new HashSet<>();
+        FileUtils.FileInfo fileInfo = FileUtils.retrieveFileInfoFromContentUri(getApplicationContext(), uri);
+
+        if (fileInfo == null || !fileInfo.isValid()) return;
+
         try {
             Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
             streamSet = new HashSet<>();
             for (String tag : tagSet) {
                 streamSet.add(getContentResolver().openInputStream(uri));
             }
-            MsgEntitiesManager.sendFileMsgToPeers(UUID.randomUUID().toString(), "a_test_file.apk", streamSet.iterator().next().available(), streamSet, tagSet);
+            MsgEntitiesManager.sendFileMsgToPeers(UUID.randomUUID().toString(), fileInfo.getName(), fileInfo.getSize(), streamSet, tagSet);
         } catch (Exception e) {
             e.printStackTrace();
             for (InputStream inputStream : streamSet) {

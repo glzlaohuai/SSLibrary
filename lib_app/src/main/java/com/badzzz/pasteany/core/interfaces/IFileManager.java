@@ -45,7 +45,7 @@ public abstract class IFileManager {
 
         @Override
         public int compare(File file, File t1) {
-            return getRangeStart(t1) - getRangeStart(file);
+            return getRangeStart(file) - getRangeStart(t1);
         }
     }
 

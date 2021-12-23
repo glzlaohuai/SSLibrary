@@ -21,6 +21,8 @@ import com.imob.lib.sslib.peer.Peer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import androidx.annotation.Nullable;
 
@@ -30,10 +32,12 @@ public class TestService extends Service {
     public static final int NEW_MSG_NOTIFICATION_ID = 0x3;
     private static final String CHANNEL_PASTE_ANY = "paste_any";
 
+    private ExecutorService singleThreadExecutorService = Executors.newSingleThreadExecutor();
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        afterStartCommand();
-        return START_NOT_STICKY;
+        //        afterStartCommand();
+        return super.onStartCommand(intent, flags, startId);
     }
 
     private String getConnectedPeersInfo() {
@@ -79,10 +83,14 @@ public class TestService extends Service {
         return builder.setContentTitle(msgEntity.getMsgID()).setContentText("from: " + msgEntity.getFromDeviceID() + "\n" + "data: " + msgEntity.getMsgData()).setSmallIcon(R.mipmap.ic_launcher).setContentIntent(pendingIntent).setPriority(Notification.PRIORITY_HIGH).build();
     }
 
-
     private void afterStartCommand() {
-        Notification notification = buildConnectedNotification();
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
+        singleThreadExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                Notification notification = buildConnectedNotification();
+                startForeground(ONGOING_NOTIFICATION_ID, notification);
+            }
+        });
     }
 
     @Nullable
@@ -96,6 +104,7 @@ public class TestService extends Service {
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
+        afterStartCommand();
         setupMonitors();
     }
 
@@ -130,7 +139,7 @@ public class TestService extends Service {
         @Override
         public void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity) {
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(NEW_MSG_NOTIFICATION_ID, buildNewMsgFoundNotification(msgEntity));
+            notificationManager.notify(msgEntity.getMsgID(), NEW_MSG_NOTIFICATION_ID, buildNewMsgFoundNotification(msgEntity));
 
         }
     };

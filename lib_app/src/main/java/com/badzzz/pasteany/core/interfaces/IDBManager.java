@@ -65,5 +65,4 @@ public abstract class IDBManager {
         return IDBManager.sqlSet;
     }
 
-
 }

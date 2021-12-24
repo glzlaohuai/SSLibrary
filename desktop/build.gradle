@@ -8,10 +8,12 @@ java {
 }
 
 dependencies {
+    implementation 'org.jmdns:jmdns:3.5.7'
+    implementation 'org.json:json:20210307'
+
+    implementation project(path: ':lib_common')
     implementation project(path: ':lib_ss')
     implementation project(path: ':lib_nsd')
-    implementation files('libs/slf4j-api-1.7.9.jar')
-    implementation 'org.jmdns:jmdns:3.5.7'
-    implementation project(path: ':lib_common')
-    implementation 'org.json:json:20210307'
+    implementation project(path: ':lib_app')
+    implementation project(path: ':lib_app_mac')
 }

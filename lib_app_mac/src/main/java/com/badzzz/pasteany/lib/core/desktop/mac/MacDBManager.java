@@ -4,6 +4,8 @@ import com.badzzz.pasteany.core.interfaces.IDBManager;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.lib_common.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -21,6 +23,39 @@ public class MacDBManager extends IDBManager {
 
     //query timeout, seconds unit
     private static final int TIMEOUT_QUERY = 10;
+
+
+    public MacDBManager() {
+        super();
+        createDBFileIfNotExists();
+        try {
+            createTableIfNotExists();
+        } catch (SQLException throwables) {
+            Logger.e(throwables);
+            throw new RuntimeException("table create failed");
+        }
+    }
+
+    private void createTableIfNotExists() throws SQLException {
+        for (String sql : getTableCreateSqls()) {
+            getStatement().executeUpdate(sql);
+        }
+    }
+
+    private void createDBFileIfNotExists() {
+        File file = new File(getDBFilePath());
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                Logger.e(e);
+            }
+        }
+    }
+
 
     private Statement getStatement() {
         Statement statement = null;
@@ -51,8 +86,8 @@ public class MacDBManager extends IDBManager {
                         if (metaData != null) {
                             int columnCount = metaData.getColumnCount();
                             String[] keys = new String[columnCount];
-                            for (int i = 0; i < columnCount; i++) {
-                                keys[i] = metaData.getColumnName(i);
+                            for (int i = 1; i <= columnCount; i++) {
+                                keys[i - 1] = metaData.getColumnName(i);
                             }
 
                             List<Map<String, String>> result = new ArrayList<>();
@@ -252,6 +287,6 @@ public class MacDBManager extends IDBManager {
 
     @Override
     protected String getDBFilePath() {
-        return "~/.pasteany/pasteany.db";
+        return MacConstants.DB_FILE;
     }
 }

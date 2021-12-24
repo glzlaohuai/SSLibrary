@@ -104,3 +104,4 @@ lint/tmp/
 *.hprof
 
 .idea/deploymentTargetDropDown.xml
+.pasteany/pasteany.db

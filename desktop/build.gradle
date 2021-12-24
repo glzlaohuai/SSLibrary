@@ -10,6 +10,7 @@ java {
 dependencies {
     implementation 'org.jmdns:jmdns:3.5.7'
     implementation 'org.json:json:20210307'
+    implementation 'org.xerial:sqlite-jdbc:3.36.0.3'
 
     implementation project(path: ':lib_common')
     implementation project(path: ':lib_ss')

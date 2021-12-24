@@ -2,50 +2,50 @@ package com.badzzz.pasteany.lib.core.desktop.mac;
 
 import com.badzzz.pasteany.core.interfaces.IPreferenceManager;
 
-import java.util.Properties;
+import java.util.prefs.Preferences;
 
 public class MacPreferenceManager implements IPreferenceManager {
 
-    private Properties properties = new Properties();
+    private Preferences preferences = Preferences.systemRoot();
 
     @Override
     public String getString(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
+        return preferences.get(key, defaultValue);
     }
 
     @Override
     public int getInt(String key, int defaultValue) {
-        return Integer.parseInt(properties.getProperty(key, Integer.toString(defaultValue)));
+        return preferences.getInt(key, defaultValue);
     }
 
     @Override
     public float getFloat(String key, float defaultValue) {
-        return Float.parseFloat(properties.getProperty(key, Float.toString(defaultValue)));
+        return preferences.getFloat(key, defaultValue);
     }
 
     @Override
     public long getLong(String key, long defaultValue) {
-        return Long.parseLong(properties.getProperty(key, Long.toString(defaultValue)));
+        return preferences.getLong(key, defaultValue);
 
     }
 
     @Override
     public void saveString(String key, String value) {
-        properties.setProperty(key, value);
+        preferences.put(key, value);
     }
 
     @Override
     public void saveInt(String key, int value) {
-        properties.setProperty(key, Integer.toString(value));
+        preferences.putInt(key, value);
     }
 
     @Override
     public void saveFloat(String key, float value) {
-        properties.setProperty(key, Float.toString(value));
+        preferences.putFloat(key, value);
     }
 
     @Override
     public void saveLong(String key, long value) {
-        properties.setProperty(key, Long.toString(value));
+        preferences.putLong(key, value);
     }
 }

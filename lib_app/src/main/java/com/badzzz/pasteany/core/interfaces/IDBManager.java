@@ -59,7 +59,7 @@ public abstract class IDBManager {
 
     protected abstract boolean doExecuteSql(String sql);
 
-    protected abstract String getDBRootDir();
+    protected abstract String getDBFilePath();
 
     protected Set<String> getTableCreateSqls() {
         return IDBManager.sqlSet;

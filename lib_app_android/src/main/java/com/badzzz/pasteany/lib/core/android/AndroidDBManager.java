@@ -121,7 +121,7 @@ public class AndroidDBManager extends IDBManager {
     }
 
     @Override
-    protected String getDBRootDir() {
+    protected String getDBFilePath() {
         throw new UnsupportedOperationException();
     }
 }

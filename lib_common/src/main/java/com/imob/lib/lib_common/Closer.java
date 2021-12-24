@@ -14,4 +14,14 @@ public class Closer {
             }
         }
     }
+
+    public static void close(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                Logger.e(e);
+            }
+        }
+    }
 }

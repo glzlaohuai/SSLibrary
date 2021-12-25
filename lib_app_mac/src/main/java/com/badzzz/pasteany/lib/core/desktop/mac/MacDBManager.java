@@ -233,20 +233,7 @@ public class MacDBManager extends IDBManager {
     protected boolean doInsert(String tableName, String[] keys, String[] values) {
         String insertClause = buildInsertClause(keys, values);
         String insertSql = "INSERT INTO " + tableName + insertClause;
-
-        Statement statement = getStatement();
-        if (statement != null) {
-            try {
-                statement.execute(insertSql);
-                return true;
-            } catch (SQLException throwables) {
-                Logger.e(throwables);
-            } finally {
-                closeStatement(statement);
-            }
-        }
-
-        return false;
+        return executeSql(insertSql);
     }
 
     @Override
@@ -255,17 +242,7 @@ public class MacDBManager extends IDBManager {
         sb.append(" " + buildWhereClause(keys, values));
         sb.append(";");
 
-        Statement statement = getStatement();
-        try {
-            statement.execute(sb.toString());
-            return true;
-        } catch (SQLException throwables) {
-            Logger.e(throwables);
-        } finally {
-            closeStatement(statement);
-        }
-
-        return false;
+        return executeSql(sb.toString());
     }
 
     @Override

@@ -238,7 +238,7 @@ public class MacDBManager extends IDBManager {
 
     @Override
     protected boolean doDelete(String tableName, String[] keys, String[] values) {
-        StringBuilder sb = new StringBuilder("DELETE FROM TABLE " + tableName);
+        StringBuilder sb = new StringBuilder("DELETE FROM " + tableName);
         sb.append(" " + buildWhereClause(keys, values));
         sb.append(";");
 

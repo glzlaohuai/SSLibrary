@@ -248,7 +248,7 @@ public class ConnectedPeersManager {
                 if (peer == incomingPeer) continue;
                 if (peer.getTag().equals(incomingPeer.getTag()) && peer.getLocalNode().isServerNode()) {
                     Logger.i(TAG, "peer's connection must has already lost, but not be detected by system yet, destroy it immediatelly: " + peer.toString());
-                    peer.destroy();
+                    peer.destroy("destroy stale peer, its connection is alread lost but not detected", null);
                 }
             }
         }

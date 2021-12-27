@@ -30,10 +30,10 @@ public class ConnectedClientsHandler {
     private List<ClientNode> clientNodeList = new LinkedList<>();
 
 
-    public synchronized void destroy() {
+    public synchronized void destroy(String reason, Exception e) {
         if (!destroyed) {
             destroyed = true;
-            doDestroy();
+            doDestroy(reason,e);
         }
     }
 
@@ -48,9 +48,9 @@ public class ConnectedClientsHandler {
         return null;
     }
 
-    private synchronized void doDestroy() {
+    private synchronized void doDestroy(String reason,Exception e) {
         for (ClientNode clientNode : clientNodeList) {
-            clientNode.destroy();
+            clientNode.destroy(reason,e);
         }
         clientNodeList.clear();
     }

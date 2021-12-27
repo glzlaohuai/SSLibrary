@@ -16,7 +16,7 @@ public class ConnectedClientsManager {
     public static void destroyRelatedConnectedPeerHolder(NsdServiceHandler handler) {
         ConnectedClientsHandler connectedPeersHandler = relatedConnectedPeersHandlerMap.get(handler);
         if (connectedPeersHandler != null) {
-            connectedPeersHandler.destroy();
+            connectedPeersHandler.destroy("destroy this client after its related nsdServiceHandler destroyed", null);
         }
     }
 

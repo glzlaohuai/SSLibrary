@@ -220,14 +220,14 @@ public class Peer {
                     listener.onIOStreamOpenFailed(Peer.this, null, e);
 
                     //something went wrong here, maybe connection is lost,
-                    destroy();
+                    destroy("exception occured during init process", e);
                 }
             }
         });
     }
 
-    public void destroy() {
-        Logger.i(logTag, "destroy called");
+    public void destroy(String reason, Exception e) {
+        Logger.i(logTag, "destroy called, reason: " + reason + ", exception: " + e);
 
         if (!isDestroyed) {
             synchronized (destroyLock) {
@@ -315,7 +315,7 @@ public class Peer {
         if (!isDestroyed()) {
             listener.onTimeoutOccured(this);
         }
-        destroy();
+        destroy("timeout occured", null);
     }
 
     private void kickOffTimeoutCheck() {
@@ -583,7 +583,7 @@ public class Peer {
                 callbackMsgSendFailed(msg, MSG_SEND_ERROR_CONNECTION_LOST, e);
                 callbackCorrupted("corrupted due to exception occured while sending msg to peer", e);
 
-                destroy();
+                destroy("error occured while writing to peer", e);
             } finally {
                 msg.destroy();
             }
@@ -691,7 +691,7 @@ public class Peer {
 
                 } catch (IOException e) {
                     Logger.e(e);
-                    destroy();
+                    destroy("error occured while monitoring incoming msg", e);
                     callbackCorrupted("corrupted due to exception occured while monitor incoming msg", e);
                 }
             }

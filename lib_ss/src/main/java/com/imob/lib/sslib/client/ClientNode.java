@@ -95,24 +95,24 @@ public class ClientNode implements INode {
         }
     }
 
-    public void destroy() {
+    public void destroy(final String reason, final Exception e) {
         socketStuffService.execute(new Runnable() {
             @Override
             public void run() {
-                doDestroyStuff();
+                doDestroyStuff(reason, e);
             }
         });
     }
 
 
-    private synchronized void doDestroyStuff() {
+    private synchronized void doDestroyStuff(String reason, Exception e) {
         if (!isDestroyed) {
             isDestroyed = true;
             callbackClientDestroy();
         }
 
         if (peer != null) {
-            peer.destroy();
+            peer.destroy(reason, e);
         }
     }
 

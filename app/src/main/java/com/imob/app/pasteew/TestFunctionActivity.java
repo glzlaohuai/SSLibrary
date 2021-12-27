@@ -252,7 +252,7 @@ public class TestFunctionActivity extends AppCompatActivity {
 
                     Set<ClientNode> clientNodes = inUsingClientMap.get(splits[0].trim());
                     ClientNode clientNode = clientNodes.iterator().next();
-                    clientNode.destroy();
+                    clientNode.destroy("manually destroy", null);
                 }
             });
         }

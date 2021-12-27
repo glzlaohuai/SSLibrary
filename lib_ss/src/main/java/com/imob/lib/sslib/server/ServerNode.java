@@ -187,7 +187,7 @@ public class ServerNode implements INode {
 
     private void destroyAllConnectedPeers() {
         for (Peer peer : connectedPeers) {
-            peer.destroy();
+            peer.destroy("destroy all connected peers of servernode after related servernode destroyed", null);
         }
     }
 

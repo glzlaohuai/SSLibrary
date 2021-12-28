@@ -7,6 +7,14 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_7
 }
 
+jar {
+    manifest {
+        attributes("Main-Class": "com.imob.app.test.desktop.Main")
+    }
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+
 dependencies {
     implementation 'org.jmdns:jmdns:3.5.7'
     implementation 'org.json:json:20210307'

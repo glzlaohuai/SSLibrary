@@ -105,3 +105,4 @@ lint/tmp/
 
 .idea/deploymentTargetDropDown.xml
 .pasteany/pasteany.db
+/.pasteany/

@@ -79,7 +79,7 @@ public class NsdServiceHandler {
                 @Override
                 public void onCreated(NsdNode nsdNode) {
                     if (!nsdNode.isDestroyed()) {
-                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), PreferenceManagerWrapper.getInstance().getServiceName()), null, serverNode.getPort());
+                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), PreferenceManagerWrapper.getInstance().getServiceName()), INSDServiceManager.buildServiceText(PreferenceManagerWrapper.getInstance().getDeviceName(), PlatformManagerHolder.get().getPlatformName()), serverNode.getPort());
                         nsdNode.watchService(Constants.NSD.NSD_SERVICE_TYPE, null);
                     }
                 }

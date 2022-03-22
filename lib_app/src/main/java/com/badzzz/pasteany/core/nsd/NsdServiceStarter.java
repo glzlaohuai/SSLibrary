@@ -6,6 +6,10 @@ import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 import com.imob.lib.lib_common.Logger;
 
+
+/**
+ *
+ */
 public class NsdServiceStarter {
 
     private static final String TAG = "NsdServiceStarter";

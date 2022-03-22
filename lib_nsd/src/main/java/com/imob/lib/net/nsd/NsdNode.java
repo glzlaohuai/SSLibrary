@@ -275,15 +275,12 @@ public class NsdNode {
     }
 
     /**
-     * @return true - has jmDns instance, false - the opposite
      */
-    public boolean destroy() {
+    public void destroy() {
         if (!isDestroyed) {
             Logger.i(tag, "destroy");
             handleDestroy();
-            return false;
         }
-        return false;
     }
 
 

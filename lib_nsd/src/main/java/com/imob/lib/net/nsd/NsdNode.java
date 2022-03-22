@@ -25,7 +25,7 @@ public class NsdNode {
 
     private static final String S_TAG = "NsdNode";
 
-    private final ExecutorService initExecutorService = Executors.newSingleThreadExecutor(SSThreadFactory.build("nsd-init"));
+    private final ExecutorService createDestroyRegisterService = Executors.newSingleThreadExecutor(SSThreadFactory.build("nsd-init"));
     private final ExecutorService retrieveServiceInfoService = Executors.newCachedThreadPool(SSThreadFactory.build("nsd-retri"));
 
     private final Byte lock = 0x0;
@@ -82,7 +82,7 @@ public class NsdNode {
         synchronized (lock) {
             if (inetAddress != null && hostName != null && !hostName.equals("") && !isCreating && !isRunning() && !isDestroyed) {
                 isCreating = true;
-                initExecutorService.execute(new Runnable() {
+                createDestroyRegisterService.execute(new Runnable() {
                     @Override
                     public void run() {
                         doCreateStuff();
@@ -141,7 +141,7 @@ public class NsdNode {
      */
     public boolean registerService(final String type, final String name, final String text, final int port) {
         if (jmDNS != null && type != null && !type.equals("") && name != null && !name.equals("")) {
-            initExecutorService.execute(new Runnable() {
+            createDestroyRegisterService.execute(new Runnable() {
                 @Override
                 public void run() {
                     doRegisterService(type, name, text, port);
@@ -160,7 +160,7 @@ public class NsdNode {
      */
     public boolean watchService(final String type, final String name) {
         if (jmDNS != null && type != null && !type.equals("")) {
-            initExecutorService.execute(new Runnable() {
+            createDestroyRegisterService.execute(new Runnable() {
                 @Override
                 public void run() {
                     synchronized (lock) {
@@ -245,7 +245,7 @@ public class NsdNode {
 
             listener.onDestroyed(this);
 
-            initExecutorService.shutdown();
+            createDestroyRegisterService.shutdown();
             retrieveServiceInfoService.shutdown();
         }
     }
@@ -285,7 +285,7 @@ public class NsdNode {
 
 
     private void handleDestroy() {
-        initExecutorService.execute(new Runnable() {
+        createDestroyRegisterService.execute(new Runnable() {
             @Override
             public void run() {
                 synchronized (lock) {

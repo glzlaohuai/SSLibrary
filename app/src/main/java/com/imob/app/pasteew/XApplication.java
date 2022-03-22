@@ -41,7 +41,7 @@ public class XApplication extends Application {
 
         //just for test, logPrint
         forTest();
-        kickOffService();
+        //        kickOffService();
     }
 
     private void kickOffService() {

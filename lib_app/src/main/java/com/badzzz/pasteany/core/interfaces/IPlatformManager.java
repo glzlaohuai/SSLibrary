@@ -7,6 +7,10 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
 
+
+/**
+ * 相当于初始化的入口处，在这里做几乎所有的模块的初始化操作
+ */
 public abstract class IPlatformManager {
 
     private boolean hasInited = false;

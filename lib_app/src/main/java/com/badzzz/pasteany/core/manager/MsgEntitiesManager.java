@@ -14,15 +14,7 @@ import com.imob.lib.sslib.peer.Peer;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MsgEntitiesManager {
     private static final String TAG = "MsgEntitiesManager";
@@ -372,13 +364,14 @@ public class MsgEntitiesManager {
         String[] toDeviceIDs = peerTagSetToIDArray(tagSet);
         handleNewMsgEntity(msgID, Constants.PeerMsgType.TYPE_FILE, absoluteFilePathOrUri, available, selfDeviceID, fileName, toDeviceIDs);
 
+        Iterator<InputStream> streamIterator = inputStreamSet.iterator();
         for (String tag : tagSet) {
             Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
             if (peer == null) {
                 //send msg failed immediately, currently peer is alread lost.
                 markMsgSendStateAndCallback(tag, msgID, Constants.DB.MSG_SEND_STATE_FAILED);
             } else {
-                peer.sendMessage(MsgCreator.createFileMsg(msgID, fileName, inputStreamSet.iterator().next()));
+                peer.sendMessage(MsgCreator.createFileMsg(msgID, fileName, streamIterator.next()));
             }
         }
     }

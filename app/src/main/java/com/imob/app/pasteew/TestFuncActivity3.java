@@ -97,7 +97,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         @Override
         public void onNewMsgEntitySendedOrReceived(MsgEntity msgEntity) {
-            
+
         }
     };
 
@@ -292,7 +292,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         try {
             Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
-            streamSet = new HashSet<>();
             for (String tag : tagSet) {
                 streamSet.add(getContentResolver().openInputStream(uri));
             }

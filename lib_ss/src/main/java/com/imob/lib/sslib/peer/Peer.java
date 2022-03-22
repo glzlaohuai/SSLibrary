@@ -512,7 +512,7 @@ public class Peer {
             int msgType = msg.getMsgType();
 
             if (available <= 0 && msgType == Msg.TYPE_NORMAL) {
-                callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, null);
+                callbackMsgSendFailed(msg, MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT, msg.getException());
                 msg.destroy();
                 continue;
             }

@@ -15,6 +15,7 @@ public abstract class Msg {
 
     private String id;
     private InputStream inputStream;
+    private Exception exception;
 
     private boolean canceled = false;
 
@@ -71,16 +72,18 @@ public abstract class Msg {
                 return inputStream.available();
             } catch (IOException e) {
                 Logger.e(e);
+                this.exception = e;
             }
         }
         return 0;
     }
 
+    public Exception getException() {
+        return exception;
+    }
+
     @Override
     public String toString() {
-        return "Msg{" +
-                "id='" + id + '\'' +
-                ", inputStream=" + inputStream +
-                '}';
+        return "Msg{" + "id='" + id + '\'' + ", inputStream=" + inputStream + '}';
     }
 }

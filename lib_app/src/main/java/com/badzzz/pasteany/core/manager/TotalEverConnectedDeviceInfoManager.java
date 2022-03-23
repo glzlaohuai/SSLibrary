@@ -133,7 +133,7 @@ public class TotalEverConnectedDeviceInfoManager {
 
     private static void callbackDeviceInfoUpdated() {
         if (deviceInfoListener != null) {
-            deviceInfoListener.onUpdated(totalKnownDevices);
+            deviceInfoListener.onUpdated(new HashMap<String, IDeviceInfoManager.DeviceInfo>(totalKnownDevices));
         }
     }
 
@@ -147,7 +147,7 @@ public class TotalEverConnectedDeviceInfoManager {
 
 
     public static Map<String, IDeviceInfoManager.DeviceInfo> getTotalKnownDevices() {
-        return totalKnownDevices;
+        return new HashMap<>(totalKnownDevices);
     }
 
     public static String getDeviceNameById(String id) {

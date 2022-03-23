@@ -4,6 +4,7 @@ import com.badzzz.pasteany.core.utils.ArrayUtils;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.MapUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.lib_common.Logger;
 
 import java.util.ArrayList;
@@ -250,10 +251,12 @@ public class MsgEntity {
         }
     }
 
-
     public void insertIntoMsgTable(DBManagerWrapper.IDBActionListener listener) {
         DBManagerWrapper.getInstance().addMsg(this, listener);
     }
 
+    public boolean isSendoutFromThisDevice() {
+        return fromDeviceID != null && fromDeviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID());
+    }
 
 }

@@ -41,5 +41,10 @@ public class Logger {
         }
     }
 
+    public static void e(String tag, String msg, Throwable throwable) {
+        i(tag, msg);
+        e(throwable);
+    }
+
 
 }

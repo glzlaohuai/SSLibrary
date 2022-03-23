@@ -24,6 +24,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
+import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
@@ -206,7 +207,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             sendingStateLayout.removeAllViews();
             for (String toID : msgSendStates.keySet()) {
                 TextView textView = new TextView(TestFuncActivity3.this);
-                textView.setText(TotalEverConnectedDeviceInfoManager.getDeviceNameById(toID) + ", " + Constants.DB.toReadableSendState(msgSendStates.get(toID)));
+                textView.setText(TotalEverConnectedDeviceInfoManager.getDeviceNameById(toID) + ", " + toReadableSendState(toID, msgSendStates.get(toID)));
                 textView.setPadding(15, 15, 15, 15);
 
                 if (msgSendStates.get(toID).equals(Constants.DB.MSG_SEND_STATE_FAILED)) {
@@ -227,6 +228,21 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     };
 
+    private static String toReadableSendState(String toID, String state) {
+        switch (state) {
+            case Constants.DB.MSG_SEND_STATE_IN_SENDING:
+                if (toID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID())) {
+                    return "receiving...";
+                } else {
+                    return "sending...";
+                }
+            case Constants.DB.MSG_SEND_STATE_FAILED:
+                return "failed";
+            case Constants.DB.MSG_SEND_STATE_SUCCEEDED:
+                return "succeeded";
+        }
+        return "unknown";
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

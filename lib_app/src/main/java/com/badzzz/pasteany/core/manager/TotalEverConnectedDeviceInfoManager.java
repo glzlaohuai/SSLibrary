@@ -168,4 +168,11 @@ public class TotalEverConnectedDeviceInfoManager {
     public static void unmonitorTotalEventConnectedDeviceListUpdate(ITotalEverConnectedDeviceInfoListener listener) {
         deviceInfoListener.remove(listener);
     }
+
+    public static void removeSelfDevice(Map<String, IDeviceInfoManager.DeviceInfo> map) {
+        if (map == null) return;
+        map.remove(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID());
+    }
+
+
 }

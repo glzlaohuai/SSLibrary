@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -22,14 +23,17 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,10 +46,12 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private static final int SELECT_FILE_REQUEST_CODE = 0xff;
 
-    private TextView connectedPeersView;
+    private LinearLayout connectedDevicesLayout;
     private ListView msgListView;
 
     private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
+
+    private List<IDeviceInfoManager.DeviceInfo> allConnectedDevices = new LinkedList<>();
 
 
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
@@ -53,24 +59,74 @@ public class TestFuncActivity3 extends AppCompatActivity {
         public void onIncomingPeer(Peer peer) {
             super.onIncomingPeer(peer);
 
-            updateConnectedPeersInfoView();
+            updateConnectedDeviceListView();
         }
 
         @Override
         public void onPeerLost(Peer peer) {
             super.onPeerLost(peer);
 
-            updateConnectedPeersInfoView();
+            updateConnectedDeviceListView();
+
         }
     };
+
+    private void updateConnectedDeviceListView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                LayoutInflater inflater = LayoutInflater.from(TestFuncActivity3.this);
+                connectedDevicesLayout.removeAllViews();
+                Set<String> connectedPeersTagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
+                Set<String> idSet = PeerUtils.generateDeviceIDSetFromPeerTagSet(connectedPeersTagSet);
+
+                for (IDeviceInfoManager.DeviceInfo deviceInfo : allConnectedDevices) {
+                    View deviceInfoView;
+                    //connected
+                    if (idSet.contains(deviceInfo.getId())) {
+                        deviceInfoView = inflater.inflate(R.layout.item_device_connected, null);
+                    } else {
+                        //not connected
+                        deviceInfoView = inflater.inflate(R.layout.item_device_notconnected, null);
+                    }
+
+                    TextView idView = deviceInfoView.findViewById(R.id.id);
+                    TextView nameView = deviceInfoView.findViewById(R.id.name);
+                    TextView platformView = deviceInfoView.findViewById(R.id.platform);
+
+                    idView.setText(deviceInfo.getId());
+                    nameView.setText(deviceInfo.getName());
+                    platformView.setText(deviceInfo.getPlatform());
+
+                    connectedDevicesLayout.addView(deviceInfoView);
+
+                }
+            }
+        });
+    }
+
 
     private TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
         @Override
         public void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
-
-            notifyMsgAdapter();
+            afterTotalConnectedDevicesListUpdated(all);
         }
     };
+
+
+    private void afterTotalConnectedDevicesListUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
+        TotalEverConnectedDeviceInfoManager.removeSelfDevice(all);
+        //diff checked
+        if (!allConnectedDevices.equals(all.values())) {
+            allConnectedDevices.clear();
+            allConnectedDevices.addAll(all.values());
+            Collections.sort(allConnectedDevices);
+
+            notifyMsgAdapter();
+            updateConnectedDeviceListView();
+        }
+    }
 
 
     private MsgEntitiesManager.IMsgEntityBatchLoadListener batchLoadListener = new MsgEntitiesManager.IMsgEntityBatchLoadListener() {
@@ -172,22 +228,12 @@ public class TestFuncActivity3 extends AppCompatActivity {
     };
 
 
-    private void updateConnectedPeersInfoView() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connectedPeersView.setText(ConnectedPeersManager.getConnectedPeersTagSet().toString());
-            }
-        });
-    }
-
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test_func_3);
 
-        connectedPeersView = findViewById(R.id.connectedPersView);
+        connectedDevicesLayout = findViewById(R.id.connectedDevicesLayout);
         msgListView = findViewById(R.id.listView);
         msgListView.setAdapter(msgAdapter);
         findViewById(R.id.sendBtn).setOnClickListener(new View.OnClickListener() {
@@ -219,8 +265,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
         TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
 
-        updateConnectedPeersInfoView();
         loadMsgBatchOrFillMsgEntitiesList();
+        afterTotalConnectedDevicesListUpdated(TotalEverConnectedDeviceInfoManager.getTotalKnownDevices());
     }
 
     private void loadMsgBatchOrFillMsgEntitiesList() {

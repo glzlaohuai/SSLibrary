@@ -26,7 +26,7 @@ public abstract class IDeviceInfoManager {
 
     public abstract void setDeviceName(String deviceName);
 
-    public static class DeviceInfo {
+    public static class DeviceInfo implements Comparable<DeviceInfo> {
 
         private String id;
         private String name;
@@ -105,6 +105,11 @@ public abstract class IDeviceInfoManager {
         @Override
         public int hashCode() {
             return Objects.hash(id, name, platform);
+        }
+
+        @Override
+        public int compareTo(DeviceInfo o) {
+            return this.id.compareTo(o.id);
         }
     }
 

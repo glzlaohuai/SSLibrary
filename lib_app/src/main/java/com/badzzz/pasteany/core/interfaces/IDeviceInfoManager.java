@@ -6,6 +6,8 @@ import com.imob.lib.lib_common.Logger;
 
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 public abstract class IDeviceInfoManager {
 
     public abstract String getDeviceID();
@@ -89,6 +91,20 @@ public abstract class IDeviceInfoManager {
         @Override
         public String toString() {
             return toJson();
+        }
+
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DeviceInfo that = (DeviceInfo) o;
+            return id.equals(that.id) && name.equals(that.name) && platform.equals(that.platform);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name, platform);
         }
     }
 

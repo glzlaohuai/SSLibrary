@@ -4,7 +4,7 @@ import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdEventListenerAdapter;
 import com.imob.lib.net.nsd.NsdEventListenerWrapper;
@@ -79,7 +79,7 @@ public class NsdServiceHandler {
                 @Override
                 public void onCreated(NsdNode nsdNode) {
                     if (!nsdNode.isDestroyed()) {
-                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), PreferenceManagerWrapper.getInstance().getServiceName()), INSDServiceManager.buildServiceText(PreferenceManagerWrapper.getInstance().getDeviceName(), PlatformManagerHolder.get().getPlatformName()), serverNode.getPort());
+                        nsdNode.registerService(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID(), SettingsManager.getInstance().getServiceName()), INSDServiceManager.buildServiceText(SettingsManager.getInstance().getDeviceName(), PlatformManagerHolder.get().getPlatformName()), serverNode.getPort());
                         nsdNode.watchService(Constants.NSD.NSD_SERVICE_TYPE, null);
                     }
                 }

@@ -3,7 +3,7 @@ package com.badzzz.pasteany.core.nsd;
 import com.badzzz.pasteany.core.interfaces.INetworkManager;
 import com.badzzz.pasteany.core.interfaces.IPlatformManager;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 
 
@@ -19,13 +19,13 @@ public class NsdServiceStarter {
     private static NsdServiceHandler nsdServiceHandler;
 
     /**
-     * this will be called by {@link IPlatformManager#initPlatform()} if serviceName is set or after serviceName is setted at {@link com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper#saveServiceName(String)}
+     * this will be called by {@link IPlatformManager#initPlatform()} if serviceName is set or after serviceName is setted at {@link SettingsManager#saveServiceName(String)}
      */
     public final static void init() {
-        if (!PreferenceManagerWrapper.getInstance().hasSavedServiceName()) {
+        if (!SettingsManager.getInstance().hasSavedServiceName()) {
             Logger.i(TAG, "try to init nsd service, but no service name set, something went wrong, ");
         } else {
-            Logger.i(TAG, "start nsd service using service name: " + PreferenceManagerWrapper.getInstance().getServiceName());
+            Logger.i(TAG, "start nsd service using service name: " + SettingsManager.getInstance().getServiceName());
             if (!hasInited) {
                 doInit();
             }
@@ -34,7 +34,7 @@ public class NsdServiceStarter {
 
 
     /**
-     * will be called after service name setted(reset), see {@link PreferenceManagerWrapper#saveServiceName(String)}
+     * will be called after service name setted(reset), see {@link SettingsManager#saveServiceName(String)}
      */
     public final static void stuffAfterServiceNameSetted() {
         if (hasInited) {

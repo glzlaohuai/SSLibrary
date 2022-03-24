@@ -48,4 +48,14 @@ public class MacPreferenceManager implements IPreferenceManager {
     public void saveLong(String key, long value) {
         preferences.putLong(key, value);
     }
+
+    @Override
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return preferences.getBoolean(key, defaultValue);
+    }
+
+    @Override
+    public void saveBoolean(String key, boolean value) {
+        preferences.putBoolean(key, value);
+    }
 }

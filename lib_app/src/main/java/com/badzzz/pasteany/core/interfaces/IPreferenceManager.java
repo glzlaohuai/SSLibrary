@@ -20,4 +20,8 @@ public interface IPreferenceManager {
 
     void saveLong(String key, long value);
 
+    boolean getBoolean(String key, boolean defaultValue);
+
+    void saveBoolean(String key, boolean value);
+
 }

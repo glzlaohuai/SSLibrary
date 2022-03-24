@@ -10,7 +10,7 @@ import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.Peer;
@@ -385,7 +385,7 @@ public class ConnectedPeersManager {
                 NsdNode nsdNode = nsdServiceHandler.getNsdNode();
                 if (nsdNode != null) {
                     Logger.i(TAG, "try to retrieve lost peer's info");
-                    nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(deviceID, PreferenceManagerWrapper.getInstance().getServiceName()));
+                    nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(deviceID, SettingsManager.getInstance().getServiceName()));
                 }
             }
         }

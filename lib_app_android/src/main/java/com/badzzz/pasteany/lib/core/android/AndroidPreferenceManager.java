@@ -79,4 +79,14 @@ public class AndroidPreferenceManager implements IPreferenceManager {
     public void saveLong(String key, long value) {
         getEditor().putLong(key, value).apply();
     }
+
+    @Override
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return getSp().getBoolean(key, defaultValue);
+    }
+
+    @Override
+    public void saveBoolean(String key, boolean value) {
+        getEditor().putBoolean(key, value).apply();
+    }
 }

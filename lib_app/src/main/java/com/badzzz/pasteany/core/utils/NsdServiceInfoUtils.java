@@ -4,7 +4,7 @@ import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
 import com.badzzz.pasteany.core.interfaces.INSDServiceManager;
 import com.badzzz.pasteany.core.nsd.NsdServiceHandler;
 import com.badzzz.pasteany.core.nsd.peer.client.ConnectedClientsManager;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdEventListenerAdapter;
 import com.imob.lib.net.nsd.NsdNode;
@@ -77,7 +77,7 @@ public class NsdServiceInfoUtils {
             @Override
             public void onCreated(NsdNode nsdNode) {
                 super.onCreated(nsdNode);
-                nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(id, PreferenceManagerWrapper.getInstance().getServiceName()));
+                nsdNode.triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(id, SettingsManager.getInstance().getServiceName()));
             }
 
             @Override
@@ -109,7 +109,7 @@ public class NsdServiceInfoUtils {
 
         NsdServiceHandler nsdServiceHandler = ConnectedClientsManager.getInUsingServiceHandler();
         if (nsdServiceHandler != null) {
-            nsdServiceHandler.getNsdNode().triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(id, PreferenceManagerWrapper.getInstance().getServiceName()));
+            nsdServiceHandler.getNsdNode().triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(id, SettingsManager.getInstance().getServiceName()));
         }
     }
 

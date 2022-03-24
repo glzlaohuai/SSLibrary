@@ -4,7 +4,7 @@ import android.content.Context;
 import android.provider.Settings;
 
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 
 public class AndroidDeviceInfoManager extends IDeviceInfoManager {
 
@@ -21,12 +21,12 @@ public class AndroidDeviceInfoManager extends IDeviceInfoManager {
 
     @Override
     public String getDeviceName() {
-        return PreferenceManagerWrapper.getInstance().getDeviceName();
+        return SettingsManager.getInstance().getDeviceName();
     }
 
     @Override
     public void setDeviceName(String deviceName) {
-        PreferenceManagerWrapper.getInstance().saveDeviceName(deviceName);
+        SettingsManager.getInstance().saveDeviceName(deviceName);
     }
 
 }

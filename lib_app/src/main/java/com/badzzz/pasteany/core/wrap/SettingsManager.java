@@ -8,18 +8,17 @@ import com.badzzz.pasteany.core.utils.Constants;
 /**
  * basically a wrapper class of {@link IPreferenceManager}
  */
-public class PreferenceManagerWrapper {
+public class SettingsManager {
 
-
-    private static PreferenceManagerWrapper instance = new PreferenceManagerWrapper();
+    private static SettingsManager instance = new SettingsManager();
 
     private IPreferenceManager manager;
 
-    public static PreferenceManagerWrapper getInstance() {
+    public static SettingsManager getInstance() {
         return instance;
     }
 
-    private PreferenceManagerWrapper() {
+    private SettingsManager() {
         manager = PlatformManagerHolder.get().getAppManager().getPreferenceManager();
     }
 
@@ -67,6 +66,10 @@ public class PreferenceManagerWrapper {
 
     public boolean hasSavedServiceName() {
         return getServiceName() != null && !getServiceName().isEmpty();
+    }
+
+    public boolean isPingCheckEnabled() {
+        return manager.getBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, false);
     }
 
 

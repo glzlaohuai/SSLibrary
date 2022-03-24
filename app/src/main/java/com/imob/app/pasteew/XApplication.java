@@ -9,7 +9,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerWrapper;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.badzzz.pasteany.lib.core.android.AndroidPlatformManager;
 import com.github.anrwatchdog.ANRWatchDog;
 import com.imob.lib.sslib.peer.Peer;
@@ -34,9 +34,13 @@ public class XApplication extends Application {
         new ANRWatchDog().start();
 
         AndroidPlatformManager androidPlatformManager = new AndroidPlatformManager(this);
-        // TODO: 2021/11/30 just for tests, should be removed later
-        PreferenceManagerWrapper.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
-        PreferenceManagerWrapper.getInstance().saveServiceName("a_test_service_name");
+        // TODO: 2021/11/30 just for tests, should be removed later，设置默认的设备、注册&监听的服务名
+        if (!SettingsManager.getInstance().hasSavedServiceName()) {
+            SettingsManager.getInstance().saveServiceName("a_test_service_name");
+        }
+        if (!SettingsManager.getInstance().hasSavedDeviceName()) {
+            SettingsManager.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
+        }
         androidPlatformManager.initPlatform();
 
         //just for test, logPrint

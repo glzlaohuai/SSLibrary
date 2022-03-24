@@ -5,7 +5,7 @@ import com.badzzz.pasteany.core.manager.TotalEverDiscoveredDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 
 
 /**
@@ -35,13 +35,13 @@ public abstract class IPlatformManager {
     }
 
     private void kickOffNsdServiceIfServiceNameSet() {
-        if (PreferenceManagerWrapper.getInstance().hasSavedServiceName()) {
+        if (SettingsManager.getInstance().hasSavedServiceName()) {
             NsdServiceStarter.init();
         }
     }
 
     private void initDefaultPreferenceValuesIfNotSet() {
-        PreferenceManagerWrapper preference = PreferenceManagerWrapper.getInstance();
+        SettingsManager preference = SettingsManager.getInstance();
 
         if (!preference.hasSavedDeviceID()) {
             preference.saveDeviceID(getAppManager().getDeviceInfoManager().getDeviceID());

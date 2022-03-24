@@ -45,6 +45,9 @@ public class Constants {
         public static final String KEY_DEVICEID = Device.KEY_DEVICEID;
         public static final String KEY_DEVICE_NAME = Device.KEY_DEVICE_NAME;
         public static final String KEY_SERVICE_NAME = NSD.Key.SERVICE_NAME;
+
+        public static final String KEY_PING_CHECK_ENABLED = "ping_check_enabled";
+        public static final String KEY_PING_CHECK_INTERVAL = "ping_check_interval";
     }
 
     public static final class Device {

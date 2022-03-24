@@ -3,7 +3,7 @@ package com.badzzz.pasteany.core.nsd.peer.client;
 import com.badzzz.pasteany.core.api.MsgCreator;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
-import com.badzzz.pasteany.core.wrap.PreferenceManagerWrapper;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.client.ClientListenerAdapter;
@@ -70,7 +70,7 @@ public class ConnectedClientsHandler {
                 Logger.e(e);
             }
 
-            if (deviceID != null && !deviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID()) && serviceName != null && serviceName.equals(PreferenceManagerWrapper.getInstance().getServiceName())) {
+            if (deviceID != null && !deviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID()) && serviceName != null && serviceName.equals(SettingsManager.getInstance().getServiceName())) {
                 Logger.i(tag, "discovered nsd service's name match, and not the one created from localhost, so connect to it.");
                 Inet4Address inetAddresses = info.getInet4Address();
                 int port = info.getPort();

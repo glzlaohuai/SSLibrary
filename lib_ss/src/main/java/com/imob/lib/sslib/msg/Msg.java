@@ -10,6 +10,7 @@ public abstract class Msg {
 
     public static final byte TYPE_NORMAL = 0x0;
     public static final byte TYPE_CONFIRM = 0x1;
+    public static final byte TYPE_PING = 0x2;
 
     public static final String MSG_ID_PREFIX = "ss_msgid_";
 

@@ -7,6 +7,7 @@ import com.imob.lib.sslib.msg.Chunk;
 import com.imob.lib.sslib.msg.ConfirmMsg;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.MsgQueue;
+import com.imob.lib.sslib.utils.PingCheckTask;
 import com.imob.lib.sslib.utils.SSThreadFactory;
 
 import java.io.DataInputStream;
@@ -69,6 +70,8 @@ public class Peer {
     private String logTag;
     private long timeout;
 
+    private PingCheckTask pingCheckTask = new PingCheckTask(this);
+
     private UnconfirmedSendedChunkManager unconfirmedSendedChunkManager = new UnconfirmedSendedChunkManager();
 
     class IncomingMsgInfo {
@@ -99,7 +102,6 @@ public class Peer {
             return total;
         }
     }
-
 
     class UnconfirmedSendedChunkManager {
 
@@ -358,6 +360,7 @@ public class Peer {
         clearAllProcessingIncomingMsgSetAndCallbackFailed();
         clearAllUnconfirmedSendedChunkAndCallbackFailed();
         stopAllExecutorService();
+        pingCheckTask.destroy();
     }
 
     private void clearAllUnconfirmedSendedChunkAndCallbackFailed() {
@@ -703,9 +706,26 @@ public class Peer {
         throw new IOException(errorMsg);
     }
 
-
     public Socket getSocket() {
         return socket;
+    }
+
+    /**
+     * @param interval 距离上一次调用#{{@link #sendMessage(Msg)}}之后，发送pingMsg的延迟时间。调用该方法后，会立即发出一条pingMsg
+     */
+    public void enableActivePingCheck(long interval) {
+        if (interval < 0) {
+            throw new IllegalArgumentException("ping check interval time must not be negative.");
+        }
+        synchronized (destroyLock) {
+            if (!isDestroyed) {
+                pingCheckTask.enable(interval);
+            }
+        }
+    }
+
+    public void disableActivePingCheck() {
+        pingCheckTask.disbale();
     }
 
 

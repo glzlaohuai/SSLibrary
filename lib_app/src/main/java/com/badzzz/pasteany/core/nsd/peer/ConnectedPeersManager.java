@@ -19,6 +19,7 @@ import com.imob.lib.sslib.peer.PeerListenerAdapter;
 import com.imob.lib.sslib.peer.PeerListenerGroup;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,8 @@ public class ConnectedPeersManager {
     private static ConnectedPeerEventListenerGroup globalConnectedPeerEventListener = new ConnectedPeerEventListenerGroup();
     private static ConnectedPeerEventListenerGroup monitoredListeners = new ConnectedPeerEventListenerGroup();
 
+    private static boolean isPingCheckEnabled = false;
+    private static long pingCheckInterval = 0;
 
     private final static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
     private final static PeerListener peerMapManagerListener = new PeerListenerAdapter() {
@@ -49,6 +52,10 @@ public class ConnectedPeersManager {
         public void onIOStreamOpened(Peer peer) {
             super.onIOStreamOpened(peer);
             afterPeerIncoming(peer);
+
+            if (isPingCheckEnabled) {
+                peer.enableActivePingCheck(pingCheckInterval);
+            }
         }
 
         @Override
@@ -58,6 +65,30 @@ public class ConnectedPeersManager {
             afterPeerDestroyed(peer);
         }
     };
+
+    public final static void enablePingCheck(long delay) {
+        isPingCheckEnabled = true;
+        pingCheckInterval = delay;
+        Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
+        for (String key : connectedPeers.keySet()) {
+            Set<Peer> peers = connectedPeers.get(key);
+            for (Peer peer : peers) {
+                if (!peer.isDestroyed()) {
+                    peer.enableActivePingCheck(delay);
+                }
+            }
+        }
+    }
+
+    public final static void disablePingCheck() {
+        Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
+        for (String key : connectedPeers.keySet()) {
+            Set<Peer> peers = connectedPeers.get(key);
+            for (Peer peer : peers) {
+                peer.disableActivePingCheck();
+            }
+        }
+    }
 
 
     private final static boolean isThisMsgTypeNeedCallback(String id) {

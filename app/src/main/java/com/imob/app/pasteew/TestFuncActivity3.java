@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,6 +27,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
@@ -312,6 +315,17 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
+        ((CheckBox) findViewById(R.id.pingCheckbox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    promptPingCheckTime(buttonView);
+                } else {
+                    ConnectedPeersManager.disablePingCheck();
+                }
+            }
+        });
+
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
@@ -320,6 +334,25 @@ public class TestFuncActivity3 extends AppCompatActivity {
         afterTotalConnectedDevicesListUpdated(TotalEverConnectedDeviceInfoManager.getTotalKnownDevices());
 
         monitorServerNodeState();
+    }
+
+    private void promptPingCheckTime(CompoundButton buttonView) {
+        DialogUtils.createInputDialog(this, "check time(s)", new DialogUtils.OnDialogInputListener() {
+            @Override
+            public void onInputContent(String content) {
+                try {
+                    int time = Integer.parseInt(content);
+                    if (time > 0) {
+                        ConnectedPeersManager.enablePingCheck(time * 1000);
+                    } else {
+                        buttonView.setChecked(false);
+                    }
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                    buttonView.setChecked(false);
+                }
+            }
+        });
     }
 
     private void monitorServerNodeState() {

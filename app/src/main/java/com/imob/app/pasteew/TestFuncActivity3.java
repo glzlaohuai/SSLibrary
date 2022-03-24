@@ -28,8 +28,12 @@ import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.sslib.peer.Peer;
+import com.imob.lib.sslib.server.ServerListener;
+import com.imob.lib.sslib.server.ServerListenerAdapter;
+import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -49,6 +53,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private LinearLayout connectedDevicesLayout;
     private ListView msgListView;
+    private TextView serverInfoView;
 
     private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
 
@@ -71,6 +76,35 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         }
     };
+
+    private ServerListener serverListener = new ServerListenerAdapter() {
+        @Override
+        public void onCreated(ServerNode serverNode) {
+            super.onCreated(serverNode);
+
+            updateServerNodeInfo(serverNode);
+        }
+
+        @Override
+        public void onDestroyed(ServerNode serverNode) {
+            super.onDestroyed(serverNode);
+            updateServerNodeInfo(serverNode);
+        }
+    };
+
+    private void updateServerNodeInfo(ServerNode serverNode) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (serverNode.isDestroyed()) {
+                    serverInfoView.setText("none");
+                } else {
+                    ServerSocket serverSocket = serverNode.getServerSocket();
+                    serverInfoView.setText(serverSocket.getInetAddress().getHostAddress() + ":" + serverSocket.getLocalPort());
+                }
+            }
+        });
+    }
 
     private void updateConnectedDeviceListView() {
         runOnUiThread(new Runnable() {
@@ -249,6 +283,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test_func_3);
 
+        serverInfoView = findViewById(R.id.server_info);
         connectedDevicesLayout = findViewById(R.id.connectedDevicesLayout);
         msgListView = findViewById(R.id.listView);
         msgListView.setAdapter(msgAdapter);
@@ -283,6 +318,17 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         loadMsgBatchOrFillMsgEntitiesList();
         afterTotalConnectedDevicesListUpdated(TotalEverConnectedDeviceInfoManager.getTotalKnownDevices());
+
+        monitorServerNodeState();
+    }
+
+    private void monitorServerNodeState() {
+        ServerNode.monitorServerNodeState(serverListener);
+
+    }
+
+    private void unmonitorServerNodeState() {
+        ServerNode.unmonitorServerNodeState(serverListener);
     }
 
     private void loadMsgBatchOrFillMsgEntitiesList() {
@@ -327,6 +373,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         ConnectedPeersManager.unmonitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverConnectedDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.unmonitorMsgEntitiesUpdate(msgEntityListUpdateListener);
+        unmonitorServerNodeState();
     }
 
 

@@ -41,15 +41,25 @@ public class ServerNode implements INode {
 
     private Queue<Peer> connectedPeers = new ConcurrentLinkedQueue<>();
 
-    private long timeout;
+    private final static ServerListenerGroup globalServerListener = new ServerListenerGroup();
+    private final static ServerListenerGroup monitoredServerListener = new ServerListenerGroup();
+    private final static ServerListenerGroup routerServerListener = new ServerListenerGroup();
 
+    private long timeout;
 
     private static final String S_TAG = "ServerNode";
     private String tag;
 
+    static {
+        routerServerListener.add(globalServerListener);
+        routerServerListener.add(monitoredServerListener);
+    }
+
 
     public ServerNode(ServerListener serverListener, PeerListener incomingPeerEventListener) {
         this.serverListenerGroup.add(new ServerListenerWrapper(serverListener, false));
+        this.serverListenerGroup.add(ServerNode.routerServerListener);
+
         this.peerListenerGroup.add(new PeerListenerWrapper(incomingPeerEventListener, false));
 
         tag = S_TAG + " # " + hashCode();
@@ -278,6 +288,10 @@ public class ServerNode implements INode {
         return serverSocket.getLocalPort();
     }
 
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
     public boolean isDestroyed() {
         return isDestroyed;
     }
@@ -312,4 +326,19 @@ public class ServerNode implements INode {
     public boolean isServerNode() {
         return true;
     }
+
+    public final static void setGlobalServerListener(ServerListenerGroup globalServerListener) {
+        ServerNode.globalServerListener.clear();
+        ServerNode.globalServerListener.add(globalServerListener);
+    }
+
+
+    public final static void monitorServerNodeState(ServerListener serverListener) {
+        ServerNode.monitoredServerListener.add(serverListener);
+    }
+
+    public final static void unmonitorServerNodeState(ServerListener serverListener) {
+        ServerNode.monitoredServerListener.remove(serverListener);
+    }
+
 }

@@ -21,6 +21,10 @@ public class ServerListenerGroup implements ServerListener {
         }
     }
 
+    public void clear() {
+        set.clear();
+    }
+
     @Override
     public void onCreated(ServerNode serverNode) {
         for (ServerListener listener : set) {

@@ -51,6 +51,10 @@
             android:name=".TestFunctionActivity"
             android:exported="true"></activity>
 
+        <activity
+            android:name=".PeerTryConnectActivity"
+            android:exported="false" />
+
         <service android:name=".TestService" />
 
     </application>

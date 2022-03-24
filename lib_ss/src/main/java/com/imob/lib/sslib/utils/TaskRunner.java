@@ -1,5 +1,7 @@
 package com.imob.lib.sslib.utils;
 
+import com.imob.lib.lib_common.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -9,7 +11,9 @@ public class TaskRunner {
     private Timer timer = new Timer();
     private Map<Runnable, TimerTask> runnables = new HashMap<>();
 
-    public void postDelayed(final Runnable runnable, long delay) {
+    private boolean isDestroyed = false;
+
+    public synchronized void postDelayed(final Runnable runnable, long delay) {
         if (delay < 0) {
             throw new IllegalArgumentException("delay time must not be negative.");
         }
@@ -25,12 +29,22 @@ public class TaskRunner {
                 runnables.remove(runnable);
             }
         });
-        timer.schedule(runnables.get(runnable), delay);
+        try {
+            timer.schedule(runnables.get(runnable), delay);
+        } catch (Throwable e) {
+            Logger.e(e);
+        }
     }
 
 
-    public void destroy() {
+    public synchronized void destroy() {
         timer.cancel();
+        this.isDestroyed = true;
+    }
+
+
+    public synchronized boolean isDestroyed() {
+        return isDestroyed;
     }
 
 }

@@ -22,7 +22,7 @@ public class PingCheckTask {
         @Override
         public void onMsgSendStart(Peer peer, String id) {
             super.onMsgSendStart(peer, id);
-            if (taskRunner != null && runnable != null) {
+            if (taskRunner != null && runnable != null && !taskRunner.isDestroyed()) {
                 taskRunner.postDelayed(runnable, interval);
             }
         }

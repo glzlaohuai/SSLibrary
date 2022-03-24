@@ -92,9 +92,9 @@ public class NsdServiceHandler {
 
 
                 @Override
-                public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
+                public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo info) {
                     //find a nsdNode, try to connect to it
-                    ConnectedClientsManager.afterServiceDiscoveryed(NsdServiceHandler.this, nsdNode, info);
+                    ConnectedClientsManager.afterServiceDiscovered(NsdServiceHandler.this, nsdNode, info);
                 }
             }));
             nsdNode.create();

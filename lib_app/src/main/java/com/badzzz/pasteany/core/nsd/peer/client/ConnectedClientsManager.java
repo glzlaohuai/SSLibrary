@@ -27,9 +27,9 @@ public class ConnectedClientsManager {
     }
 
 
-    public static void afterServiceDiscoveryed(NsdServiceHandler nsdServiceHandler, NsdNode nsdNode, ServiceInfo info) {
+    public static void afterServiceDiscovered(NsdServiceHandler nsdServiceHandler, NsdNode nsdNode, ServiceInfo info) {
         if (inUsingServiceHandler == nsdServiceHandler && relatedConnectedPeersHandlerMap.get(nsdServiceHandler) != null && nsdNode != null && info != null && nsdNode.isRunning()) {
-            relatedConnectedPeersHandlerMap.get(nsdServiceHandler).afterServiceDiscoveryed(info);
+            relatedConnectedPeersHandlerMap.get(nsdServiceHandler).afterServiceDiscovered(info);
         }
     }
 

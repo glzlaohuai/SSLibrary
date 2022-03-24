@@ -56,10 +56,10 @@ public class NsdEventListenerWrapper implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
-        base.onServiceDiscoveryed(nsdNode, info);
+    public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo info) {
+        base.onServiceDiscovered(nsdNode, info);
         if (printLog) {
-            Logger.i(TAG, "onServiceDiscoveryed, nsdNode: " + nsdNode + ", info: " + info);
+            Logger.i(TAG, "onServiceDiscovered, nsdNode: " + nsdNode + ", info: " + info);
 
         }
     }

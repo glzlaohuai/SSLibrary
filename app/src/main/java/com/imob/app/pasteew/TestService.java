@@ -12,7 +12,7 @@ import android.os.IBinder;
 
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.manager.MsgEntitiesManager;
-import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
+import com.badzzz.pasteany.core.manager.TotalEverDiscoveredDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
@@ -83,12 +83,12 @@ public class TestService extends Service {
         Intent notificationIntent = new Intent(this, TestFuncActivity3.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, NOTIFYCATION_REQUEST_CODE, notificationIntent, 0);
 
-        String content = "from: " + TotalEverConnectedDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()) + "\n" + "data: " + msgEntity.getExtra() + "\n";
+        String content = "from: " + TotalEverDiscoveredDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()) + "\n" + "data: " + msgEntity.getExtra() + "\n";
 
         StringBuilder sb = new StringBuilder();
         Map<String, String> msgSendStates = msgEntity.getMsgSendStates();
         for (Map.Entry<String, String> entry : msgSendStates.entrySet()) {
-            sb.append(TotalEverConnectedDeviceInfoManager.getDeviceNameById(entry.getKey()) + ", " + Constants.DB.toReadableSendState(entry.getValue()));
+            sb.append(TotalEverDiscoveredDeviceInfoManager.getDeviceNameById(entry.getKey()) + ", " + Constants.DB.toReadableSendState(entry.getValue()));
             if (entry.getValue().equals(Constants.DB.MSG_SEND_STATE_IN_SENDING)) {
                 sb.append("%" + msgEntity.getProgressByDeviceID(entry.getKey()));
             }

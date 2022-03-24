@@ -1,7 +1,7 @@
 package com.badzzz.pasteany.core.interfaces;
 
 import com.badzzz.pasteany.core.manager.MsgEntitiesManager;
-import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
+import com.badzzz.pasteany.core.manager.TotalEverDiscoveredDeviceInfoManager;
 import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
@@ -28,7 +28,7 @@ public abstract class IPlatformManager {
             initDefaultPreferenceValuesIfNotSet();
             kickOffNsdServiceIfServiceNameSet();
             ConnectedPeersManager.init();
-            TotalEverConnectedDeviceInfoManager.init();
+            TotalEverDiscoveredDeviceInfoManager.init();
             MsgEntitiesManager.init();
             hasInited = true;
         }

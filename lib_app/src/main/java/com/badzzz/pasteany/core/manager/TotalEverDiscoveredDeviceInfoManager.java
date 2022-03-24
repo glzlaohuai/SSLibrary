@@ -2,13 +2,15 @@ package com.badzzz.pasteany.core.manager;
 
 import com.badzzz.pasteany.core.dbentity.DeviceEntity;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
-import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
+import com.badzzz.pasteany.core.utils.NsdServiceInfoUtils;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.lib_common.Logger;
-import com.imob.lib.sslib.peer.Peer;
+import com.imob.lib.net.nsd.NsdEventListener;
+import com.imob.lib.net.nsd.NsdEventListenerAdapter;
+import com.imob.lib.net.nsd.NsdNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,15 +18,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class TotalEverConnectedDeviceInfoManager {
+import javax.jmdns.ServiceInfo;
 
-    private static final String TAG = "TotalEverConnectedDeviceInfoManager";
+public class TotalEverDiscoveredDeviceInfoManager {
+
+    private static final String TAG = "TotalEverDiscoveredDeviceInfoManager";
 
     private final static Map<String, IDeviceInfoManager.DeviceInfo> totalKnownDevices = new HashMap<>();
 
     private static boolean hasInited = false;
     private static boolean fetched = false;
     private static ITotalEverConnectedDeviceInfoListenerGroup deviceInfoListener = new ITotalEverConnectedDeviceInfoListenerGroup();
+    private final static NsdEventListener nsdEventListener = new NsdEventListenerAdapter() {
+        @Override
+        public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo event) {
+            super.onServiceDiscovered(nsdNode, event);
+            afterNsdServiceDiscovered(event);
+        }
+    };
 
 
     public interface ITotalEverConnectedDeviceInfoListener {
@@ -56,7 +67,6 @@ public class TotalEverConnectedDeviceInfoManager {
         }
     }
 
-
     private static void getDeviceInfoFromConnectedPeersAndAddToMap() {
         Set<String> tagSet = ConnectedPeersManager.getConnectedPeersTagSet();
         if (tagSet != null && tagSet.size() > 0) {
@@ -69,7 +79,6 @@ public class TotalEverConnectedDeviceInfoManager {
             }
         }
     }
-
 
     private static void addSelfDeviceInfoToTotalKnownDevice() {
         IDeviceInfoManager deviceInfoManager = PlatformManagerHolder.get().getAppManager().getDeviceInfoManager();
@@ -99,13 +108,7 @@ public class TotalEverConnectedDeviceInfoManager {
             }
         });
 
-        ConnectedPeersManager.monitorConnectedPeersEvent(new ConnectedPeerEventListenerAdapter() {
-            @Override
-            public void onIncomingPeer(Peer peer) {
-                super.onIncomingPeer(peer);
-                afterPeerIncoming(peer);
-            }
-        });
+        NsdNode.monitorListener(nsdEventListener);
     }
 
     //read from db finished or not
@@ -113,9 +116,9 @@ public class TotalEverConnectedDeviceInfoManager {
         return fetched;
     }
 
+    public final static void afterNsdServiceDiscovered(ServiceInfo event) {
 
-    public final static void afterPeerIncoming(Peer peer) {
-        IDeviceInfoManager.DeviceInfo deviceInfo = PeerUtils.generateDeviceInfoFromPeer(peer);
+        IDeviceInfoManager.DeviceInfo deviceInfo = NsdServiceInfoUtils.buildFromServiceInfo(event);
 
         if (deviceInfo != null) {
             DeviceEntity deviceEntity = DeviceEntity.buildWithDeviceInfo(deviceInfo);

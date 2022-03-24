@@ -57,9 +57,9 @@ public class NsdEventListenerGroup implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo info) {
+    public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo info) {
         for (NsdEventListener listener : queue) {
-            listener.onServiceDiscoveryed(nsdNode, info);
+            listener.onServiceDiscovered(nsdNode, info);
         }
     }
 

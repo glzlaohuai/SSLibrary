@@ -38,18 +38,25 @@ public class NsdNode {
     private NsdEventListenerGroup listener = new NsdEventListenerGroup();
 
     private static NsdEventListenerGroup globalListenerGroup = new NsdEventListenerGroup();
+    private static NsdEventListenerGroup monitorListenerGroup = new NsdEventListenerGroup();
+    private static NsdEventListenerGroup routerListenerGroup = new NsdEventListenerGroup();
 
     private boolean isDestroyed;
     private boolean isCreating;
 
     private String tag;
 
+    static {
+        routerListenerGroup.add(globalListenerGroup);
+        routerListenerGroup.add(monitorListenerGroup);
+    }
+
     public NsdNode(INsdExtraActionPerformer performer, InetAddress inetAddress, String hostName, NsdEventListener listener) {
         this.performer = performer;
         this.inetAddress = inetAddress;
         this.hostName = hostName;
         this.listener.add(listener);
-        this.listener.add(globalListenerGroup);
+        this.listener.add(routerListenerGroup);
 
         tag = S_TAG + " # " + hashCode();
     }
@@ -65,6 +72,14 @@ public class NsdNode {
     public static void setGlobalListener(NsdEventListener listener) {
         NsdNode.globalListenerGroup.clear();
         NsdNode.globalListenerGroup.add(listener);
+    }
+
+    public static void monitorListener(NsdEventListener listener) {
+        monitorListenerGroup.add(listener);
+    }
+
+    public static void unmonitorListener(NsdEventListener listener) {
+        monitorListenerGroup.remove(listener);
     }
 
     public boolean isRunning() {
@@ -189,7 +204,7 @@ public class NsdNode {
 
                                 @Override
                                 public void serviceResolved(ServiceEvent event) {
-                                    listener.onServiceDiscoveryed(NsdNode.this, event.getInfo());
+                                    listener.onServiceDiscovered(NsdNode.this, event.getInfo());
                                 }
                             });
                             listener.onSuccessfullyWatchService(NsdNode.this, type, name);
@@ -265,7 +280,7 @@ public class NsdNode {
                         }
                         Logger.i(tag, "got service info: " + serviceInfo);
                         if (serviceInfo != null) {
-                            listener.onServiceDiscoveryed(NsdNode.this, serviceInfo);
+                            listener.onServiceDiscovered(NsdNode.this, serviceInfo);
                         }
 
                     }

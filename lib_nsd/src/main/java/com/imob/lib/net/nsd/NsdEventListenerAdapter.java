@@ -24,7 +24,7 @@ public class NsdEventListenerAdapter implements NsdEventListener {
     }
 
     @Override
-    public void onServiceDiscoveryed(NsdNode nsdNode, ServiceInfo event) {
+    public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo event) {
 
     }
 

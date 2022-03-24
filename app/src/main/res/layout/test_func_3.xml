@@ -4,6 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <Button
+        android:id="@+id/redo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="redo"
+        android:text="something went wrong? redo" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

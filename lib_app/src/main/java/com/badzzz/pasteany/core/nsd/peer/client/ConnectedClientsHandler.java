@@ -33,7 +33,7 @@ public class ConnectedClientsHandler {
     public synchronized void destroy(String reason, Exception e) {
         if (!destroyed) {
             destroyed = true;
-            doDestroy(reason,e);
+            doDestroy(reason, e);
         }
     }
 
@@ -48,15 +48,15 @@ public class ConnectedClientsHandler {
         return null;
     }
 
-    private synchronized void doDestroy(String reason,Exception e) {
+    private synchronized void doDestroy(String reason, Exception e) {
         for (ClientNode clientNode : clientNodeList) {
-            clientNode.destroy(reason,e);
+            clientNode.destroy(reason, e);
         }
         clientNodeList.clear();
     }
 
 
-    public synchronized void afterServiceDiscoveryed(final ServiceInfo info) {
+    public synchronized void afterServiceDiscovered(final ServiceInfo info) {
         if (info != null) {
 
             String deviceID = null;
@@ -71,7 +71,7 @@ public class ConnectedClientsHandler {
             }
 
             if (deviceID != null && !deviceID.equals(PlatformManagerHolder.get().getAppManager().getDeviceInfoManager().getDeviceID()) && serviceName != null && serviceName.equals(PreferenceManagerWrapper.getInstance().getServiceName())) {
-                Logger.i(tag, "discoveryed nsd service's name match, and not the one created from localhost, so connect to it.");
+                Logger.i(tag, "discovered nsd service's name match, and not the one created from localhost, so connect to it.");
                 Inet4Address inetAddresses = info.getInet4Address();
                 int port = info.getPort();
 
@@ -119,7 +119,7 @@ public class ConnectedClientsHandler {
                     }
                 }
             } else {
-                Logger.i(tag, "discoveryed nsd service's name mismatch or it's a localhost nsd service, ignore it.");
+                Logger.i(tag, "discovered nsd service's name mismatch or it's a localhost nsd service, ignore it.");
             }
         }
     }

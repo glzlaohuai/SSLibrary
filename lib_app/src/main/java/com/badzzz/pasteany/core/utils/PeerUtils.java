@@ -11,7 +11,6 @@ import java.util.Set;
 
 public class PeerUtils {
 
-
     public static IDeviceInfoManager.DeviceInfo generateDeviceInfoFromPeer(Peer peer) {
         if (peer == null || peer.getTag() == null) return null;
         return IDeviceInfoManager.DeviceInfo.buildFromJsonString(peer.getTag());

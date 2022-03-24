@@ -20,7 +20,8 @@ import android.widget.TextView;
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
 import com.badzzz.pasteany.core.manager.MsgEntitiesManager;
-import com.badzzz.pasteany.core.manager.TotalEverConnectedDeviceInfoManager;
+import com.badzzz.pasteany.core.manager.TotalEverDiscoveredDeviceInfoManager;
+import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListener;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeerEventListenerAdapter;
 import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
@@ -145,7 +146,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
     }
 
 
-    private TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverConnectedDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
+    private TotalEverDiscoveredDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverDiscoveredDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
         @Override
         public void onUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
             afterTotalConnectedDevicesListUpdated(all);
@@ -154,7 +155,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
 
     private void afterTotalConnectedDevicesListUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
-        TotalEverConnectedDeviceInfoManager.removeSelfDevice(all);
+        TotalEverDiscoveredDeviceInfoManager.removeSelfDevice(all);
         //diff checked
         if (!allConnectedDevices.equals(all.values())) {
             allConnectedDevices.clear();
@@ -238,13 +239,13 @@ public class TestFuncActivity3 extends AppCompatActivity {
             sb.append("time: " + new Date(msgEntity.getMsgTime()).toString());
 
             msgView.setText(sb.toString());
-            msgFromView.setText("fromDeviceID: " + msgEntity.getFromDeviceID() + "\n" + "fromDeviceName: " + TotalEverConnectedDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()));
+            msgFromView.setText("fromDeviceID: " + msgEntity.getFromDeviceID() + "\n" + "fromDeviceName: " + TotalEverDiscoveredDeviceInfoManager.getDeviceNameById(msgEntity.getFromDeviceID()));
 
             Map<String, String> msgSendStates = msgEntity.getMsgSendStates();
             sendingStateLayout.removeAllViews();
             for (String toID : msgSendStates.keySet()) {
                 TextView textView = new TextView(TestFuncActivity3.this);
-                textView.setText(TotalEverConnectedDeviceInfoManager.getDeviceNameById(toID) + ", " + toReadableSendState(toID, msgSendStates.get(toID)));
+                textView.setText(TotalEverDiscoveredDeviceInfoManager.getDeviceNameById(toID) + ", " + toReadableSendState(toID, msgSendStates.get(toID)));
                 textView.setPadding(15, 15, 15, 15);
 
                 if (msgSendStates.get(toID).equals(Constants.DB.MSG_SEND_STATE_FAILED)) {
@@ -327,11 +328,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         });
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
-        TotalEverConnectedDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
+        TotalEverDiscoveredDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
 
         loadMsgBatchOrFillMsgEntitiesList();
-        afterTotalConnectedDevicesListUpdated(TotalEverConnectedDeviceInfoManager.getTotalKnownDevices());
+        afterTotalConnectedDevicesListUpdated(TotalEverDiscoveredDeviceInfoManager.getTotalKnownDevices());
 
         monitorServerNodeState();
     }
@@ -404,7 +405,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         super.onDestroy();
 
         ConnectedPeersManager.unmonitorConnectedPeersEvent(connectedPeerEventListener);
-        TotalEverConnectedDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
+        TotalEverDiscoveredDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.unmonitorMsgEntitiesUpdate(msgEntityListUpdateListener);
         unmonitorServerNodeState();
     }
@@ -447,5 +448,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     }
 
-
+    public void redo(View view) {
+        NsdServiceStarter.redoIfSomethingWentWrong();
+    }
 }

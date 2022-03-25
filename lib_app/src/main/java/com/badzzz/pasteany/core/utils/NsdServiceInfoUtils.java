@@ -72,6 +72,8 @@ public class NsdServiceInfoUtils {
         final AtomicBoolean callbacked = new AtomicBoolean(false);
         final Timer timer = new Timer();
 
+        Logger.i(TAG, "try to fetch service info by id: " + id);
+
         final NsdEventListenerAdapter listenerAdapter = new NsdEventListenerAdapter() {
             @Override
             public void onCreated(NsdNode nsdNode) {
@@ -89,6 +91,8 @@ public class NsdServiceInfoUtils {
                         listener.onFetched(event);
                         timer.cancel();
                         NsdNode.unmonitorListener(this);
+
+                        Logger.i(TAG, "discovered service info: " + event.getName() + ", " + event.getTextString());
                     }
                 }
             }

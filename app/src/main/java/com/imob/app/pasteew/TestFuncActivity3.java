@@ -31,6 +31,9 @@ import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
+import com.imob.lib.net.nsd.NsdEventListener;
+import com.imob.lib.net.nsd.NsdEventListenerAdapter;
+import com.imob.lib.net.nsd.NsdNode;
 import com.imob.lib.sslib.peer.Peer;
 import com.imob.lib.sslib.server.ServerListener;
 import com.imob.lib.sslib.server.ServerListenerAdapter;
@@ -58,12 +61,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private LinearLayout connectedDevicesLayout;
     private ListView msgListView;
     private TextView serverInfoView;
+    private TextView nsdInfoView;
 
     private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
 
     private List<IDeviceInfoManager.DeviceInfo> allEverDiscoveredDevices = new LinkedList<>();
-
-
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
         @Override
         public void onIncomingPeer(Peer peer) {
@@ -80,7 +82,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         }
     };
-
     private ServerListener serverListener = new ServerListenerAdapter() {
         @Override
         public void onCreated(ServerNode serverNode) {
@@ -95,6 +96,41 @@ public class TestFuncActivity3 extends AppCompatActivity {
             updateServerNodeInfo(serverNode);
         }
     };
+    private NsdEventListener nsdEventListener = new NsdEventListenerAdapter() {
+        @Override
+        public void onDestroyed(NsdNode nsdNode) {
+            super.onDestroyed(nsdNode);
+            updateNsdRegisterInfo(nsdNode, null, null, null, -1);
+        }
+
+        @Override
+        public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
+            super.onSuccessfullyRegisterService(nsdNode, type, name, text, port);
+            updateNsdRegisterInfo(nsdNode, type, name, text, port);
+        }
+    };
+
+    private void updateNsdRegisterInfo(NsdNode nsdNode, String type, String name, String text, int port) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (nsdNode.isDestroyed()) {
+                    nsdInfoView.setText("none");
+                } else {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("type: " + type);
+                    sb.append("\n");
+                    sb.append("name: " + name);
+                    sb.append("\n");
+                    sb.append("text: " + text);
+                    sb.append("\n");
+                    sb.append("port: " + port);
+                    sb.append("\n");
+                    nsdInfoView.setText(sb.toString());
+                }
+            }
+        });
+    }
 
     private void updateServerNodeInfo(ServerNode serverNode) {
         runOnUiThread(new Runnable() {
@@ -305,6 +341,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         setContentView(R.layout.test_func_3);
 
         serverInfoView = findViewById(R.id.server_info);
+        nsdInfoView = findViewById(R.id.nsd_info);
         connectedDevicesLayout = findViewById(R.id.connectedDevicesLayout);
         msgListView = findViewById(R.id.listView);
         msgListView.setAdapter(msgAdapter);
@@ -352,6 +389,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         afterTotalConnectedDevicesListUpdated(TotalEverDiscoveredDeviceInfoManager.getTotalKnownDevices());
 
         monitorServerNodeState();
+        monitorNsdNodeState();
     }
 
     private void promptPingCheckTime(CompoundButton buttonView) {
@@ -375,11 +413,18 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private void monitorServerNodeState() {
         ServerNode.monitorServerNodeState(serverListener);
-
     }
 
     private void unmonitorServerNodeState() {
         ServerNode.unmonitorServerNodeState(serverListener);
+    }
+
+    private void monitorNsdNodeState() {
+        NsdNode.monitorListener(nsdEventListener);
+    }
+
+    private void unmonitorNsdNodeState() {
+        NsdNode.unmonitorListener(nsdEventListener);
     }
 
     private void loadMsgBatchOrFillMsgEntitiesList() {
@@ -425,6 +470,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         TotalEverDiscoveredDeviceInfoManager.unmonitorTotalEventConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.unmonitorMsgEntitiesUpdate(msgEntityListUpdateListener);
         unmonitorServerNodeState();
+        unmonitorNsdNodeState();
     }
 
 

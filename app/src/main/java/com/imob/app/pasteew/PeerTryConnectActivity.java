@@ -78,7 +78,9 @@ public class PeerTryConnectActivity extends AppCompatActivity {
                 appendLog("got nsd service info: " + serviceInfo.toString());
             }
         });
+    }
 
-
+    public void clearLogs(View view) {
+        logsView.setText("");
     }
 }

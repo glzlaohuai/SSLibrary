@@ -68,7 +68,6 @@ public class NsdServiceInfoUtils {
         return null;
     }
 
-
     public static void tryToFetchServiceInfoByID(final String id, final long timeout, final IPositivelyNsdServiceInfoFetchListener listener) {
         final AtomicBoolean callbacked = new AtomicBoolean(false);
         final Timer timer = new Timer();
@@ -108,7 +107,7 @@ public class NsdServiceInfoUtils {
         NsdNode.monitorListener(listenerAdapter);
 
         NsdServiceHandler nsdServiceHandler = ConnectedClientsManager.getInUsingServiceHandler();
-        if (nsdServiceHandler != null) {
+        if (nsdServiceHandler != null && nsdServiceHandler.getNsdNode() != null) {
             nsdServiceHandler.getNsdNode().triggerServiceInfoResolve(Constants.NSD.NSD_SERVICE_TYPE, INSDServiceManager.buildServiceName(id, SettingsManager.getInstance().getServiceName()));
         }
     }

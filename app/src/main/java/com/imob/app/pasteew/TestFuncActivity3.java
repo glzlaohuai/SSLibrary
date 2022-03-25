@@ -61,7 +61,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
     private List<MsgEntity> msgEntities = new ArrayList<>(MsgEntitiesManager.getAllMsgEntities());
 
-    private List<IDeviceInfoManager.DeviceInfo> allConnectedDevices = new LinkedList<>();
+    private List<IDeviceInfoManager.DeviceInfo> allEverDiscoveredDevices = new LinkedList<>();
 
 
     private ConnectedPeerEventListener connectedPeerEventListener = new ConnectedPeerEventListenerAdapter() {
@@ -120,14 +120,22 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 Set<String> connectedPeersTagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
                 Set<String> idSet = PeerUtils.generateDeviceIDSetFromPeerTagSet(connectedPeersTagSet);
 
-                for (IDeviceInfoManager.DeviceInfo deviceInfo : allConnectedDevices) {
+                for (IDeviceInfoManager.DeviceInfo deviceInfo : allEverDiscoveredDevices) {
                     View deviceInfoView;
                     //connected
                     if (idSet.contains(deviceInfo.getId())) {
                         deviceInfoView = inflater.inflate(R.layout.item_device_connected, null);
+                        deviceInfoView.setOnClickListener(null);
                     } else {
                         //not connected
                         deviceInfoView = inflater.inflate(R.layout.item_device_notconnected, null);
+
+                        deviceInfoView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                gotoTryToConnectActivity(deviceInfo);
+                            }
+                        });
                     }
 
                     TextView idView = deviceInfoView.findViewById(R.id.id);
@@ -145,6 +153,13 @@ public class TestFuncActivity3 extends AppCompatActivity {
         });
     }
 
+    private void gotoTryToConnectActivity(IDeviceInfoManager.DeviceInfo deviceInfo) {
+        String s = deviceInfo.toJson();
+        Intent intent = new Intent(this, PeerTryConnectActivity.class);
+        intent.putExtra("device", s);
+        startActivity(intent);
+    }
+
 
     private TotalEverDiscoveredDeviceInfoManager.ITotalEverConnectedDeviceInfoListener deviceInfoListener = new TotalEverDiscoveredDeviceInfoManager.ITotalEverConnectedDeviceInfoListener() {
         @Override
@@ -157,10 +172,10 @@ public class TestFuncActivity3 extends AppCompatActivity {
     private void afterTotalConnectedDevicesListUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
         TotalEverDiscoveredDeviceInfoManager.removeSelfDevice(all);
         //diff checked
-        if (!allConnectedDevices.equals(all.values())) {
-            allConnectedDevices.clear();
-            allConnectedDevices.addAll(all.values());
-            Collections.sort(allConnectedDevices);
+        if (!allEverDiscoveredDevices.equals(all.values())) {
+            allEverDiscoveredDevices.clear();
+            allEverDiscoveredDevices.addAll(all.values());
+            Collections.sort(allEverDiscoveredDevices);
 
             notifyMsgAdapter();
             updateConnectedDeviceListView();

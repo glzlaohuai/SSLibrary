@@ -5,14 +5,19 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.badzzz.pasteany.core.utils.Constants;
+import com.badzzz.pasteany.core.utils.NsdServiceInfoUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.jmdns.ServiceInfo;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PeerTryConnectActivity extends AppCompatActivity {
+
+    private static final int TIMEOUT = 1000 * 5;
 
     private String deviceInfo;
     private String did;
@@ -47,10 +52,32 @@ public class PeerTryConnectActivity extends AppCompatActivity {
         }
     }
 
+
+    private void appendLog(String log) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                logsView.append("\n" + log);
+            }
+        });
+    }
+
     public void retry(View view) {
+        doFetchAndConnect();
     }
 
     private void doFetchAndConnect() {
+        NsdServiceInfoUtils.tryToFetchServiceInfoByID(did, TIMEOUT, new NsdServiceInfoUtils.IPositivelyNsdServiceInfoFetchListener() {
+            @Override
+            public void onTimeout(String deviceID, long timeout) {
+                appendLog("fetch nsd timeout after: " + timeout);
+            }
+
+            @Override
+            public void onFetched(ServiceInfo serviceInfo) {
+                appendLog("got nsd service info: " + serviceInfo.toString());
+            }
+        });
 
 
     }

@@ -75,7 +75,7 @@ public class PeerTryConnectActivity extends AppCompatActivity {
 
             @Override
             public void onFetched(ServiceInfo serviceInfo) {
-                appendLog("got nsd service info: " + serviceInfo.toString());
+                appendLog("got nsd service info: name: " + serviceInfo.getName() + ", text: " + serviceInfo.getTextString());
             }
         });
     }

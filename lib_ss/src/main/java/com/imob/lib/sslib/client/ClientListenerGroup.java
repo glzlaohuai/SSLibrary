@@ -33,6 +33,14 @@ public class ClientListenerGroup implements ClientListener {
             listener.onClientDestroyed(clientNode);
         }
     }
+    @Override
+    public void onClientCreating(ClientNode clientNode) {
+        for (ClientListener listener : queue) {
+            listener.onClientCreating(clientNode);
+        }
+    }
+
+
 
     @Override
     public void onClientCreated(ClientNode clientNode) {

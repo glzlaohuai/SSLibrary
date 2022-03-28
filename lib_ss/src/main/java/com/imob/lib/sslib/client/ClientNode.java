@@ -59,6 +59,7 @@ public class ClientNode implements INode {
      * @param timeout pass a positive number to take effect
      */
     public synchronized void create(final long timeout) {
+        listener.onClientCreating(this);
         if (ip == null || ip.equals("") || port <= 0) {
             listener.onClientCreateFailed(this, ERROR_INVALID_PARAMETERS, null);
         } else {

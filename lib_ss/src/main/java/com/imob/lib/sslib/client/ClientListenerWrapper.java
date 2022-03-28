@@ -28,6 +28,14 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
+    public void onClientCreating(ClientNode clientNode) {
+        base.onClientCreating(clientNode);
+        if (printLog) {
+            Logger.i(TAG, "onClientCreating, clientNode: " + clientNode.getTag());
+        }
+    }
+
+    @Override
     public void onClientCreated(ClientNode clientNode) {
         base.onClientCreated(clientNode);
         if (printLog) {

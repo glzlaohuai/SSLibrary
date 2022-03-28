@@ -6,7 +6,8 @@ import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.imob.lib.sslib.peer.Peer;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class PeerUtils {
@@ -26,14 +27,14 @@ public class PeerUtils {
         return deviceEntity == null ? null : deviceEntity.getId();
     }
 
-    public static Set<String> generateDeviceIDSetFromPeerTagSet(Set<String> tagSet) {
+    public static Map<String, String> generateDeviceIDMapByTagSet(Set<String> tagSet) {
         if (tagSet == null) return null;
-        Set<String> idSet = new HashSet<>();
+        Map<String, String> idMap = new HashMap<>();
         for (String tag : tagSet) {
             String id = getDeviceIDFromPeerTag(tag);
-            idSet.add(id);
+            idMap.put(id, tag);
         }
-        return idSet;
+        return idMap;
     }
 
     public static String getPlatformFromPeer(Peer peer) {

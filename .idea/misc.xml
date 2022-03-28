@@ -4,7 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.36041666666666666" />
-        <entry key="app/src/main/res/layout/item_device_connected.xml" value="0.165" />
+        <entry key="app/src/main/res/layout/item_device_connected.xml" value="0.1" />
         <entry key="app/src/main/res/layout/item_device_notconnected.xml" value="0.322463768115942" />
         <entry key="app/src/main/res/layout/item_msg.xml" value="0.32155797101449274" />
         <entry key="app/src/main/res/layout/main.xml" value="0.2921195652173913" />

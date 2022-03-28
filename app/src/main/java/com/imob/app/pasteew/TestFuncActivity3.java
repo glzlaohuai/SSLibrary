@@ -41,6 +41,7 @@ import com.imob.lib.sslib.server.ServerNode;
 
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -57,6 +58,8 @@ import androidx.appcompat.app.AppCompatActivity;
 public class TestFuncActivity3 extends AppCompatActivity {
 
     private static final int SELECT_FILE_REQUEST_CODE = 0xff;
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
     private LinearLayout connectedDevicesLayout;
     private ListView msgListView;
@@ -154,20 +157,22 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 LayoutInflater inflater = LayoutInflater.from(TestFuncActivity3.this);
                 connectedDevicesLayout.removeAllViews();
                 Set<String> connectedPeersTagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
-                Set<String> idSet = PeerUtils.generateDeviceIDSetFromPeerTagSet(connectedPeersTagSet);
+                Map<String, String> id_tagMap = PeerUtils.generateDeviceIDMapByTagSet(connectedPeersTagSet);
 
                 List<IDeviceInfoManager.DeviceInfo> allEverDiscoveredDevices = Collections.unmodifiableList(TestFuncActivity3.this.allEverDiscoveredDevices);
 
                 for (IDeviceInfoManager.DeviceInfo deviceInfo : allEverDiscoveredDevices) {
                     View deviceInfoView;
+                    boolean connected = false;
+
                     //connected
-                    if (idSet.contains(deviceInfo.getId())) {
+                    if (id_tagMap.keySet().contains(deviceInfo.getId())) {
                         deviceInfoView = inflater.inflate(R.layout.item_device_connected, null);
                         deviceInfoView.setOnClickListener(null);
+                        connected = true;
                     } else {
                         //not connected
                         deviceInfoView = inflater.inflate(R.layout.item_device_notconnected, null);
-
                         deviceInfoView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -179,13 +184,19 @@ public class TestFuncActivity3 extends AppCompatActivity {
                     TextView idView = deviceInfoView.findViewById(R.id.id);
                     TextView nameView = deviceInfoView.findViewById(R.id.name);
                     TextView platformView = deviceInfoView.findViewById(R.id.platform);
+                    TextView timeView = deviceInfoView.findViewById(R.id.connectTime);
 
                     idView.setText(deviceInfo.getId());
                     nameView.setText(deviceInfo.getName());
                     platformView.setText(deviceInfo.getPlatform());
-
+                    if (connected) {
+                        String tag = id_tagMap.get(deviceInfo.getId());
+                        Peer peer = ConnectedPeersManager.getConnectedPeerByTag(tag);
+                        if (peer != null) {
+                            timeView.setText("" + DATE_FORMAT.format(new Date(peer.getConnectionEstablishedTime())));
+                        }
+                    }
                     connectedDevicesLayout.addView(deviceInfoView);
-
                 }
             }
         });

@@ -75,6 +75,8 @@ public class Peer {
     private String logTag;
     private long timeout;
 
+    private long connectionEstablishedTime;
+
     private PingCheckTask pingCheckTask = new PingCheckTask(this);
 
     private UnconfirmedSendedChunkManager unconfirmedSendedChunkManager = new UnconfirmedSendedChunkManager();
@@ -217,6 +219,8 @@ public class Peer {
                     dis = new DataInputStream(socket.getInputStream());
                     dos = new DataOutputStream(socket.getOutputStream());
 
+                    connectionEstablishedTime = System.currentTimeMillis();
+
                     listener.onIOStreamOpened(Peer.this);
 
                     startMonitorIncomingMsg();
@@ -231,6 +235,10 @@ public class Peer {
                 }
             }
         });
+    }
+
+    public long getConnectionEstablishedTime() {
+        return connectionEstablishedTime;
     }
 
     public void destroy(String reason, Exception e) {

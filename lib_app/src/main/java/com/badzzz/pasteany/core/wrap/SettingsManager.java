@@ -54,7 +54,6 @@ public class SettingsManager {
         NsdServiceStarter.stuffAfterServiceNameSetted();
     }
 
-
     public boolean hasSavedDeviceID() {
         return getDeviceID() != null && !getDeviceID().isEmpty();
     }
@@ -63,13 +62,21 @@ public class SettingsManager {
         return getDeviceName() != null && !getDeviceName().isEmpty();
     }
 
-
     public boolean hasSavedServiceName() {
         return getServiceName() != null && !getServiceName().isEmpty();
     }
 
     public boolean isPingCheckEnabled() {
-        return manager.getBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, false);
+        return manager.getBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, false) && getPingCheckInterval() > 0;
+    }
+
+    public long getPingCheckInterval() {
+        return manager.getLong(Constants.Preference.KEY_PING_CHECK_INTERVAL, -1);
+    }
+
+    public void setPingCheckEnabled(boolean enabled, long time) {
+        manager.saveBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, enabled);
+        manager.saveLong(Constants.Preference.KEY_PING_CHECK_INTERVAL, time);
     }
 
 

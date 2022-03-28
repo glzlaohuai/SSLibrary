@@ -42,6 +42,9 @@ public class XApplication extends Application {
             SettingsManager.getInstance().saveDeviceName(Build.BRAND + "#" + Build.DEVICE.toString());
         }
         androidPlatformManager.initPlatform();
+        if (SettingsManager.getInstance().isPingCheckEnabled()) {
+            ConnectedPeersManager.enablePingCheck(SettingsManager.getInstance().getPingCheckInterval());
+        }
 
         //just for test, logPrint
         forTest();

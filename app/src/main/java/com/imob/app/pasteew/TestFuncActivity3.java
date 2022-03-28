@@ -28,6 +28,7 @@ import com.badzzz.pasteany.core.nsd.peer.ConnectedPeersManager;
 import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
@@ -370,6 +371,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
+        ((CheckBox) findViewById(R.id.pingCheckbox)).setChecked(SettingsManager.getInstance().isPingCheckEnabled());
         ((CheckBox) findViewById(R.id.pingCheckbox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {

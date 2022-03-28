@@ -67,6 +67,10 @@ public class ConnectedPeersManager {
     };
 
     public final static void enablePingCheck(long delay) {
+        if (delay < 0) {
+            throw new IllegalArgumentException("ping check interval must be a positive number");
+        }
+        SettingsManager.getInstance().setPingCheckEnabled(true, delay);
         isPingCheckEnabled = true;
         pingCheckInterval = delay;
         Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
@@ -81,6 +85,7 @@ public class ConnectedPeersManager {
     }
 
     public final static void disablePingCheck() {
+        SettingsManager.getInstance().setPingCheckEnabled(false, -1);
         Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
         for (String key : connectedPeers.keySet()) {
             Set<Peer> peers = connectedPeers.get(key);

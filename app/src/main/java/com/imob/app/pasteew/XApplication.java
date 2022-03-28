@@ -43,7 +43,7 @@ public class XApplication extends Application {
         }
         androidPlatformManager.initPlatform();
         if (SettingsManager.getInstance().isPingCheckEnabled()) {
-            ConnectedPeersManager.enablePingCheck(SettingsManager.getInstance().getPingCheckInterval());
+            ConnectedPeersManager.enablePingCheck();
         }
 
         //just for test, logPrint

@@ -47,7 +47,6 @@ public class Constants {
         public static final String KEY_SERVICE_NAME = NSD.Key.SERVICE_NAME;
 
         public static final String KEY_PING_CHECK_ENABLED = "ping_check_enabled";
-        public static final String KEY_PING_CHECK_INTERVAL = "ping_check_interval";
 
         public static final String KEY_USE_LAST_KNOWN_NSD_INFO = "use_last_known_nsd_info";
         public static final String KEY_LAST_KNOWN_NSD_INFO_PREFIX = "discovered_nsd_";

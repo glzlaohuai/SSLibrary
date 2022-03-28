@@ -29,7 +29,6 @@ import com.badzzz.pasteany.core.utils.Constants;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
 import com.badzzz.pasteany.core.wrap.SettingsManager;
-import com.imob.app.pasteew.utils.DialogUtils;
 import com.imob.app.pasteew.utils.FileUtils;
 import com.imob.lib.lib_common.Closer;
 import com.imob.lib.net.nsd.NsdEventListener;
@@ -375,7 +374,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    promptPingCheckTime(buttonView);
+                    ConnectedPeersManager.enablePingCheck();
                 } else {
                     ConnectedPeersManager.disablePingCheck();
                 }
@@ -399,25 +398,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         monitorServerNodeState();
         monitorNsdNodeState();
-    }
-
-    private void promptPingCheckTime(CompoundButton buttonView) {
-        DialogUtils.createInputDialog(this, "check time(s)", new DialogUtils.OnDialogInputListener() {
-            @Override
-            public void onInputContent(String content) {
-                try {
-                    int time = Integer.parseInt(content);
-                    if (time > 0) {
-                        ConnectedPeersManager.enablePingCheck(time * 1000);
-                    } else {
-                        buttonView.setChecked(false);
-                    }
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                    buttonView.setChecked(false);
-                }
-            }
-        });
     }
 
     private void monitorServerNodeState() {

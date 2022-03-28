@@ -38,7 +38,6 @@ public class ConnectedPeersManager {
     private static ConnectedPeerEventListenerGroup monitoredListeners = new ConnectedPeerEventListenerGroup();
 
     private static boolean isPingCheckEnabled = false;
-    private static long pingCheckInterval = 0;
 
     private final static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
     private final static PeerListener peerMapManagerListener = new PeerListenerAdapter() {
@@ -54,7 +53,7 @@ public class ConnectedPeersManager {
             afterPeerIncoming(peer);
 
             if (isPingCheckEnabled) {
-                peer.enableActivePingCheck(pingCheckInterval);
+                peer.enableActivePingCheck(Constants.Others.TIMEOUT);
             }
         }
 
@@ -66,26 +65,22 @@ public class ConnectedPeersManager {
         }
     };
 
-    public final static void enablePingCheck(long delay) {
-        if (delay < 0) {
-            throw new IllegalArgumentException("ping check interval must be a positive number");
-        }
-        SettingsManager.getInstance().setPingCheckEnabled(true, delay);
+    public final static void enablePingCheck() {
+        SettingsManager.getInstance().setPingCheckEnabled(true);
         isPingCheckEnabled = true;
-        pingCheckInterval = delay;
         Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
         for (String key : connectedPeers.keySet()) {
             Set<Peer> peers = connectedPeers.get(key);
             for (Peer peer : peers) {
                 if (!peer.isDestroyed()) {
-                    peer.enableActivePingCheck(delay);
+                    peer.enableActivePingCheck(Constants.Others.TIMEOUT);
                 }
             }
         }
     }
 
     public final static void disablePingCheck() {
-        SettingsManager.getInstance().setPingCheckEnabled(false, -1);
+        SettingsManager.getInstance().setPingCheckEnabled(false);
         Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
         for (String key : connectedPeers.keySet()) {
             Set<Peer> peers = connectedPeers.get(key);

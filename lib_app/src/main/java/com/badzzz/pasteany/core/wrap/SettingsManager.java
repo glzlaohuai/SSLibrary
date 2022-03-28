@@ -72,16 +72,11 @@ public class SettingsManager {
     }
 
     public boolean isPingCheckEnabled() {
-        return manager.getBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, false) && getPingCheckInterval() > 0;
+        return manager.getBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, false);
     }
 
-    public long getPingCheckInterval() {
-        return manager.getLong(Constants.Preference.KEY_PING_CHECK_INTERVAL, -1);
-    }
-
-    public void setPingCheckEnabled(boolean enabled, long time) {
+    public void setPingCheckEnabled(boolean enabled) {
         manager.saveBoolean(Constants.Preference.KEY_PING_CHECK_ENABLED, enabled);
-        manager.saveLong(Constants.Preference.KEY_PING_CHECK_INTERVAL, time);
     }
 
     public boolean useLastKnownNsdInfo() {

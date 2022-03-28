@@ -7,6 +7,7 @@ import com.imob.lib.sslib.msg.Chunk;
 import com.imob.lib.sslib.msg.ConfirmMsg;
 import com.imob.lib.sslib.msg.Msg;
 import com.imob.lib.sslib.msg.MsgQueue;
+import com.imob.lib.sslib.msg.PingMsg;
 import com.imob.lib.sslib.utils.PingCheckTask;
 import com.imob.lib.sslib.utils.SSThreadFactory;
 
@@ -27,6 +28,8 @@ public class Peer {
 
     public static final int CHUNK_BYTE_LEN = 1024 * 512;
 
+    private static final int AVAILABLE_BYTES_FOR_PING_MSG = 1;
+
     private static final String MSG_SEND_ERROR_PEER_IS_DESTROIED = "send failed, peer is already destroied";
     private static final String MSG_SEND_ERROR_NO_AVAILABLE_BYTES_INPUT = "no available bytes found";
     private static final String MSG_SEND_ERROR_READ_CHUNK_FROM_INPUT = "error occured while reading byte chunk from input stream";
@@ -37,6 +40,8 @@ public class Peer {
     private static final String ERROR_MSG_CHUNK_READ_FAILED_EOF = "read msg chunk failed due to peer send error occured, eof";
     private static final String ERROR_MSG_CHUNK_READ_FAILED_CANCELED = "read msg chunk failed due to peer send error occured, canceled";
     private static final String ERROR_MSG_CHUNK_READ_FAILED_IO = "read msg chunk failed due to peer send error occured, io error";
+
+    private Set<String> pingIDSet = new HashSet<>();
 
     private static PeerListenerGroup globalPeerListener = new PeerListenerGroup();
     private static PeerListenerGroup monitoredListener = new PeerListenerGroup();
@@ -411,6 +416,7 @@ public class Peer {
 
 
     private void callbackMsgSendPending(Msg msg) {
+        if (msg instanceof PingMsg) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendPending(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -436,6 +442,7 @@ public class Peer {
     }
 
     private void callbackMsgIntoQueue(Msg msg) {
+        if (msg instanceof PingMsg) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgIntoQueue(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -450,6 +457,7 @@ public class Peer {
 
 
     private void callbackMsgSendStart(Msg msg) {
+        if (msg instanceof PingMsg) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendStart(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -458,6 +466,7 @@ public class Peer {
     }
 
     private void callbackMsgSendSucceeded(Msg msg) {
+        if (msg instanceof PingMsg) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendSucceeded(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -466,6 +475,7 @@ public class Peer {
     }
 
     private void callbackMsgSendFailed(Msg msg, String errorMsg, Exception e) {
+        if (msg instanceof PingMsg) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendFailed(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal(), errorMsg, e);
         } else {
@@ -527,7 +537,8 @@ public class Peer {
                 switch (msgType) {
                     case Msg.TYPE_PING:
                         synchronized (timeoutLock) {
-                            addItemToChunkSendingTime(msg.getId(), 1);
+                            addItemToChunkSendingTime(msg.getId(), AVAILABLE_BYTES_FOR_PING_MSG);
+                            pingIDSet.add(msg.getId());
                             timeoutLock.notifyAll();
                         }
                         break;
@@ -683,8 +694,13 @@ public class Peer {
                                     throwIOException("got unexpected confirm soFar or total value from peer, connection corrupted.");
                                 }
 
-                                listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
+                                if (!pingIDSet.contains(id)) {
+                                    //只有非ping的msg，才会对外回调incomingConfirmMsg
+                                    listener.onIncomingConfirmMsg(Peer.this, id, soFar, total);
+                                }
+                                pingIDSet.remove(id);
                                 unconfirmedSendedChunkManager.afterConfirmMsgIncome(id, soFar);
+
                                 synchronized (timeoutLock) {
                                     removeItemFromChunkSendingTime(id, soFar);
                                     timeoutLock.notify();
@@ -692,7 +708,7 @@ public class Peer {
                                 break;
                             case Msg.TYPE_PING:
                                 //just simply send a confirm msg to peer
-                                sendMessage(ConfirmMsg.build(id, 1, 1));
+                                sendMessage(ConfirmMsg.build(id, AVAILABLE_BYTES_FOR_PING_MSG, AVAILABLE_BYTES_FOR_PING_MSG));
                                 break;
                             default:
                                 throwIOException("got a unexpected msg type from peer, connection corrupted.");

@@ -53,13 +53,26 @@
 
     </LinearLayout>
 
-
-    <CheckBox
-        android:id="@+id/pingCheckbox"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="false"
-        android:text="ping check" />
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/pingCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="ping check" />
+
+        <CheckBox
+            android:id="@+id/useLastKnownNsdInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="use last known nsd info" />
+
+    </LinearLayout>
 
 
     <HorizontalScrollView

@@ -79,5 +79,20 @@ public class SettingsManager {
         manager.saveLong(Constants.Preference.KEY_PING_CHECK_INTERVAL, time);
     }
 
+    public boolean useLastKnownNsdInfo() {
+        return manager.getBoolean(Constants.Preference.KEY_USE_LAST_KNOWN_NSD_INFO, false);
+    }
+
+    public void setUseLastKnownNsdInfo(boolean shouldUseLastKnownInfo) {
+        manager.saveBoolean(Constants.Preference.KEY_USE_LAST_KNOWN_NSD_INFO, shouldUseLastKnownInfo);
+    }
+
+    public void saveRecentlyDiscoveredNsdInfo(String did, String detail) {
+        manager.saveString(Constants.Preference.KEY_LAST_KNOWN_NSD_INFO_PREFIX + did, detail);
+    }
+
+    public String getRecentlyDiscoveredNsdInfo(String did) {
+        return manager.getString(Constants.Preference.KEY_LAST_KNOWN_NSD_INFO_PREFIX + did, "");
+    }
 
 }

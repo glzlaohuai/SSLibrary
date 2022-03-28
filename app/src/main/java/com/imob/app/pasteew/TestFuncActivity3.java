@@ -367,7 +367,6 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 intent.setType("*/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent, SELECT_FILE_REQUEST_CODE);
-
             }
         });
 
@@ -380,6 +379,14 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 } else {
                     ConnectedPeersManager.disablePingCheck();
                 }
+            }
+        });
+
+        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setChecked(SettingsManager.getInstance().useLastKnownNsdInfo());
+        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SettingsManager.getInstance().setUseLastKnownNsdInfo(isChecked);
             }
         });
 

@@ -10,8 +10,6 @@ import com.badzzz.pasteany.core.utils.NsdServiceInfoUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.jmdns.ServiceInfo;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -74,9 +72,10 @@ public class PeerTryConnectActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFetched(ServiceInfo serviceInfo) {
-                appendLog("got nsd service info: name: " + serviceInfo.getName() + ", text: " + serviceInfo.getTextString());
+            public void onFetched(String did, String ip, int port) {
+                appendLog("got device info: ip: " + ip + ", port: " + port);
             }
+
         });
     }
 

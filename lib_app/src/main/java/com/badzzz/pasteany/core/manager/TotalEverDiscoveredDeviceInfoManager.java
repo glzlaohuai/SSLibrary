@@ -7,6 +7,7 @@ import com.badzzz.pasteany.core.utils.NsdServiceInfoUtils;
 import com.badzzz.pasteany.core.utils.PeerUtils;
 import com.badzzz.pasteany.core.wrap.DBManagerWrapper;
 import com.badzzz.pasteany.core.wrap.PlatformManagerHolder;
+import com.badzzz.pasteany.core.wrap.SettingsManager;
 import com.imob.lib.lib_common.Logger;
 import com.imob.lib.net.nsd.NsdEventListener;
 import com.imob.lib.net.nsd.NsdEventListenerAdapter;
@@ -33,6 +34,7 @@ public class TotalEverDiscoveredDeviceInfoManager {
         @Override
         public void onServiceDiscovered(NsdNode nsdNode, ServiceInfo event) {
             super.onServiceDiscovered(nsdNode, event);
+            saveDiscoveredNsdInfo(event);
             afterNsdServiceDiscovered(event);
         }
     };
@@ -116,8 +118,16 @@ public class TotalEverDiscoveredDeviceInfoManager {
         return fetched;
     }
 
-    public final static void afterNsdServiceDiscovered(ServiceInfo event) {
+    private final static void saveDiscoveredNsdInfo(ServiceInfo event) {
+        if (event != null && event.getInet4Address() != null && event.getInet4Address().getHostAddress() != null && event.getPort() > 0) {
+            String did = NsdServiceInfoUtils.getDeviceIDFromServiceInfo(event);
+            if (did != null) {
+                SettingsManager.getInstance().saveRecentlyDiscoveredNsdInfo(did, event.getInetAddress().getHostAddress(), event.getPort());
+            }
+        }
+    }
 
+    public final static void afterNsdServiceDiscovered(ServiceInfo event) {
         IDeviceInfoManager.DeviceInfo deviceInfo = NsdServiceInfoUtils.buildFromServiceInfo(event);
 
         if (deviceInfo != null) {

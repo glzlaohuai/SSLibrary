@@ -192,11 +192,11 @@ public class Peer {
     }
 
 
-    public synchronized void registerListener(PeerListener peerListener) {
+    public void registerListener(PeerListener peerListener) {
         this.listener.add(peerListener);
     }
 
-    public synchronized void unregisterListener(PeerListener peerListener) {
+    public void unregisterListener(PeerListener peerListener) {
         this.listener.remove(peerListener);
     }
 
@@ -486,7 +486,6 @@ public class Peer {
     private void addItemToChunkSendingTime(String id, int soFar) {
         Logger.i(logTag, "add chunk send time to map: " + id + ", " + soFar);
         chunkSendingTime.put(id + " # " + soFar, System.currentTimeMillis());
-
     }
 
     private void removeItemFromChunkSendingTime(String id, int soFar) {
@@ -526,6 +525,12 @@ public class Peer {
                 dos.writeInt(msg.getMsgType());
 
                 switch (msgType) {
+                    case Msg.TYPE_PING:
+                        synchronized (timeoutLock) {
+                            addItemToChunkSendingTime(msg.getId(), 1);
+                            timeoutLock.notifyAll();
+                        }
+                        break;
                     case Msg.TYPE_NORMAL:
                         dos.writeInt(available);
 
@@ -685,7 +690,10 @@ public class Peer {
                                     timeoutLock.notify();
                                 }
                                 break;
-
+                            case Msg.TYPE_PING:
+                                //just simply send a confirm msg to peer
+                                sendMessage(ConfirmMsg.build(id, 1, 1));
+                                break;
                             default:
                                 throwIOException("got a unexpected msg type from peer, connection corrupted.");
                                 break;

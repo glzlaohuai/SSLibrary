@@ -24,7 +24,7 @@ public class NsdServiceInfoUtils {
     public interface IPositivelyNsdServiceInfoFetchListener {
         void onTimeout(String deviceID, long timeout);
 
-        void onFetched(ServiceInfo serviceInfo);
+        void onFetched(String did, String ip, int port);
     }
 
     public final static IDeviceInfoManager.DeviceInfo buildFromServiceInfo(ServiceInfo serviceInfo) {
@@ -86,12 +86,16 @@ public class NsdServiceInfoUtils {
                 super.onServiceDiscovered(nsdNode, event);
                 if (event != null) {
                     String gotID = getDeviceIDFromServiceInfo(event);
-
-                    if (gotID != null && gotID.equals(id) && callbacked.compareAndSet(false, true)) {
-                        listener.onFetched(event);
+                    int port = event.getPort();
+                    String ip = null;
+                    if (event.getInet4Address() != null) {
+                        ip = event.getInetAddress().getHostAddress();
+                    }
+                    if (gotID != null && gotID.equals(id) && ip != null && port > 0 && callbacked.compareAndSet(false, true)) {
+                        listener.onFetched(gotID, ip, port);
                         timer.cancel();
-                        NsdNode.unmonitorListener(this);
 
+                        NsdNode.unmonitorListener(this);
                         Logger.i(TAG, "discovered service info: " + event.getName() + ", " + event.getTextString());
                     }
                 }
@@ -102,7 +106,26 @@ public class NsdServiceInfoUtils {
             @Override
             public void run() {
                 if (callbacked.compareAndSet(false, true)) {
-                    listener.onTimeout(id, timeout);
+                    boolean lastKnownNsdUsed = false;
+                    if (SettingsManager.getInstance().useLastKnownNsdInfo()) {
+                        String lastKnownNsdInfo = SettingsManager.getInstance().getRecentlyDiscoveredNsdInfo(id);
+                        try {
+                            JSONObject jsonObject = new JSONObject(lastKnownNsdInfo);
+
+                            String ip = jsonObject.getString(Constants.Preference.KEY_IP);
+                            int port = jsonObject.getInt(Constants.Preference.KEY_PORT);
+                            Logger.i(TAG, "got last discovered nsd info from settings: " + ip + ", " + port);
+
+                            lastKnownNsdUsed = true;
+                            listener.onFetched(id, ip, port);
+                        } catch (Throwable e) {
+                            Logger.e(TAG, "no last known nsd info found for did: " + id, e);
+                        }
+                    }
+
+                    if (!lastKnownNsdUsed) {
+                        listener.onTimeout(id, timeout);
+                    }
                 }
                 NsdNode.unmonitorListener(listenerAdapter);
             }

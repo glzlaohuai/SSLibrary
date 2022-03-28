@@ -51,6 +51,9 @@ public class Constants {
 
         public static final String KEY_USE_LAST_KNOWN_NSD_INFO = "use_last_known_nsd_info";
         public static final String KEY_LAST_KNOWN_NSD_INFO_PREFIX = "discovered_nsd_";
+
+        public static final String KEY_IP = "ip";
+        public static final String KEY_PORT = "port";
     }
 
     public static final class Device {

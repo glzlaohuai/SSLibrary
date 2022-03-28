@@ -3,12 +3,17 @@ package com.badzzz.pasteany.core.wrap;
 import com.badzzz.pasteany.core.interfaces.IPreferenceManager;
 import com.badzzz.pasteany.core.nsd.NsdServiceStarter;
 import com.badzzz.pasteany.core.utils.Constants;
+import com.imob.lib.lib_common.Logger;
+
+import org.json.JSONObject;
 
 
 /**
  * basically a wrapper class of {@link IPreferenceManager}
  */
 public class SettingsManager {
+    private static final String TAG = "SettingsManager";
+
 
     private static SettingsManager instance = new SettingsManager();
 
@@ -87,8 +92,14 @@ public class SettingsManager {
         manager.saveBoolean(Constants.Preference.KEY_USE_LAST_KNOWN_NSD_INFO, shouldUseLastKnownInfo);
     }
 
-    public void saveRecentlyDiscoveredNsdInfo(String did, String detail) {
-        manager.saveString(Constants.Preference.KEY_LAST_KNOWN_NSD_INFO_PREFIX + did, detail);
+    public void saveRecentlyDiscoveredNsdInfo(String did, String ip, int port) {
+        Logger.i(TAG, "save recently discovered nsd info: " + did + ", " + ip + ", " + port);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Constants.Device.KEY_DEVICEID, did);
+        jsonObject.put(Constants.Preference.KEY_IP, ip);
+        jsonObject.put(Constants.Preference.KEY_PORT, port);
+
+        manager.saveString(Constants.Preference.KEY_LAST_KNOWN_NSD_INFO_PREFIX + did, jsonObject.toString());
     }
 
     public String getRecentlyDiscoveredNsdInfo(String did) {

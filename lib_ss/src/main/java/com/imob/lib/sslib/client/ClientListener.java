@@ -12,5 +12,4 @@ public interface ClientListener extends PeerListener {
 
     void onClientCreateFailed(ClientNode clientNode, String msg, Exception exception);
 
-
 }

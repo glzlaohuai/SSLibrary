@@ -221,7 +221,7 @@ public class TestFunctionActivity extends AppCompatActivity {
     public void destroyServer(View view) {
         ServerNode managedServerNode = ServerManager.getServerNode();
         if (managedServerNode != null) {
-            managedServerNode.destroy();
+            managedServerNode.destroy("destroy by user", null);
         }
     }
 

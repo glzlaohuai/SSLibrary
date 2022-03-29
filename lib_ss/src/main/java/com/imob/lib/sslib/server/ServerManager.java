@@ -24,7 +24,7 @@ public class ServerManager {
 
                     if (serverNode != ServerManager.serverNode && !serverNode.isDestroyed()) {
                         Logger.i(TAG, "onCreated called, but the server node from the callback paramater not equals the holded static instance, and it's not destroyed, something went wrong here.");
-                        serverNode.destroy();
+                        serverNode.destroy("onCreated called, but the server node from the callback paramater not equals the holded static instance, and it's not destroyed, something went wrong here.", null);
                     }
                 }
             }, new PeerListenerWrapper(peerListener, false));
@@ -61,7 +61,7 @@ public class ServerManager {
 
     public static synchronized void destroyServer() {
         if (serverNode != null && serverNode.isInUsing()) {
-            serverNode.destroy();
+            serverNode.destroy("destroyServer called", null);
             serverNode = null;
         }
     }

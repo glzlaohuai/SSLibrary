@@ -38,7 +38,7 @@ public class NsdServiceStarter {
      */
     public final static void stuffAfterServiceNameSetted() {
         if (hasInited) {
-            redoIfSomethingWentWrong();
+            redoIfSomethingWentWrong("service name was set", null);
         } else {
             doInit();
         }
@@ -48,11 +48,11 @@ public class NsdServiceStarter {
         if (!hasInited) {
             hasInited = true;
 
-            NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne();
+            NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne("init", null);
             PlatformManagerHolder.get().getAppManager().getNetworkManager().monitorNetworkChange(new INetworkManager.NetworkChangeListener() {
                 @Override
                 public void onNetworkChanged() {
-                    NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne();
+                    NsdServiceStarter.destroyPreviousNsdServiceHandlerAndCreateANewOne("network changed", null);
                 }
             });
         }
@@ -75,11 +75,11 @@ public class NsdServiceStarter {
         }
     }
 
-    public final static void redoIfSomethingWentWrong() {
-        destroyPreviousNsdServiceHandlerAndCreateANewOne();
+    public final static void redoIfSomethingWentWrong(String reason, Exception e) {
+        destroyPreviousNsdServiceHandlerAndCreateANewOne(reason, e);
     }
 
-    private final static synchronized void destroyPreviousNsdServiceHandlerAndCreateANewOne() {
+    private final static synchronized void destroyPreviousNsdServiceHandlerAndCreateANewOne(String reason, Exception e) {
         if (nsdServiceHandler == null) {
             createNsdServiceHandlerIfEnvironmentAvailable();
         } else {
@@ -90,7 +90,7 @@ public class NsdServiceStarter {
                         nsdServiceHandler = null;
                         createNsdServiceHandlerIfEnvironmentAvailable();
                     }
-                });
+                }, reason, e);
             }
         }
     }

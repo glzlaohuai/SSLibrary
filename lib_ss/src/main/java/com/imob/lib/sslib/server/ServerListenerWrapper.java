@@ -28,24 +28,21 @@ public class ServerListenerWrapper implements ServerListener {
     }
 
     @Override
-    public void onCreateFailed(Exception exception) {
+    public void onCreateFailed(ServerNode serverNode, Exception exception) {
         if (printLog) {
-            Logger.i(TAG, "onCreateFailed, " + exception);
-
+            Logger.i(TAG, "onCreateFailed, serverNode: " + serverNode + ", exception: " + exception);
         }
-
-        base.onCreateFailed(exception);
+        base.onCreateFailed(serverNode, exception);
     }
 
     @Override
-    public void onDestroyed(ServerNode serverNode) {
+    public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
         if (printLog) {
-            Logger.i(TAG, "onDestroyed, serverNode: " + serverNode);
-
+            Logger.i(TAG, "onDestroyed, serverNode: " + serverNode + ", reason: " + reason + ", exception: " + e);
         }
-
-        base.onDestroyed(serverNode);
+        base.onDestroyed(serverNode, reason, e);
     }
+
 
     @Override
     public void onCorrupted(ServerNode serverNode, String msg, Exception e) {

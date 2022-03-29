@@ -33,16 +33,16 @@ public class ServerListenerGroup implements ServerListener {
     }
 
     @Override
-    public void onCreateFailed(Exception exception) {
+    public void onCreateFailed(ServerNode serverNode, Exception exception) {
         for (ServerListener listener : queue) {
-            listener.onCreateFailed(exception);
+            listener.onCreateFailed(serverNode, exception);
         }
     }
 
     @Override
-    public void onDestroyed(ServerNode serverNode) {
+    public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
         for (ServerListener listener : queue) {
-            listener.onDestroyed(serverNode);
+            listener.onDestroyed(serverNode, reason, e);
         }
     }
 

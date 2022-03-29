@@ -64,8 +64,8 @@ public class ServerNode implements INode {
             }
 
             @Override
-            public void onDestroyed(ServerNode serverNode) {
-                super.onDestroyed(serverNode);
+            public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
+                super.onDestroyed(serverNode, reason, e);
                 activeServerNode.compareAndSet(serverNode, null);
             }
         });
@@ -139,7 +139,7 @@ public class ServerNode implements INode {
 
             } catch (IOException e) {
                 Logger.e(e);
-                serverListenerGroup.onCreateFailed(e);
+                serverListenerGroup.onCreateFailed(this, e);
             } finally {
                 isCreating = false;
             }
@@ -168,7 +168,7 @@ public class ServerNode implements INode {
     }
 
 
-    private void handleDestroy() {
+    private void handleDestroy(final String reason, final Exception e) {
         createExecutorService.execute(new Runnable() {
             @Override
             public void run() {
@@ -177,17 +177,17 @@ public class ServerNode implements INode {
                         isDestroyed = true;
                         Logger.i(tag, "do destroy stuff");
                         doDestroyStuff();
-                        callbackDestroyed();
+                        callbackDestroyed(reason, e);
                     }
                 }
             }
         });
     }
 
-    public void destroy() {
+    public void destroy(String reason, Exception e) {
         if (!isDestroyed) {
-            Logger.i(tag, "destroy called");
-            handleDestroy();
+            Logger.i(tag, "destroy called, reason: " + reason + " , exception: " + e);
+            handleDestroy(reason, e);
         }
     }
 
@@ -199,9 +199,9 @@ public class ServerNode implements INode {
     }
 
 
-    private void callbackDestroyed() {
+    private void callbackDestroyed(String reason, Exception e) {
         if (!isDestroyedCallbacked) {
-            serverListenerGroup.onDestroyed(this);
+            serverListenerGroup.onDestroyed(this, reason, e);
         }
     }
 
@@ -224,7 +224,7 @@ public class ServerNode implements INode {
             }
         } catch (IOException e) {
             Logger.e(e);
-            destroy();
+            destroy("server socket connection corrupted", e);
             callbackCorrupted("server socket connection corrupted due to error occured while monitoring incoming clients", e);
         }
     }

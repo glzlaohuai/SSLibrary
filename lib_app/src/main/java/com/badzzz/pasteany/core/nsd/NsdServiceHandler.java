@@ -53,21 +53,21 @@ public class NsdServiceHandler {
             }
 
             @Override
-            public void onCreateFailed(Exception exception) {
-                super.onCreateFailed(exception);
-                triggerNsdServiceStarterRedoStuff();
+            public void onCreateFailed(ServerNode serverNode, Exception exception) {
+                super.onCreateFailed(serverNode, exception);
+                triggerNsdServiceStarterRedoStuff("server node create failed", exception);
             }
 
             @Override
-            public void onDestroyed(ServerNode serverNode) {
-                super.onDestroyed(serverNode);
-                triggerNsdServiceStarterRedoStuff();
+            public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
+                super.onDestroyed(serverNode, reason, e);
+                triggerNsdServiceStarterRedoStuff("server node destroyed with reason: " + reason, e);
             }
 
-            void triggerNsdServiceStarterRedoStuff() {
-                Logger.i(tag, "trigger nsd service start redo stuff");
+            void triggerNsdServiceStarterRedoStuff(String reason, Exception e) {
+                Logger.i(tag, "trigger nsd service start redo stuff, reason: " + reason + ", e: " + e);
                 serverNode.unmonitorServerStatus(this);
-                NsdServiceStarter.redoIfSomethingWentWrong();
+                NsdServiceStarter.redoIfSomethingWentWrong(reason, e);
             }
         }, true), new PeerListenerWrapper(new PeerListenerAdapter(), true));
         serverNode.create(Constants.Others.TIMEOUT);
@@ -87,7 +87,7 @@ public class NsdServiceHandler {
                 @Override
                 public void onCreateFailed(String msg, Exception e) {
                     //something went wrong, redo it
-                    NsdServiceStarter.redoIfSomethingWentWrong();
+                    NsdServiceStarter.redoIfSomethingWentWrong("nsd node create failed, msg: " + msg, e);
                 }
 
 
@@ -102,10 +102,10 @@ public class NsdServiceHandler {
     }
 
 
-    public synchronized void destroy(INsdServiceHandlerDestroyListener listener) {
+    public synchronized void destroy(INsdServiceHandlerDestroyListener listener, String reason, Exception e) {
         if (!isDestroyCalled) {
             isDestroyCalled = true;
-            doDestroy(listener);
+            doDestroy(listener, reason, e);
         }
     }
 
@@ -120,16 +120,16 @@ public class NsdServiceHandler {
         ConnectedClientsManager.destroyRelatedConnectedPeerHolder(this);
     }
 
-    private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener) {
+    private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener, String reason, Exception e) {
         if (serverNode != null && !serverNode.isDestroyed()) {
             serverNode.monitorServerStatus(new ServerListenerAdapter() {
                 @Override
-                public void onDestroyed(ServerNode serverNode) {
-                    super.onDestroyed(serverNode);
+                public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
+                    super.onDestroyed(serverNode, reason, e);
                     doStuffAfterHandlerBeDestroyed(listener);
                 }
             });
-            serverNode.destroy();
+            serverNode.destroy(reason, e);
             if (nsdNode != null) {
                 nsdNode.destroy();
             }

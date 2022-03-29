@@ -89,13 +89,12 @@ public class TestFuncActivity3 extends AppCompatActivity {
         @Override
         public void onCreated(ServerNode serverNode) {
             super.onCreated(serverNode);
-
             updateServerNodeInfo(serverNode);
         }
 
         @Override
-        public void onDestroyed(ServerNode serverNode) {
-            super.onDestroyed(serverNode);
+        public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
+            super.onDestroyed(serverNode, reason, e);
             updateServerNodeInfo(serverNode);
         }
     };
@@ -502,10 +501,9 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 Closer.close(inputStream);
             }
         }
-
     }
 
     public void redo(View view) {
-        NsdServiceStarter.redoIfSomethingWentWrong();
+        NsdServiceStarter.redoIfSomethingWentWrong("redo called by user", null);
     }
 }

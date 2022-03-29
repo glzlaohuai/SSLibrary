@@ -9,12 +9,12 @@ public class ServerListenerAdapter implements ServerListener {
     }
 
     @Override
-    public void onCreateFailed(Exception exception) {
+    public void onCreateFailed(ServerNode serverNode, Exception exception) {
 
     }
 
     @Override
-    public void onDestroyed(ServerNode serverNode) {
+    public void onDestroyed(ServerNode serverNode, String reason, Exception e) {
 
     }
 

@@ -26,7 +26,7 @@
             android:id="@+id/server_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="none"
+            android:text="..."
             android:textSize="13sp"
             android:textStyle="bold" />
 
@@ -47,7 +47,7 @@
             android:id="@+id/nsd_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="none"
+            android:text="..."
             android:textSize="13sp"
             android:textStyle="bold" />
 

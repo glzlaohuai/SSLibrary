@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -46,9 +47,28 @@ public class NsdNode {
 
     private String tag;
 
+    private static AtomicReference<NsdNode> activeNsdNodeRef = new AtomicReference<>();
+    private static String activeRegisterServiceText = null;
+
     static {
         routerListenerGroup.add(globalListenerGroup);
         routerListenerGroup.add(monitorListenerGroup);
+
+        routerListenerGroup.add(new NsdEventListenerAdapter() {
+            @Override
+            public void onDestroyed(NsdNode nsdNode) {
+                super.onDestroyed(nsdNode);
+                NsdNode.activeNsdNodeRef.compareAndSet(nsdNode, null);
+            }
+
+            @Override
+            public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
+                super.onSuccessfullyRegisterService(nsdNode, type, name, text, port);
+
+                NsdNode.activeNsdNodeRef.set(nsdNode);
+                NsdNode.activeRegisterServiceText = text;
+            }
+        });
     }
 
     public NsdNode(INsdExtraActionPerformer performer, InetAddress inetAddress, String hostName, NsdEventListener listener) {
@@ -314,6 +334,14 @@ public class NsdNode {
 
             }
         });
+    }
+
+    public static NsdNode getActiveNsdNode() {
+        return activeNsdNodeRef.get();
+    }
+
+    public static String getActiveRegisteredServiceText() {
+        return activeRegisterServiceText;
     }
 
     public boolean isDestroyed() {

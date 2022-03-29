@@ -9,6 +9,11 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     @Override
+    public void onClientCreating(ClientNode clientNode) {
+
+    }
+
+    @Override
     public void onClientCreated(ClientNode clientNode) {
 
     }
@@ -104,7 +109,7 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
 
     }
 

@@ -103,33 +103,24 @@ public class TestFuncActivity3 extends AppCompatActivity {
         @Override
         public void onDestroyed(NsdNode nsdNode) {
             super.onDestroyed(nsdNode);
-            updateNsdRegisterInfo(nsdNode, null, null, null, -1);
+            updateNsdRegisterInfo(nsdNode, null);
         }
 
         @Override
         public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
             super.onSuccessfullyRegisterService(nsdNode, type, name, text, port);
-            updateNsdRegisterInfo(nsdNode, type, name, text, port);
+            updateNsdRegisterInfo(nsdNode, text);
         }
     };
 
-    private void updateNsdRegisterInfo(NsdNode nsdNode, String type, String name, String text, int port) {
+    private void updateNsdRegisterInfo(NsdNode nsdNode, String text) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (nsdNode.isDestroyed()) {
                     nsdInfoView.setText("none");
                 } else {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("type: " + type);
-                    sb.append("\n");
-                    sb.append("name: " + name);
-                    sb.append("\n");
-                    sb.append("text: " + text);
-                    sb.append("\n");
-                    sb.append("port: " + port);
-                    sb.append("\n");
-                    nsdInfoView.setText(sb.toString());
+                    nsdInfoView.setText(text);
                 }
             }
         });
@@ -139,7 +130,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (serverNode.isDestroyed()) {
+                if (serverNode == null || serverNode.isDestroyed()) {
                     serverInfoView.setText("none");
                 } else {
                     ServerSocket serverSocket = serverNode.getServerSocket();
@@ -409,6 +400,9 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         monitorServerNodeState();
         monitorNsdNodeState();
+
+        updateServerNodeInfo(ServerNode.getActiveServerNode());
+        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText());
     }
 
     private void monitorServerNodeState() {

@@ -54,6 +54,7 @@ public class PingCheckTask {
         this.interval = interval;
 
         taskRunner.postDelayed(runnable, interval);
+        Logger.i(TAG, "next check delay: " + interval);
         peer.registerListener(peerListener);
     }
 

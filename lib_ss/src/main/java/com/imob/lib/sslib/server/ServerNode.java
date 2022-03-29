@@ -20,6 +20,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerNode implements INode {
 
@@ -45,6 +46,8 @@ public class ServerNode implements INode {
     private final static ServerListenerGroup monitoredServerListener = new ServerListenerGroup();
     private final static ServerListenerGroup routerServerListener = new ServerListenerGroup();
 
+    private static AtomicReference<ServerNode> activeServerNode = new AtomicReference<>();
+
     private long timeout;
 
     private static final String S_TAG = "ServerNode";
@@ -53,8 +56,20 @@ public class ServerNode implements INode {
     static {
         routerServerListener.add(globalServerListener);
         routerServerListener.add(monitoredServerListener);
-    }
+        routerServerListener.add(new ServerListenerAdapter() {
+            @Override
+            public void onCreated(ServerNode serverNode) {
+                super.onCreated(serverNode);
+                activeServerNode.set(serverNode);
+            }
 
+            @Override
+            public void onDestroyed(ServerNode serverNode) {
+                super.onDestroyed(serverNode);
+                activeServerNode.compareAndSet(serverNode, null);
+            }
+        });
+    }
 
     public ServerNode(ServerListener serverListener, PeerListener incomingPeerEventListener) {
         this.serverListenerGroup.add(new ServerListenerWrapper(serverListener, false));
@@ -341,4 +356,7 @@ public class ServerNode implements INode {
         ServerNode.monitoredServerListener.remove(serverListener);
     }
 
+    public static ServerNode getActiveServerNode() {
+        return activeServerNode.get();
+    }
 }

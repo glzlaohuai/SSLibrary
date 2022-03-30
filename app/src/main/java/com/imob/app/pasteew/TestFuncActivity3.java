@@ -403,20 +403,14 @@ public class TestFuncActivity3 extends AppCompatActivity {
         MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
 
         loadMsgBatchOrFillMsgEntitiesList();
-
         afterTotalConnectedDevicesListUpdated(TotalEverDiscoveredDeviceInfoManager.getTotalKnownDevices());
 
         monitorServerNodeState();
-
         monitorNsdNodeState();
 
         updateServerNodeInfo(ServerNode.getActiveServerNode());
-
         updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText());
     }
-
-
-
 
     private void monitorServerNodeState() {
         ServerNode.monitorServerNodeState(serverListener);
@@ -532,4 +526,5 @@ public class TestFuncActivity3 extends AppCompatActivity {
     public void redo(View view) {
         NsdServiceStarter.redoIfSomethingWentWrong("redo called by user", null);
     }
+
 }

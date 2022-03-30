@@ -7,6 +7,8 @@ import com.imob.lib.sslib.peer.PeerListener;
 import com.imob.lib.sslib.peer.PeerListenerAdapter;
 
 import java.util.UUID;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class PingCheckTask {
 
@@ -14,19 +16,13 @@ public class PingCheckTask {
 
     private String logTag = TAG + " # " + hashCode();
 
-    private TaskRunner taskRunner;
     private Peer peer;
     private Runnable runnable;
     private long interval;
-    private PeerListener peerListener = new PeerListenerAdapter() {
-        @Override
-        public void onMsgSendStart(Peer peer, String id) {
-            super.onMsgSendStart(peer, id);
-            if (peer.isMsgQueueEmpty()) {
-                kickOffNextCheckLoop();
-            }
-        }
+    private ScheduledThreadPoolExecutor executor;
 
+
+    private PeerListener peerListener = new PeerListenerAdapter() {
         @Override
         public void onDestroy(Peer peer) {
             super.onDestroy(peer);
@@ -34,25 +30,22 @@ public class PingCheckTask {
         }
     };
 
-    private void kickOffNextCheckLoop() {
-        if (taskRunner != null && runnable != null && !taskRunner.isDestroyed() && !peer.isDestroyed() && !peer.isMsgQueueEmpty()) {
-            Logger.i(logTag, "another check loop kicked off, interval: " + interval);
-            taskRunner.postDelayed(runnable, interval);
-        }
-    }
-
     public PingCheckTask(final Peer peer) {
         this.peer = peer;
         runnable = new Runnable() {
             @Override
             public void run() {
-                Logger.i(logTag, "ping msg send out.");
+                Logger.i(logTag, "ping check loop entered");
                 if (peer.isDestroyed()) {
                     Logger.i(logTag, "ping check invoked, but find out peer is alread destroyed, this should not happen, just call destroy on this instance");
                     destroy();
                 } else {
-                    peer.sendMessage(PingMsg.build(UUID.randomUUID().toString()));
-                    kickOffNextCheckLoop();
+                    if (peer.isMsgQueueEmpty()) {
+                        Logger.i(logTag, "msg queue is empty, send out a ping msg immediately.");
+                        peer.sendMessage(PingMsg.build(UUID.randomUUID().toString()));
+                    } else {
+                        Logger.i(logTag, "has msg in queue, wait for next check loop");
+                    }
                 }
             }
         };
@@ -62,20 +55,19 @@ public class PingCheckTask {
         if (peer.isDestroyed()) return;
 
         disbale();
-        taskRunner = new TaskRunner();
+        executor = new ScheduledThreadPoolExecutor(1, new SSThreadFactory("pcheck"));
         this.interval = interval;
 
-        taskRunner.postDelayed(runnable, interval);
-        Logger.i(logTag, "next check delay: " + interval);
+        executor.scheduleWithFixedDelay(runnable, 0, interval, TimeUnit.MILLISECONDS);
         peer.registerListener(peerListener);
-
     }
 
     public synchronized void disbale() {
-        if (taskRunner != null) {
-            taskRunner.destroy();
-        }
         peer.unregisterListener(peerListener);
+        if (executor != null) {
+            executor.shutdown();
+            executor = null;
+        }
     }
 
     public synchronized void destroy() {

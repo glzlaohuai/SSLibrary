@@ -20,10 +20,10 @@ public class ClientListenerWrapper implements ClientListener {
     }
 
     @Override
-    public void onClientDestroyed(ClientNode clientNode) {
-        base.onClientDestroyed(clientNode);
+    public void onClientDestroyed(ClientNode clientNode, String reason, Exception exception) {
+        base.onClientDestroyed(clientNode, reason, exception);
         if (printLog) {
-            Logger.i(TAG, "onClientDestroyed, clientNode: " + clientNode.getTag());
+            Logger.i(TAG, "onClientDestroyed, clientNode: " + clientNode.getTag() + ", reason: " + reason + ", exception: " + exception);
         }
     }
 

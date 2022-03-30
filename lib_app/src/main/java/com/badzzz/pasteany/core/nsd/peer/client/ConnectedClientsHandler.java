@@ -96,8 +96,8 @@ public class ConnectedClientsHandler {
                             }
 
                             @Override
-                            public void onClientDestroyed(ClientNode clientNode) {
-                                super.onClientDestroyed(clientNode);
+                            public void onClientDestroyed(ClientNode clientNode, String reason, Exception exception) {
+                                super.onClientDestroyed(clientNode, reason, exception);
                                 afterClientDestroyed(clientNode);
                             }
 

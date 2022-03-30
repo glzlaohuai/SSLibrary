@@ -4,7 +4,7 @@ import com.imob.lib.sslib.peer.PeerListener;
 
 public interface ClientListener extends PeerListener {
 
-    void onClientDestroyed(ClientNode clientNode);
+    void onClientDestroyed(ClientNode clientNode, String reason, Exception exception);
 
     void onClientCreating(ClientNode clientNode);
 

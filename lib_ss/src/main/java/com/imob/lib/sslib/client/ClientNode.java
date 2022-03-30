@@ -109,7 +109,7 @@ public class ClientNode implements INode {
     private synchronized void doDestroyStuff(String reason, Exception e) {
         if (!isDestroyed) {
             isDestroyed = true;
-            callbackClientDestroy();
+            callbackClientDestroy(reason, e);
         }
 
         if (peer != null) {
@@ -118,10 +118,10 @@ public class ClientNode implements INode {
     }
 
 
-    private void callbackClientDestroy() {
+    private void callbackClientDestroy(String reason, Exception exception) {
         if (!isDestroyCallbacked) {
             isDestroyCallbacked = true;
-            listener.onClientDestroyed(this);
+            listener.onClientDestroyed(this, reason, exception);
         }
     }
 

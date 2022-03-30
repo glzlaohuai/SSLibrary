@@ -21,25 +21,23 @@ public class ClientListenerGroup implements ClientListener {
         }
     }
 
-
     public void clear() {
         queue.clear();
     }
 
-
     @Override
-    public void onClientDestroyed(ClientNode clientNode) {
+    public void onClientDestroyed(ClientNode clientNode, String reason, Exception exception) {
         for (ClientListener listener : queue) {
-            listener.onClientDestroyed(clientNode);
+            listener.onClientDestroyed(clientNode, reason, exception);
         }
     }
+
     @Override
     public void onClientCreating(ClientNode clientNode) {
         for (ClientListener listener : queue) {
             listener.onClientCreating(clientNode);
         }
     }
-
 
 
     @Override
@@ -177,9 +175,9 @@ public class ClientListenerGroup implements ClientListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
         for (ClientListener listener : queue) {
-            listener.onIncomingMsgReadSucceeded(peer, id,available);
+            listener.onIncomingMsgReadSucceeded(peer, id, available);
         }
     }
 

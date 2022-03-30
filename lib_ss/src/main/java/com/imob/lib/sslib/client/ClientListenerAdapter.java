@@ -3,8 +3,9 @@ package com.imob.lib.sslib.client;
 import com.imob.lib.sslib.peer.Peer;
 
 public class ClientListenerAdapter implements ClientListener {
+
     @Override
-    public void onClientDestroyed(ClientNode clientNode) {
+    public void onClientDestroyed(ClientNode clientNode, String reason, Exception exception) {
 
     }
 

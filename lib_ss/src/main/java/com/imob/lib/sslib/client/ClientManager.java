@@ -28,9 +28,10 @@ public class ClientManager {
             return false;
         } else {
             ClientNode clientNode = new ClientNode(ip, port, new ClientListenerWrapper(clientListener, false) {
+
                 @Override
-                public void onClientDestroyed(ClientNode clientNode) {
-                    super.onClientDestroyed(clientNode);
+                public void onClientDestroyed(ClientNode clientNode, String reason, Exception exception) {
+                    super.onClientDestroyed(clientNode, reason, exception);
                     ClientManager.removeClientNodeFromMap(clientNode);
                 }
 

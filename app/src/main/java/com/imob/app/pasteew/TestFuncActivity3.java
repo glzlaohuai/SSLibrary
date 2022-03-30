@@ -105,24 +105,28 @@ public class TestFuncActivity3 extends AppCompatActivity {
         @Override
         public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
             super.onDestroyed(nsdNode, reason, e);
-            updateNsdRegisterInfo(nsdNode, null);
+            updateNsdRegisterInfo(nsdNode, null, -1);
         }
 
         @Override
         public void onSuccessfullyRegisterService(NsdNode nsdNode, String type, String name, String text, int port) {
             super.onSuccessfullyRegisterService(nsdNode, type, name, text, port);
-            updateNsdRegisterInfo(nsdNode, text);
+            updateNsdRegisterInfo(nsdNode, text, port);
         }
     };
 
-    private void updateNsdRegisterInfo(NsdNode nsdNode, String text) {
+    private void updateNsdRegisterInfo(NsdNode nsdNode, String text, int port) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (nsdNode == null || nsdNode.isDestroyed()) {
                     nsdInfoView.setText("none");
                 } else {
-                    nsdInfoView.setText(text);
+                    StringBuilder sb = new StringBuilder("text: ");
+                    sb.append(text);
+                    sb.append("\nport: ");
+                    sb.append(port);
+                    nsdInfoView.setText(sb.toString());
                 }
             }
         });
@@ -409,7 +413,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         monitorNsdNodeState();
 
         updateServerNodeInfo(ServerNode.getActiveServerNode());
-        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText());
+        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText(), NsdNode.getActiveRegisterPort());
     }
 
     private void monitorServerNodeState() {

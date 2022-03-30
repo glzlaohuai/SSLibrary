@@ -49,6 +49,7 @@ public class NsdNode {
 
     private static AtomicReference<NsdNode> activeNsdNodeRef = new AtomicReference<>();
     private static String activeRegisterServiceText = null;
+    private static int activeRegisterPort = -1;
 
     static {
         routerListenerGroup.add(globalListenerGroup);
@@ -62,6 +63,7 @@ public class NsdNode {
 
                 NsdNode.activeNsdNodeRef.compareAndSet(nsdNode, null);
                 NsdNode.activeRegisterServiceText = null;
+                NsdNode.activeRegisterPort = -1;
             }
 
             @Override
@@ -70,6 +72,7 @@ public class NsdNode {
 
                 NsdNode.activeNsdNodeRef.set(nsdNode);
                 NsdNode.activeRegisterServiceText = text;
+                NsdNode.activeRegisterPort = port;
             }
         });
     }
@@ -345,6 +348,10 @@ public class NsdNode {
 
     public static String getActiveRegisteredServiceText() {
         return activeRegisterServiceText;
+    }
+
+    public static int getActiveRegisterPort() {
+        return activeRegisterPort;
     }
 
     public boolean isDestroyed() {

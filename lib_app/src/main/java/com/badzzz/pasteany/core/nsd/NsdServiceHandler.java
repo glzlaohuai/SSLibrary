@@ -120,7 +120,7 @@ public class NsdServiceHandler {
         ConnectedClientsManager.destroyRelatedConnectedPeerHolder(this);
     }
 
-    private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener, String reason, Exception e) {
+    private synchronized void doDestroy(final INsdServiceHandlerDestroyListener listener, String reason, Exception exception) {
         if (serverNode != null && !serverNode.isDestroyed()) {
             serverNode.monitorServerStatus(new ServerListenerAdapter() {
                 @Override
@@ -129,9 +129,9 @@ public class NsdServiceHandler {
                     doStuffAfterHandlerBeDestroyed(listener);
                 }
             });
-            serverNode.destroy(reason, e);
+            serverNode.destroy(reason, exception);
             if (nsdNode != null) {
-                nsdNode.destroy();
+                nsdNode.destroy(reason, exception);
             }
         } else {
             doStuffAfterHandlerBeDestroyed(listener);

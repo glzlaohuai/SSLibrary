@@ -99,9 +99,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         }
     };
     private NsdEventListener nsdEventListener = new NsdEventListenerAdapter() {
+
+
         @Override
-        public void onDestroyed(NsdNode nsdNode) {
-            super.onDestroyed(nsdNode);
+        public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
+            super.onDestroyed(nsdNode, reason, e);
             updateNsdRegisterInfo(nsdNode, null);
         }
 

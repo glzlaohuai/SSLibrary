@@ -14,7 +14,7 @@ public class NsdEventListenerAdapter implements NsdEventListener {
     }
 
     @Override
-    public void onDestroyed(NsdNode nsdNode) {
+    public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
 
     }
 

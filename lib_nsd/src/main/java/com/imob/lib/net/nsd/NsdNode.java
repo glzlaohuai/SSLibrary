@@ -55,10 +55,13 @@ public class NsdNode {
         routerListenerGroup.add(monitorListenerGroup);
 
         routerListenerGroup.add(new NsdEventListenerAdapter() {
+
             @Override
-            public void onDestroyed(NsdNode nsdNode) {
-                super.onDestroyed(nsdNode);
+            public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
+                super.onDestroyed(nsdNode, reason, e);
+
                 NsdNode.activeNsdNodeRef.compareAndSet(nsdNode, null);
+                NsdNode.activeRegisterServiceText = null;
             }
 
             @Override
@@ -255,8 +258,8 @@ public class NsdNode {
         }
     }
 
-    private void doDestroy() {
-        Logger.i(tag, "destroy stuff called");
+    private void doDestroy(String reason, Exception exception) {
+        Logger.i(tag, "destroy stuff called, reason: " + reason + ", exception: " + exception);
         synchronized (lock) {
             if (jmDNS != null) {
                 try {
@@ -278,7 +281,7 @@ public class NsdNode {
             performer = null;
             jmDNS = null;
 
-            listener.onDestroyed(this);
+            listener.onDestroyed(this, reason, exception);
 
             createDestroyRegisterService.shutdown();
             retrieveServiceInfoService.shutdown();
@@ -311,15 +314,15 @@ public class NsdNode {
 
     /**
      */
-    public void destroy() {
+    public void destroy(String reason, Exception exception) {
         if (!isDestroyed) {
-            Logger.i(tag, "destroy");
-            handleDestroy();
+            Logger.i(tag, "destroy, reason: " + reason + ", exception: " + exception);
+            handleDestroy(reason, exception);
         }
     }
 
 
-    private void handleDestroy() {
+    private void handleDestroy(final String reason, final Exception e) {
         createDestroyRegisterService.execute(new Runnable() {
             @Override
             public void run() {
@@ -327,7 +330,7 @@ public class NsdNode {
                     if (!isDestroyed) {
                         isDestroyed = true;
                         if (jmDNS != null) {
-                            doDestroy();
+                            doDestroy(reason, e);
                         }
                     }
                 }

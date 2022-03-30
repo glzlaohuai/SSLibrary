@@ -38,13 +38,13 @@ public class NsdEventListenerWrapper implements NsdEventListener {
     }
 
     @Override
-    public void onDestroyed(NsdNode nsdNode) {
-        base.onDestroyed(nsdNode);
+    public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
+        base.onDestroyed(nsdNode, reason, e);
         if (printLog) {
-            Logger.i(TAG, "onDestroyed, nsdNode: " + nsdNode);
-
+            Logger.i(TAG, "onDestroyed, nsdNode: " + nsdNode + ", reason: " + reason + ", exception: " + e);
         }
     }
+
 
     @Override
     public void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e) {

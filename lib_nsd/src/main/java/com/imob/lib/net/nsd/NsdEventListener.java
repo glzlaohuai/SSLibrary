@@ -8,7 +8,7 @@ public interface NsdEventListener {
 
     void onCreateFailed(String msg, Exception e);
 
-    void onDestroyed(NsdNode nsdNode);
+    void onDestroyed(NsdNode nsdNode, String reason, Exception e);
 
     void onRegisterServiceFailed(NsdNode nsdNode, String type, String name, int port, String text, String msg, Exception e);
 

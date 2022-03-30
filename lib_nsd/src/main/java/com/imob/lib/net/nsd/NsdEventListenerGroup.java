@@ -42,9 +42,9 @@ public class NsdEventListenerGroup implements NsdEventListener {
     }
 
     @Override
-    public void onDestroyed(NsdNode nsdNode) {
+    public void onDestroyed(NsdNode nsdNode, String reason, Exception e) {
         for (NsdEventListener listener : queue) {
-            listener.onDestroyed(nsdNode);
+            listener.onDestroyed(nsdNode, reason, e);
         }
     }
 

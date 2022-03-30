@@ -424,7 +424,7 @@ public class Peer {
 
 
     private void callbackMsgSendPending(Msg msg) {
-        if (msg instanceof PingMsg) return;
+        if (isPingMsg(msg)) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendPending(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -450,7 +450,7 @@ public class Peer {
     }
 
     private void callbackMsgIntoQueue(Msg msg) {
-        if (msg instanceof PingMsg) return;
+        if (isPingMsg(msg)) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgIntoQueue(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -463,9 +463,12 @@ public class Peer {
         return isDestroyed;
     }
 
+    private boolean isPingMsg(Msg msg) {
+        return msg != null && (msg instanceof PingMsg || pingIDSet.contains(msg.getId()) || msg.isPingRelatedMsg());
+    }
 
     private void callbackMsgSendStart(Msg msg) {
-        if (msg instanceof PingMsg) return;
+        if (isPingMsg(msg)) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendStart(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -474,7 +477,7 @@ public class Peer {
     }
 
     private void callbackMsgSendSucceeded(Msg msg) {
-        if (msg instanceof PingMsg) return;
+        if (isPingMsg(msg)) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendSucceeded(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal());
         } else {
@@ -483,7 +486,7 @@ public class Peer {
     }
 
     private void callbackMsgSendFailed(Msg msg, String errorMsg, Exception e) {
-        if (msg instanceof PingMsg) return;
+        if (isPingMsg(msg)) return;
         if (msg instanceof ConfirmMsg) {
             listener.onConfirmMsgSendFailed(this, msg.getId(), ((ConfirmMsg) msg).getSoFar(), ((ConfirmMsg) msg).getTotal(), errorMsg, e);
         } else {
@@ -597,7 +600,14 @@ public class Peer {
                         }
                         break;
                     case Msg.TYPE_CONFIRM:
-                        Logger.i(S_TAG, "write confirmMsg to dos, " + msg.getId());
+                        if (pingIDSet.contains(msg.getId())) {
+                            Logger.i(S_TAG, "send confirm msg to dos to ask ping: " + msg.getId());
+                            pingIDSet.remove(msg.getId());
+                            msg.setPingRelatedMsg(true);
+                        } else {
+                            Logger.i(S_TAG, "send confirm msg to dos, " + msg.getId());
+                        }
+
                         dos.writeInt(((ConfirmMsg) msg).getSoFar());
                         dos.writeInt(((ConfirmMsg) msg).getTotal());
                         break;
@@ -716,6 +726,7 @@ public class Peer {
                                 break;
                             case Msg.TYPE_PING:
                                 //just simply send a confirm msg to peer
+                                pingIDSet.add(id);
                                 sendMessage(ConfirmMsg.build(id, AVAILABLE_BYTES_FOR_PING_MSG, AVAILABLE_BYTES_FOR_PING_MSG));
                                 break;
                             default:
@@ -758,6 +769,10 @@ public class Peer {
 
     public void disableActivePingCheck() {
         pingCheckTask.disbale();
+    }
+
+    public boolean isMsgQueueEmpty() {
+        return msgQueue.isEmpty();
     }
 
 

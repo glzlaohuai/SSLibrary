@@ -19,6 +19,16 @@ public abstract class Msg {
     private Exception exception;
 
     private boolean canceled = false;
+    private boolean isPingRelatedMsg = false;
+
+
+    public boolean isPingRelatedMsg() {
+        return isPingRelatedMsg;
+    }
+
+    public void setPingRelatedMsg(boolean pingRelatedMsg) {
+        isPingRelatedMsg = pingRelatedMsg;
+    }
 
     public Msg(String id, InputStream inputStream) {
         this.id = id;

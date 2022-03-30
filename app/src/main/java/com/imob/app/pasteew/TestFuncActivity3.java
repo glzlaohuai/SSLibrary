@@ -378,45 +378,25 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
-        ((CheckBox)
+        ((CheckBox) findViewById(R.id.pingCheckbox)).setChecked(SettingsManager.getInstance().isPingCheckEnabled());
+        ((CheckBox) findViewById(R.id.pingCheckbox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ConnectedPeersManager.enablePingCheck();
+                } else {
+                    ConnectedPeersManager.disablePingCheck();
+                }
+            }
+        });
 
-                findViewById(R.id.pingCheckbox)).
-
-                setChecked(SettingsManager.getInstance().
-
-                        isPingCheckEnabled());
-        ((CheckBox)
-
-                findViewById(R.id.pingCheckbox)).
-
-                setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) {
-                            ConnectedPeersManager.enablePingCheck();
-                        } else {
-                            ConnectedPeersManager.disablePingCheck();
-                        }
-                    }
-                });
-
-        ((CheckBox)
-
-                findViewById(R.id.useLastKnownNsdInfo)).
-
-                setChecked(SettingsManager.getInstance().
-
-                        useLastKnownNsdInfo());
-        ((CheckBox)
-
-                findViewById(R.id.useLastKnownNsdInfo)).
-
-                setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        SettingsManager.getInstance().setUseLastKnownNsdInfo(isChecked);
-                    }
-                });
+        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setChecked(SettingsManager.getInstance().useLastKnownNsdInfo());
+        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SettingsManager.getInstance().setUseLastKnownNsdInfo(isChecked);
+            }
+        });
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverDiscoveredDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
@@ -432,10 +412,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
 
         updateServerNodeInfo(ServerNode.getActiveServerNode());
 
-        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.
-
-                getActiveRegisteredServiceText());
+        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText());
     }
+
+
+
 
     private void monitorServerNodeState() {
         ServerNode.monitorServerNodeState(serverListener);

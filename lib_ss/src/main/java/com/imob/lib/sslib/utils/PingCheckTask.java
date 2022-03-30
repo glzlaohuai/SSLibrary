@@ -22,8 +22,8 @@ public class PingCheckTask {
         @Override
         public void onMsgSendStart(Peer peer, String id) {
             super.onMsgSendStart(peer, id);
-            if (taskRunner != null && runnable != null && !taskRunner.isDestroyed()) {
-                taskRunner.postDelayed(runnable, interval);
+            if (peer.isMsgQueueEmpty()) {
+                kickOffNextCheckLoop();
             }
         }
 
@@ -33,6 +33,13 @@ public class PingCheckTask {
             disbale();
         }
     };
+
+    private void kickOffNextCheckLoop() {
+        if (taskRunner != null && runnable != null && !taskRunner.isDestroyed() && !peer.isDestroyed() && !peer.isMsgQueueEmpty()) {
+            Logger.i(logTag, "another check loop kicked off, interval: " + interval);
+            taskRunner.postDelayed(runnable, interval);
+        }
+    }
 
     public PingCheckTask(final Peer peer) {
         this.peer = peer;
@@ -45,6 +52,7 @@ public class PingCheckTask {
                     destroy();
                 } else {
                     peer.sendMessage(PingMsg.build(UUID.randomUUID().toString()));
+                    kickOffNextCheckLoop();
                 }
             }
         };
@@ -60,6 +68,7 @@ public class PingCheckTask {
         taskRunner.postDelayed(runnable, interval);
         Logger.i(logTag, "next check delay: " + interval);
         peer.registerListener(peerListener);
+
     }
 
     public synchronized void disbale() {

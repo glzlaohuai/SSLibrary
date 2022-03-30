@@ -127,7 +127,7 @@ public class Constants {
 
 
     public static final class Others {
-        public static final long TIMEOUT = 60 * 1000;
+        public static final long TIMEOUT = 10 * 1000;
         public static final String APP_ROOT_DIR_NAME = "paste_any_where";
 
         public static final String BUGLY_APP_ID = "9a38940688";

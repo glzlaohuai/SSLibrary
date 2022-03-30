@@ -211,7 +211,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
     };
 
 
-    private void afterTotalConnectedDevicesListUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
+    private synchronized void afterTotalConnectedDevicesListUpdated(Map<String, IDeviceInfoManager.DeviceInfo> all) {
         TotalEverDiscoveredDeviceInfoManager.removeSelfDevice(all);
         //diff checked
         if (!allEverDiscoveredDevices.equals(all.values())) {

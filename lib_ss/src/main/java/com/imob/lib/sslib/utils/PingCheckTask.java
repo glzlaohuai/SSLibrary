@@ -26,6 +26,12 @@ public class PingCheckTask {
                 taskRunner.postDelayed(runnable, interval);
             }
         }
+
+        @Override
+        public void onDestroy(Peer peer) {
+            super.onDestroy(peer);
+            disbale();
+        }
     };
 
     public PingCheckTask(final Peer peer) {
@@ -33,7 +39,7 @@ public class PingCheckTask {
         runnable = new Runnable() {
             @Override
             public void run() {
-                Logger.i(logTag, "ping check.");
+                Logger.i(logTag, "ping msg send out.");
                 if (peer.isDestroyed()) {
                     Logger.i(logTag, "ping check invoked, but find out peer is alread destroyed, this should not happen, just call destroy on this instance");
                     destroy();
@@ -47,14 +53,12 @@ public class PingCheckTask {
     public synchronized void enable(long interval) {
         if (peer.isDestroyed()) return;
 
-        if (taskRunner != null) {
-            taskRunner.destroy();
-        }
+        disbale();
         taskRunner = new TaskRunner();
         this.interval = interval;
 
         taskRunner.postDelayed(runnable, interval);
-        Logger.i(TAG, "next check delay: " + interval);
+        Logger.i(logTag, "next check delay: " + interval);
         peer.registerListener(peerListener);
     }
 

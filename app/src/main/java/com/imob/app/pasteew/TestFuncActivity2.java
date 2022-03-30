@@ -133,7 +133,7 @@ public class TestFuncActivity2 extends AppCompatActivity {
                     @Override
                     public void run() {
                         peerList.clear();
-                        peerList.addAll(ConnectedPeersManager.getConnectedPeers().values());
+                        peerList.addAll(ConnectedPeersManager.getConnectedPeersMap().values());
                         knowAdapter.notifyDataSetChanged();
                     }
                 });

@@ -68,20 +68,18 @@ public class ConnectedPeersManager {
     public final static void enablePingCheck() {
         SettingsManager.getInstance().setPingCheckEnabled(true);
         isPingCheckEnabled = true;
-        Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
-        for (String key : connectedPeers.keySet()) {
-            Set<Peer> peers = connectedPeers.get(key);
-            for (Peer peer : peers) {
-                if (!peer.isDestroyed()) {
-                    peer.enableActivePingCheck(Constants.Others.TIMEOUT);
-                }
+
+        Set<Peer> peerSet = ConnectedPeersManager.getConnectedPeersSet();
+        for (Peer peer : peerSet) {
+            if (!peer.isDestroyed()) {
+                peer.enableActivePingCheck(Constants.Others.TIMEOUT);
             }
         }
     }
 
     public final static void disablePingCheck() {
         SettingsManager.getInstance().setPingCheckEnabled(false);
-        Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeers());
+        Map<String, Set<Peer>> connectedPeers = new HashMap<>(getConnectedPeersMap());
         for (String key : connectedPeers.keySet()) {
             Set<Peer> peers = connectedPeers.get(key);
             for (Peer peer : peers) {
@@ -325,14 +323,27 @@ public class ConnectedPeersManager {
         }
     }
 
-    public static Map<String, Set<Peer>> getConnectedPeers() {
+    public static Map<String, Set<Peer>> getConnectedPeersMap() {
         synchronized (peerMapLock) {
             return connectedPeersMap;
         }
     }
 
+    public static Set<Peer> getConnectedPeersSet() {
+        Map<String, Set<Peer>> map = new HashMap<>(getConnectedPeersMap());
+        Set<Peer> peers = new HashSet<>();
+
+        for (Set<Peer> peerSet : map.values()) {
+            if (peerSet != null) {
+                peers.addAll(peerSet);
+            }
+        }
+        return peers;
+    }
+
+
     public static Set<String> getConnectedPeersTagSet() {
-        return getConnectedPeers().keySet();
+        return getConnectedPeersMap().keySet();
     }
 
     public static Peer getConnectedPeerByTag(String tag) {
@@ -340,7 +351,7 @@ public class ConnectedPeersManager {
             return null;
         }
         //just in case if concurrent exception occure
-        Set<Peer> peers = new HashSet<>(getConnectedPeers().get(tag));
+        Set<Peer> peers = new HashSet<>(getConnectedPeersMap().get(tag));
         if (peers == null || peers.isEmpty()) return null;
 
         return peers.iterator().next();

@@ -116,7 +116,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (nsdNode.isDestroyed()) {
+                if (nsdNode == null || nsdNode.isDestroyed()) {
                     nsdInfoView.setText("none");
                 } else {
                     nsdInfoView.setText(text);

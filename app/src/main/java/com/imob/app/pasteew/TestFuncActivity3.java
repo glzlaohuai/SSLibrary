@@ -16,6 +16,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.badzzz.pasteany.core.dbentity.MsgEntity;
 import com.badzzz.pasteany.core.interfaces.IDeviceInfoManager;
@@ -365,6 +366,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         findViewById(R.id.sendFileBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!hasConnectedPeers()) {
+                    Toast.makeText(TestFuncActivity3.this, "no connected peers", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.setType("*/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -372,38 +378,63 @@ public class TestFuncActivity3 extends AppCompatActivity {
             }
         });
 
-        ((CheckBox) findViewById(R.id.pingCheckbox)).setChecked(SettingsManager.getInstance().isPingCheckEnabled());
-        ((CheckBox) findViewById(R.id.pingCheckbox)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    ConnectedPeersManager.enablePingCheck();
-                } else {
-                    ConnectedPeersManager.disablePingCheck();
-                }
-            }
-        });
+        ((CheckBox)
 
-        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setChecked(SettingsManager.getInstance().useLastKnownNsdInfo());
-        ((CheckBox) findViewById(R.id.useLastKnownNsdInfo)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SettingsManager.getInstance().setUseLastKnownNsdInfo(isChecked);
-            }
-        });
+                findViewById(R.id.pingCheckbox)).
+
+                setChecked(SettingsManager.getInstance().
+
+                        isPingCheckEnabled());
+        ((CheckBox)
+
+                findViewById(R.id.pingCheckbox)).
+
+                setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) {
+                            ConnectedPeersManager.enablePingCheck();
+                        } else {
+                            ConnectedPeersManager.disablePingCheck();
+                        }
+                    }
+                });
+
+        ((CheckBox)
+
+                findViewById(R.id.useLastKnownNsdInfo)).
+
+                setChecked(SettingsManager.getInstance().
+
+                        useLastKnownNsdInfo());
+        ((CheckBox)
+
+                findViewById(R.id.useLastKnownNsdInfo)).
+
+                setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        SettingsManager.getInstance().setUseLastKnownNsdInfo(isChecked);
+                    }
+                });
 
         ConnectedPeersManager.monitorConnectedPeersEvent(connectedPeerEventListener);
         TotalEverDiscoveredDeviceInfoManager.monitorTotalEverConnectedDeviceListUpdate(deviceInfoListener);
         MsgEntitiesManager.monitorMsgEntitiesUpdate(msgEntityListUpdateListener);
 
         loadMsgBatchOrFillMsgEntitiesList();
+
         afterTotalConnectedDevicesListUpdated(TotalEverDiscoveredDeviceInfoManager.getTotalKnownDevices());
 
         monitorServerNodeState();
+
         monitorNsdNodeState();
 
         updateServerNodeInfo(ServerNode.getActiveServerNode());
-        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.getActiveRegisteredServiceText());
+
+        updateNsdRegisterInfo(NsdNode.getActiveNsdNode(), NsdNode.
+
+                getActiveRegisteredServiceText());
     }
 
     private void monitorServerNodeState() {
@@ -454,7 +485,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
     }
 
     private void sendTestMsgsToAllConnectedPeers() {
-        MsgEntitiesManager.sendStringMsgToPeers(UUID.randomUUID().toString(), "this is a test msg, time: " + new Date().toLocaleString(), ConnectedPeersManager.getConnectedPeersTagSet());
+        if (!hasConnectedPeers()) {
+            Toast.makeText(this, "No connected peers", Toast.LENGTH_SHORT).show();
+        } else {
+            MsgEntitiesManager.sendStringMsgToPeers(UUID.randomUUID().toString(), "this is a test msg, time: " + new Date().toLocaleString(), ConnectedPeersManager.getConnectedPeersTagSet());
+        }
     }
 
     @Override
@@ -468,6 +503,9 @@ public class TestFuncActivity3 extends AppCompatActivity {
         unmonitorNsdNodeState();
     }
 
+    private boolean hasConnectedPeers() {
+        return ConnectedPeersManager.getConnectedPeersTagSet().size() > 0;
+    }
 
     @SuppressLint("WrongConstant")
     @Override
@@ -490,6 +528,11 @@ public class TestFuncActivity3 extends AppCompatActivity {
         FileUtils.FileInfo fileInfo = FileUtils.retrieveFileInfoFromContentUri(getApplicationContext(), uri);
 
         if (fileInfo == null || !fileInfo.isValid()) return;
+
+        if (!hasConnectedPeers()) {
+            Toast.makeText(this, "has no connected peers", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         try {
             Set<String> tagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());

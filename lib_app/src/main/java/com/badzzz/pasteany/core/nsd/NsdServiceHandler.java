@@ -69,7 +69,7 @@ public class NsdServiceHandler {
                 serverNode.unmonitorServerStatus(this);
                 NsdServiceStarter.redoIfSomethingWentWrong(reason, e);
             }
-        }, true), new PeerListenerWrapper(new PeerListenerAdapter(), true));
+        }, true), new PeerListenerWrapper(new PeerListenerAdapter(), false));
         serverNode.create(Constants.Others.TIMEOUT);
     }
 

@@ -264,6 +264,7 @@ public class NsdNode {
     private void doDestroy(String reason, Exception exception) {
         Logger.i(tag, "destroy stuff called, reason: " + reason + ", exception: " + exception);
         synchronized (lock) {
+            Logger.i(tag, "do destroy got lock!");
             if (jmDNS != null) {
                 try {
                     jmDNS.unregisterAllServices();

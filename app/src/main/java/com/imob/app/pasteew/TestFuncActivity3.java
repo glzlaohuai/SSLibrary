@@ -296,6 +296,8 @@ public class TestFuncActivity3 extends AppCompatActivity {
             sb.append("\n");
             sb.append("msgExtra: " + msgEntity.getExtra());
             sb.append("\n");
+            sb.append("msgLen: " + (msgEntity.getMsgLen() * 1.0f / 1024 / 1024) + "M");
+            sb.append("\n");
 
             sb.append("time: " + new Date(msgEntity.getMsgTime()).toString());
 

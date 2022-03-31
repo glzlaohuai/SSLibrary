@@ -42,9 +42,10 @@ public class PeerListenerAdapter implements PeerListener {
     }
 
     @Override
-    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize, int round, int needRound) {
 
     }
+
 
     @Override
     public void onIOStreamOpened(Peer peer) {

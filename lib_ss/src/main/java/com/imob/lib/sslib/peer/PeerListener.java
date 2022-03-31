@@ -17,7 +17,7 @@ public interface PeerListener {
 
     void onConfirmMsgSendFailed(Peer peer, String id, int soFar, int total, String msg, Exception exception);
 
-    void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize);
+    void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize, int round, int needRound);
 
     void onIOStreamOpened(Peer peer);
 

@@ -98,11 +98,10 @@ public class PeerListenerWrapper implements PeerListener {
     }
 
     @Override
-    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
-        base.onMsgChunkSendSucceeded(peer, id, chunkSize);
+    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize, int round, int needRound) {
+        base.onMsgChunkSendSucceeded(peer, id, chunkSize, round, needRound);
         if (printLog) {
-            Logger.i(tag, "onMsgChunkSendSucceeded, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize);
-
+            Logger.i(tag, "onMsgChunkSendSucceeded, peer: " + peer + ", id: " + id + ", chunkSize: " + chunkSize + ", round: " + round + ", needRound: " + needRound);
         }
     }
 
@@ -182,8 +181,8 @@ public class PeerListenerWrapper implements PeerListener {
     }
 
     @Override
-    public void onIncomingMsgReadSucceeded(Peer peer, String id,int available) {
-        base.onIncomingMsgReadSucceeded(peer, id,available);
+    public void onIncomingMsgReadSucceeded(Peer peer, String id, int available) {
+        base.onIncomingMsgReadSucceeded(peer, id, available);
         if (printLog) {
             Logger.i(tag, "onIncomingMsgReadSucceeded, peer: " + peer + ", id: " + id);
 

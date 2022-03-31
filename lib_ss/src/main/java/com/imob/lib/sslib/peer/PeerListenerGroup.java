@@ -85,9 +85,9 @@ public class PeerListenerGroup implements PeerListener {
     }
 
     @Override
-    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize, int round, int needRound) {
         for (PeerListener listener : queue) {
-            listener.onMsgChunkSendSucceeded(peer, id, chunkSize);
+            listener.onMsgChunkSendSucceeded(peer, id, chunkSize, round, needRound);
         }
     }
 

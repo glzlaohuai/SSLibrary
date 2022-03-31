@@ -65,7 +65,7 @@ public class ClientListenerAdapter implements ClientListener {
     }
 
     @Override
-    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize) {
+    public void onMsgChunkSendSucceeded(Peer peer, String id, int chunkSize, int round, int needRound) {
 
     }
 

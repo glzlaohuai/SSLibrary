@@ -26,7 +26,7 @@ public class Peer {
 
     private static final String S_TAG = "Peer";
 
-    public static final int CHUNK_BYTE_LEN = 1024 * 512;
+    public static final int CHUNK_BYTE_LEN = 1024 * 1024;
 
     private static final int AVAILABLE_BYTES_FOR_PING_MSG = 1;
 
@@ -559,6 +559,8 @@ public class Peer {
                         int readed = 0;
                         int round = 1;
 
+                        int needRound = (int) Math.ceil(available * 1.0f / CHUNK_BYTE_LEN);
+
                         while (readed < available) {
                             Chunk chunk = msg.readChunk(bytes);
                             int state = chunk.getState();
@@ -578,7 +580,7 @@ public class Peer {
                                     dos.writeInt(chunk.getSize());
                                     dos.write(chunk.getBytes(), 0, chunk.getSize());
 
-                                    listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize());
+                                    listener.onMsgChunkSendSucceeded(Peer.this, msg.getId(), chunk.getSize(), round, needRound);
 
                                     unconfirmedSendedChunkManager.afterChunkMsgSended(msg.getId(), readed);
                                     break;

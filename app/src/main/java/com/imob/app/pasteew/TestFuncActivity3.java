@@ -156,7 +156,7 @@ public class TestFuncActivity3 extends AppCompatActivity {
                 Set<String> connectedPeersTagSet = new HashSet<>(ConnectedPeersManager.getConnectedPeersTagSet());
                 Map<String, String> id_tagMap = PeerUtils.generateDeviceIDMapByTagSet(connectedPeersTagSet);
 
-                List<IDeviceInfoManager.DeviceInfo> allEverDiscoveredDevices = new ArrayList<>(TestFuncActivity3.this.allEverDiscoveredDevices);
+                List<IDeviceInfoManager.DeviceInfo> allEverDiscoveredDevices = new LinkedList<>(TestFuncActivity3.this.allEverDiscoveredDevices);
 
                 for (IDeviceInfoManager.DeviceInfo deviceInfo : allEverDiscoveredDevices) {
                     View deviceInfoView;
